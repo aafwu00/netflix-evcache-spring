@@ -1,0 +1,9 @@
+evcache:
+  name: test
+  prefixes:
+    - name: test1
+      time-to-live: 1000
+      server-group-retry: true
+      enableExceptionThrowing: true
+    - name: test2
+      server-group-retry: false

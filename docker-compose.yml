@@ -1,0 +1,18 @@
+version: '2'
+services:
+  shard1-replica1:
+    image: memcached:alpine
+    ports:
+      - '11211:11211'
+  shard1-replica2:
+    image: memcached:alpine
+    ports:
+      - '11212:11211'
+  shard2-replica1:
+    image: memcached:alpine
+    ports:
+      - '11213:11211'
+  shard2-replica2:
+    image: memcached:alpine
+    ports:
+      - '11214:11211'

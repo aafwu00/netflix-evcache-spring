@@ -1,0 +1,5 @@
+dependencies {
+    compile "com.netflix.evcache:evcache-client:${evcacheVersion}"
+    compile 'org.springframework:spring-context'
+    compile 'org.springframework:spring-context-support'
+}

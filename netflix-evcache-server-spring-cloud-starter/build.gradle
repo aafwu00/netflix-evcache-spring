@@ -1,0 +1,10 @@
+dependencies {
+    compile project(':netflix-evcache-server-spring-cloud-autoconfigure')
+
+    compile 'org.springframework.boot:spring-boot-starter-actuator'
+    compile 'org.springframework.boot:spring-boot-starter-validation'
+    compile 'org.springframework.boot:spring-boot-starter-web'
+
+    compile 'org.springframework.cloud:spring-cloud-starter-netflix-archaius'
+    compile 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+}

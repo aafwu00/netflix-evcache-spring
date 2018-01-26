@@ -1,0 +1,3 @@
+# AutoConfiguration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.github.aafwu00.spring.boot.netflix.evcache.client.EVCacheAutoConfiguration

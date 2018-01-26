@@ -1,0 +1,8 @@
+dependencies {
+    compile project(':netflix-evcache-client-spring-cloud-starter')
+    compile project(':samples:spring-sample')
+
+    compile 'org.springframework.boot:spring-boot-starter-validation'
+    compile 'org.springframework.boot:spring-boot-starter-actuator'
+    compile 'org.springframework.boot:spring-boot-starter-web'
+}

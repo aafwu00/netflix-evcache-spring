@@ -1,0 +1,381 @@
+image::https://img.shields.io/badge/License-Apache%202.0-blue.svg["License Apache 2.0", link="https://opensource.org/licenses/Apache-2.0"]
+
+= Netflix EVCache Spring
+This project provides Netflix EVCache integrations for Spring Cache Abstraction, Spring Boot, Spring Cloud
+
+== Getting Start
+
+=== Prerequisites
+
+=== Build
+:jdkversion: 1.8
+
+To build the source you will need to install JDK {jdkversion}.
+
+----
+$ ./gradlew build
+----
+
+=== Run memcached
+
+start memcached server
+
+[source,shell]
+----
+memcached -p 11211
+memcached -p 11212
+memcached -p 11213
+memcached -p 11214
+----
+
+or run `docker-compose`
+
+[source,shell]
+----
+docker-compose up
+----
+
+== Example
+
+See on link:samples[Samples]
+
+=== netflix-evcache-client-spring
+
+This project provides Netflix EVCache integrations for Spring Cache Abstraction.
+See on link:samples/spring-sample[spring-sample]
+
+1. Dependency Management
+
+[source,gradle]
+----
+repositories {
+    maven { url 'https://jitpack.io' } <1>
+}
+
+dependencies {
+    compile 'com.github.aafwu00:netflix-evcache-client-spring:x.y.z' <2>
+}
+----
+<1> add `jitpack` repository
+<2> add dependency
+
+2. Write java source code
+
+[source,java]
+----
+@Configuration
+@ComponentScan
+@EnableCaching
+public class TodoApp {
+    @Bean
+    public CacheManager cacheManager(final ConversionService conversionService) {
+        EVCacheConfig.getInstance()
+                     .getDynamicStringProperty("TODO-NODES",
+                                               "shard1=localhost:11211,localhost:11212;shard2=localhost:11213,localhost:11214") # <2>
+                     .get();
+        final EVCacheConfiguration configuration = new EVCacheConfiguration();
+        configuration.setName("todos");
+        configuration.setTimeToLive(10);
+        configuration.setServerGroupRetry(true);
+        return new EVCacheManager("TODO", conversionService, Collections.singletonList(configuration)); # <1>
+    }
+}
+
+@Repository
+public class TodoRepository {
+    @Cacheable(cacheNames = "todos", key = "'findAll'") # <3>
+    public List<Todo> findAll() {
+        return ...;
+    }
+}
+----
+<1> `EVCacheManager` app name is `TODO`
+<2> `EVCacheManager` app name + `-NODES` means memcache server address, see on : https://github.com/Netflix/EVCache/wiki/Sample-EVCache-Deployment#step-4-create-a-cache-deployment-descriptor
+<3> `@Cacheable` `cacheNames` is sames as `EVCacheConfiguration` name
+
+=== netflix-evcache-client-spring-boot-starter
+
+This project provides Netflix EVCache integrations for Spring Boot.
+See on link:samples/evcache-client-sample[evcache-client-sample]
+
+1. Dependency Management
+
+[source,gradle]
+----
+repositories {
+    maven { url 'https://jitpack.io' } <1>
+}
+
+dependencies {
+    compile 'com.github.aafwu00:netflix-evcache-client-spring-boot-starter:x.y.z' <2>
+}
+----
+<1> add `jitpack` repository
+<2> add dependency
+
+2. Write java code
+
+[source,java]
+----
+@SpringBootApplication
+@EnableCaching # <1>
+public class Application {
+    public static void main(final String[] args) {
+        new SpringApplicationBuilder(Application.class).run(args);
+    }
+}
+
+@Repository
+public class TodoRepository {
+    @Cacheable(cacheNames = "todos", key = "'findAll'") # <2>
+    public List<Todo> findAll() {
+        return ...;
+    }
+}
+----
+<1> see on https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/integration.html#cache
+<2> `@Cacheable` `cacheNames` is sames as `evcache.prefixes[].name`
+
+3. Write `application.yml` code, See on link:samples/evcache-client-sample/src/main/resources/config/application.yml[Sample]
+
+[source,yml]
+----
+evcache:
+  name: EVCACHE-SERVER # <1>
+  prefixes:
+    - name: todos # <2>
+      enable-exception-throwing: false
+
+EVCACHE-SERVER-NODES: shard1=localhost:11211,localhost:11212;shard2=localhost:11213,localhost:11214
+----
+<1> EVCache App Name
+<2> EVCache cache name, cache prefix same as `@Cacheable` `cacheNames`
+<3> `evcache.name` + `-NODES` means memcache server address, see on : https://github.com/Netflix/EVCache/wiki/Sample-EVCache-Deployment#step-4-create-a-cache-deployment-descriptor
+
+IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
+
+
+.Table Eureka Client Properties
+|===
+| Name | Default | Description
+
+| evcache.enabled
+| true
+|
+
+| evcache.name
+|
+| Name of the EVCache App cluster, Recommend Upper Case
+
+| evcache.prefix[].name
+|
+| Cache name, Cache Prefix Key, Don't contain colon(:) character
+
+| evcache.prefix[].timeToLive
+| 900
+| Default Time To Live(TTL), Seconds
+
+| evcache.prefix[].allowNullValues
+| true
+| Whether to allow for `null` values
+
+| evcache.prefix[].serverGroupRetry
+| true
+| Retry across Server Group for cache misses and exceptions
+
+| evcache.prefix[].enableExceptionThrowing
+| true
+| Exceptions are not propagated and null values are returned
+
+| evcache.metrics.enabled
+| true
+| Spring Boot Metrics for EVCache
+
+|===
+
+See also: https://github.com/Netflix/EVCache/wiki/Configuring-EVCache-Client
+
+=== netflix-evcache-server-spring-cloud-starter
+
+This project is not an original `EVCar`(`EVCache` + `Sidecar`). EVCache Server created by Netflix.
+`EVCar` is not released at this time, so I combined the functions of `Eureka` + `Sidecar`.
+You can find some hints about the function of `EVCar` below.
+
+Hint on: https://github.com/Netflix/EVCache/issues/49 and https://github.com/Netflix/EVCache/tree/nflx-specific/evcar
+
+Example EVCache Server, See on link:samples/evcache-server-sample[evcache-server-sample]
+
+1. Start Eureka Server
+See on link:samples/eureka-server-sample[eureka-server-sample]
+
+2. Dependency Management
+
+[source,gradle]
+----
+repositories {
+    maven { url 'https://jitpack.io' } <1>
+}
+
+dependencies {
+    compile 'com.github.aafwu00:netflix-evcache-server-spring-cloud-starter:x.y.z' <2>
+}
+----
+<1> add `jitpack` repository
+<2> add dependency
+
+3. Write java source code
+
+[source,java]
+----
+@SpringBootApplication
+@EnableEVCacheServer # <1>
+public class Application {
+    public static void main(final String[] args) {
+        new SpringApplicationBuilder(Application.class).run(args);
+    }
+}
+----
+<1> Using `@EnableEVCacheServer` annotation, that's all
+
+4. Write `application.yml` code, See on link:samples/evcache-server-sample/src/main/resources/config/application.yml[Sample]
+
+[source,yml]
+----
+spring:
+  application:
+    name: EVCACHE-SERVER # <1>
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/ # <2>
+
+evcache:
+  server:
+    port: 11211 # <3>
+    group: shard1 # <4>
+----
+<1> EVCache Server App Name
+<2> see on http://cloud.spring.io/spring-cloud-static/spring-cloud-netflix/1.4.0.RELEASE/multi/multi__service_discovery_eureka_clients.html#_registering_with_eureka
+<3> memcached server port
+<4> evcache server group, shard name of replica set
+
+.Table Eureka Server Properties
+|===
+| Name | Default | Description
+
+| evcache.server.enabled
+| true
+|
+
+| evcache.server.hostname
+|
+| Hostname of Memcached Or Rend, If blank using localhost
+
+| evcache.server.port
+| 11211
+| Default Port of Memcached Or Rend
+
+| evcache.server.group
+| Default
+| Server Group Name, shard name
+
+| evcache.server.health.eureka.enabled
+| true
+| Eureka Health Check for Memcached
+
+| evcache.server.metrics.enabled
+| true
+| Spring Boot Metrics for Memcached
+
+| evcache.server.health.memcached.enabled
+| true
+| Spring Boot Health Check for Memcached
+
+|===
+
+=== netflix-evcache-client-spring-cloud-starter
+
+This project provides Netflix EVCache And Eureka integrations for Spring Cloud.
+see link:samples/evcache-client-sample[evcache-client-sample]
+
+1. Run evcache server.
+See on <<netflix-evcache-server-spring-cloud-starter>>
+
+2. Dependency Management
+
+[source,gradle]
+----
+repositories {
+    maven { url 'https://jitpack.io' } <1>
+}
+
+dependencies {
+    compile 'com.github.aafwu00:netflix-evcache-client-spring-cloud-starter:x.y.z' <2>
+}
+----
+<1> add `jitpack` repository
+<2> add dependency
+
+3. Write java code
+
+[source,java]
+----
+@SpringBootApplication
+@EnableDiscoveryClient # <1>
+@EnableCaching # <2>
+public class Application {
+    public static void main(final String[] args) {
+        new SpringApplicationBuilder(Application.class).run(args);
+    }
+}
+----
+<1> see on http://cloud.spring.io/spring-cloud-static/spring-cloud-netflix/1.4.0.RELEASE/multi/multi__service_discovery_eureka_clients.html#_registering_with_eureka
+<2> see on https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/integration.html#cache
+
+4. Write `application.yml` code, See on link:samples/evcache-eureka-client-sample/src/main/resources/config/application.yml[Sample]
+
+[source,yml]
+----
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/ # <1>
+
+evcache:
+  name: EVCACHE-SERVER # <2>
+  prefixes:
+    - name: todos # <3>
+      timeToLive: 5
+      server-group-retry: true
+----
+<1> see on http://cloud.spring.io/spring-cloud-static/spring-cloud-netflix/1.4.0.RELEASE/multi/multi__service_discovery_eureka_clients.html#_registering_with_eureka
+<2> EVCache Server App Name(`spring.application.name`)
+<3> EVCache cache name, cache prefix same as `@Cacheable` `cacheNames
+
+IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
+
+== Contributing
+
+Please read link:CONTRIBUTING.md[CONTRIBUTING.md] for details on our code of conduct, and the process for submitting pull requests to us.
+
+== Versioning
+
+We use http://semver.org/[SemVer] for versioning. For the versions available, see the https://github.com/aafwu00/netflix-evcache-spring/tag)[tags on this repository].
+
+== Authors
+
+* **Taeho Kim** - *Initial work* - https://github.com/aafwu00[aafwu00]
+
+== License
+
+This project is licensed under the Apache License 2.0 - see the link:LICENSE[LICENSE] file for details
+
+== Acknowledgments
+
+* https://github.com/Netflix/EVCache[EVCache]
+* https://github.com/Netflix/EVCache/tree/nflx-specific/evcar[evcar]
+* https://github.com/Netflix/eureka[Eureka]
+* https://github.com/spring-projects/spring-boot[Spring Boot]
+* https://github.com/spring-cloud/spring-cloud-netflix[Spring Cloud Netflix]
+* http://nebula-plugins.github.io[Gradle Nebula Plugins]

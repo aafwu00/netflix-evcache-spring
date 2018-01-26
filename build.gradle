@@ -1,0 +1,171 @@
+buildscript {
+    ext {
+        springBootVersion = '1.5.9.RELEASE'
+        springCloudVersion = 'Edgware.SR1'
+        evcacheVersion = '5.0.17-rc.1'
+    }
+    repositories {
+        maven { url 'https://plugins.gradle.org/m2/' }
+        maven { url 'http://repo.spring.io/plugins-release' }
+    }
+    dependencies {
+        classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.2'
+
+        classpath 'com.netflix.nebula:nebula-release-plugin:6.1.0'
+        classpath 'com.netflix.nebula:nebula-project-plugin:3.4.0'
+        classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:3.2.0'
+        classpath 'com.netflix.nebula:gradle-lint-plugin:8.3.1'
+
+        classpath 'gradle.plugin.com.dorongold.plugins:task-tree:1.3'
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.17.0'
+
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        classpath 'io.spring.gradle:dependency-management-plugin:1.0.4.RELEASE'
+        classpath 'io.spring.gradle:propdeps-plugin:0.0.9.RELEASE'
+    }
+}
+
+allprojects {
+    apply plugin: 'nebula.release'
+    apply plugin: 'nebula.info'
+    apply plugin: 'nebula.project'
+    apply plugin: 'nebula.optional-base'
+    apply plugin: 'nebula.lint'
+
+    group 'com.github.aafwu00'
+
+    contacts {
+        'aafwu00@gmail.com' {
+            moniker 'Taeho Kim'
+            role 'Developer'
+        }
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+
+    apply plugin: 'org.junit.platform.gradle.plugin'
+
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    if (!project.name.contains('sample')) {
+        apply plugin: 'maven-publish'
+        apply plugin: 'checkstyle'
+        apply plugin: 'findbugs'
+        apply plugin: 'pmd'
+        apply plugin: 'jacoco'
+
+        apply plugin: 'com.dorongold.task-tree'
+        apply plugin: 'com.github.ben-manes.versions'
+
+        apply plugin: 'nebula.maven-publish'
+        apply plugin: 'nebula.source-jar'
+
+        bootRun.enabled = false
+        bootRepackage.enabled = false
+
+        dependencyUpdates.resolutionStrategy = {
+            componentSelection { rules ->
+                rules.all { ComponentSelection selection ->
+                    boolean rejected = ['alpha', 'beta', 'rc', 'cr', 'm', 'dev', 'snapshot'].any { qualifier ->
+                        selection.candidate.version ==~ /(?i).*[.-]${qualifier}[.\d-]*/
+                    }
+                    if (rejected) {
+                        selection.reject('Release Candidate')
+                    }
+                }
+            }
+        }
+
+        checkstyle {
+            toolVersion = '8.7'
+            ignoreFailures = false
+            maxErrors = 0
+            maxWarnings = 0
+            configFile = rootProject.file('config/checkstyle/checkstyle_checks.xml')
+            configProperties = ['checkstyle.header.file'       : "${rootProject.projectDir}/config/checkstyle/java.header",
+                                'checkstyle.regexp.header.file': "${rootProject.projectDir}/config/checkstyle/java_regexp.header",
+                                'checkstyle.suppressions.file' : "${rootProject.projectDir}/config/checkstyle/suppressions.xml",
+                                'checkstyle.importcontrol.file': "${rootProject.projectDir}/config/checkstyle/import-control.xml"]
+        }
+
+        findbugs {
+            toolVersion = '3.0.1'
+            ignoreFailures = false
+            effort = 'max'
+            reportLevel = 'high'
+        }
+
+        pmd {
+            toolVersion = '6.0.0'
+            ruleSetFiles = rootProject.files('config/pmd/rulesets.xml')
+            sourceSets = [project.sourceSets.main as SourceSet]
+            ignoreFailures = false
+            rulePriority = 3
+        }
+
+        jacoco {
+            toolVersion = '0.8.0'
+        }
+    }
+
+    if (project.name.endsWith('sample')) {
+        apply plugin: 'application'
+    }
+
+    if (project.name.contains('samples')) {
+        bootRun.enabled = false
+        bootRepackage.enabled = false
+    }
+
+
+    if (project.name.contains('autoconfigure')) {
+        apply plugin: 'propdeps'
+        apply plugin: 'propdeps-maven'
+        apply plugin: 'propdeps-idea'
+        apply plugin: 'propdeps-eclipse'
+
+        compileJava.dependsOn(processResources)
+    }
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
+
+    configurations {
+        all.collect { configuration ->
+            configuration.exclude group: 'log4j', module: 'log4j'
+            configuration.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+            configuration.exclude group: 'org.slf4j', module: 'slf4j-jcl'
+            configuration.exclude group: 'org.slf4j', module: 'slf4j-jdk14'
+        }
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
+    }
+
+    dependencies {
+        testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.0.3'
+        testCompile 'org.junit.jupiter:junit-jupiter-api:5.0.3'
+        testCompile 'org.apiguardian:apiguardian-api:1.0.0'
+
+        testCompile 'com.github.sbrannen:spring-test-junit5:1.0.3'
+        testCompile 'org.springframework.boot:spring-boot-starter-test'
+
+        testCompile 'org.assertj:assertj-core:3.9.0'
+
+        if (project.name.contains('autoconfigure')) {
+            compile 'org.springframework.boot:spring-boot-configuration-processor', optional
+        }
+    }
+}

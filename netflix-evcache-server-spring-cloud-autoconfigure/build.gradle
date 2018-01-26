@@ -1,0 +1,12 @@
+dependencies {
+    compile "com.netflix.evcache:evcache-client:${evcacheVersion}"
+
+    compile 'org.springframework.boot:spring-boot-autoconfigure'
+    compile 'org.springframework.boot:spring-boot-actuator', optional
+
+    compile 'org.springframework.boot:spring-boot-starter-validation', optional
+
+    compile 'org.springframework.cloud:spring-cloud-netflix-core', optional
+    compile 'org.springframework.cloud:spring-cloud-commons', optional
+    compile 'org.springframework.cloud:spring-cloud-netflix-eureka-client', optional
+}
