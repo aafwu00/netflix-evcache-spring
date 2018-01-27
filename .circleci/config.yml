@@ -39,4 +39,5 @@ jobs:
           key: v1-dependencies-{{ checksum "build.gradle" }}
 
       # run tests!
-      - run: gradle check
+      - run: ./gradlew check jacocoTestReport
+      - rum: bash <(curl -s https://codecov.io/bash)

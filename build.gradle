@@ -111,6 +111,21 @@ subprojects {
 
         jacoco {
             toolVersion = '0.8.0'
+            applyTo junitPlatformTest
+        }
+
+        jacocoTestReport {
+            reports {
+                html.enabled = true
+                xml.enabled = true
+                csv.enabled = false
+            }
+        }
+        
+        junitPlatformTest {
+            jacoco {
+                destinationFile = file("${buildDir}/jacoco/test.exec")
+            }
         }
     }
 
