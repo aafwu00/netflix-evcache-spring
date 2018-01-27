@@ -1,8 +1,11 @@
-image::https://img.shields.io/badge/License-Apache%202.0-blue.svg["License Apache 2.0", link="https://opensource.org/licenses/Apache-2.0"]
+image:https://img.shields.io/badge/License-Apache%202.0-blue.svg["License Apache 2.0", link="https://opensource.org/licenses/Apache-2.0"]
+image:https://jitpack.io/v/aafwu00//netflix-evcache-spring.svg["Release", link=
+"https://jitpack.io/#aafwu00/netflix-evcache-spring"]
+image:https://circleci.com/gh/aafwu00/netflix-evcache-spring.svg?style=svg["CircleCI", link="https://circleci.com/gh/aafwu00/netflix-evcache-spring"]
+image:https://api.codacy.com/project/badge/Grade/7e1d4c8db17c47a591d98cd499a47b24[link="https://www.codacy.com/app/aafwu00/netflix-evcache-spring?utm_source=github.com&utm_medium=referral&utm_content=aafwu00/netflix-evcache-spring&utm_campaign=badger"]
 
 = Netflix EVCache Spring
 
-image:https://api.codacy.com/project/badge/Grade/7e1d4c8db17c47a591d98cd499a47b24[link="https://www.codacy.com/app/aafwu00/netflix-evcache-spring?utm_source=github.com&utm_medium=referral&utm_content=aafwu00/netflix-evcache-spring&utm_campaign=badger"]
 This project provides Netflix EVCache integrations for Spring Cache Abstraction, Spring Boot, Spring Cloud
 
 == Getting Start
