@@ -18,14 +18,9 @@ package com.github.aafwu00.spring.cloud.netflix.evcache.server;
 
 import javax.validation.constraints.Min;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
-
-import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
 
 /**
  * Configuration properties for the EVCache Server.
@@ -54,43 +49,6 @@ public class EVCacheServerProperties {
      */
     @Min(0)
     private int port = DEFAULT_PORT;
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final EVCacheServerProperties that = (EVCacheServerProperties) obj;
-        return new EqualsBuilder()
-            .append(enabled, that.enabled)
-            .append(hostname, that.hostname)
-            .append(port, that.port)
-            .append(group, that.group)
-            .isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder()
-            .append(enabled)
-            .append(hostname)
-            .append(port)
-            .append(group)
-            .toHashCode();
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this, SHORT_PREFIX_STYLE)
-            .append("enabled", enabled)
-            .append("hostname", hostname)
-            .append("port", port)
-            .append("group", group)
-            .toString();
-    }
 
     public boolean isEnabled() {
         return enabled;

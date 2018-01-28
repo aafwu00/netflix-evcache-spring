@@ -16,7 +16,7 @@
 
 package com.github.aafwu00.spring.boot.netflix.evcache.client;
 
-import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +31,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.github.aafwu00.spring.netflix.evcache.client.EVCacheConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
  * @author Taeho Kim
@@ -44,26 +45,29 @@ class EVCachePropertiesTest {
 
     @Test
     void should_be_loaded_yml() {
-        final EVCacheProperties result = new EVCacheProperties();
-        result.setEnabled(true);
-        result.setName("test");
-        final EVCacheProperties.Prefix prefix1 = new EVCacheProperties.Prefix();
-        prefix1.setName("test1");
-        prefix1.setTimeToLive(1000);
-        prefix1.setServerGroupRetry(true);
-        prefix1.setEnableExceptionThrowing(true);
-        final EVCacheProperties.Prefix prefix2 = new EVCacheProperties.Prefix();
-        prefix2.setName("test2");
-        prefix2.setServerGroupRetry(false);
-        result.setPrefixes(Arrays.asList(prefix1, prefix2));
-        assertThat(properties).isEqualTo(result);
+        assertAll(
+            () -> assertThat(properties.isEnabled()).isTrue(),
+            () -> assertThat(properties.getName()).isEqualTo("test"),
+            () -> assertThat(properties.getPrefixes().get(0).getName()).isEqualTo("test1"),
+            () -> assertThat(properties.getPrefixes().get(0).getTimeToLive()).isEqualTo(1000),
+            () -> assertThat(properties.getPrefixes().get(0).isServerGroupRetry()).isTrue(),
+            () -> assertThat(properties.getPrefixes().get(0).isEnableExceptionThrowing()).isTrue(),
+            () -> assertThat(properties.getPrefixes().get(1).getName()).isEqualTo("test2"),
+            () -> assertThat(properties.getPrefixes().get(1).isServerGroupRetry()).isFalse()
+        );
     }
 
     @Test
     void should_be_converted_to_configurations() {
-        final EVCacheConfiguration configuration1 = new EVCacheConfiguration("test1", 1000, true, true, true);
-        final EVCacheConfiguration configuration2 = new EVCacheConfiguration("test2", 900, true, false, false);
-        assertThat(properties.toConfigurations()).containsExactly(configuration1, configuration2);
+        final List<EVCacheConfiguration> configurations = properties.toConfigurations();
+        assertAll(
+            () -> assertThat(configurations.get(0).getName()).isEqualTo("test1"),
+            () -> assertThat(configurations.get(0).getTimeToLive()).isEqualTo(1000),
+            () -> assertThat(configurations.get(0).isServerGroupRetry()).isTrue(),
+            () -> assertThat(configurations.get(0).isEnableExceptionThrowing()).isTrue(),
+            () -> assertThat(configurations.get(1).getName()).isEqualTo("test2"),
+            () -> assertThat(configurations.get(1).isEnableExceptionThrowing()).isFalse()
+        );
     }
 
     @Configuration

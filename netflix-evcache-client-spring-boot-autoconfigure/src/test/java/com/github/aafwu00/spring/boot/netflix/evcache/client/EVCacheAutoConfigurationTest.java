@@ -16,8 +16,6 @@
 
 package com.github.aafwu00.spring.boot.netflix.evcache.client;
 
-import java.util.Arrays;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -155,18 +153,6 @@ class EVCacheAutoConfigurationTest {
 
     @Test
     void should_be_loaded_EVCacheProperties() {
-        final EVCacheProperties result = new EVCacheProperties();
-        result.setEnabled(true);
-        result.setName("test");
-        final EVCacheProperties.Prefix prefix1 = new EVCacheProperties.Prefix();
-        prefix1.setName("test1");
-        prefix1.setTimeToLive(1000);
-        prefix1.setServerGroupRetry(true);
-        prefix1.setEnableExceptionThrowing(true);
-        final EVCacheProperties.Prefix prefix2 = new EVCacheProperties.Prefix();
-        prefix2.setName("test2");
-        prefix2.setServerGroupRetry(false);
-        result.setPrefixes(Arrays.asList(prefix1, prefix2));
         loadContext(EnableCachingConfiguration.class,
                     "evcache.name=test",
                     "evcache.prefixes[0].name=test1",
@@ -175,7 +161,15 @@ class EVCacheAutoConfigurationTest {
                     "evcache.prefixes[0].enable-exception-throwing=true",
                     "evcache.prefixes[1].name=test2",
                     "evcache.prefixes[1].server-group-retry=false");
-        assertThat(context.getBean(EVCacheProperties.class)).isEqualTo(result);
+        final EVCacheProperties properties = context.getBean(EVCacheProperties.class);
+        assertAll(
+            () -> assertThat(properties.getName()).isEqualTo("test"),
+            () -> assertThat(properties.getPrefixes().get(0).getName()).isEqualTo("test1"),
+            () -> assertThat(properties.getPrefixes().get(0).getTimeToLive()).isEqualTo(1000),
+            () -> assertThat(properties.getPrefixes().get(0).isServerGroupRetry()).isTrue(),
+            () -> assertThat(properties.getPrefixes().get(1).getName()).isEqualTo("test2"),
+            () -> assertThat(properties.getPrefixes().get(1).isServerGroupRetry()).isFalse()
+        );
     }
 
     private void loadContext(final Class<?> configuration, final String... pairs) {

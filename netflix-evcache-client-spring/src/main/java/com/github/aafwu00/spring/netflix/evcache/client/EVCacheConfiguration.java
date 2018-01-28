@@ -16,14 +16,9 @@
 
 package com.github.aafwu00.spring.netflix.evcache.client;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 import static org.apache.commons.lang3.Validate.inclusiveBetween;
 import static org.apache.commons.lang3.Validate.matchesPattern;
 import static org.apache.commons.lang3.Validate.notEmpty;
-import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
 
 /**
  * Configuration for {@link EVCacheManager}
@@ -73,46 +68,6 @@ public class EVCacheConfiguration {
         this.enableExceptionThrowing = enableExceptionThrowing;
         matchesPattern(name, "[^:]*$", "'name' must not contain colon(:) character");
         inclusiveBetween(1, Integer.MAX_VALUE, timeToLive, "'timeToLive' must be positive integer");
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final EVCacheConfiguration that = (EVCacheConfiguration) obj;
-        return new EqualsBuilder()
-            .append(timeToLive, that.timeToLive)
-            .append(allowNullValues, that.allowNullValues)
-            .append(serverGroupRetry, that.serverGroupRetry)
-            .append(enableExceptionThrowing, that.enableExceptionThrowing)
-            .append(name, that.name)
-            .isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder()
-            .append(name)
-            .append(timeToLive)
-            .append(allowNullValues)
-            .append(serverGroupRetry)
-            .append(enableExceptionThrowing)
-            .toHashCode();
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this, SHORT_PREFIX_STYLE)
-            .append("name", name)
-            .append("timeToLive", timeToLive)
-            .append("allowNullValues", allowNullValues)
-            .append("serverGroupRetry", serverGroupRetry)
-            .append("enableExceptionThrowing", enableExceptionThrowing)
-            .toString();
     }
 
     public String getName() {

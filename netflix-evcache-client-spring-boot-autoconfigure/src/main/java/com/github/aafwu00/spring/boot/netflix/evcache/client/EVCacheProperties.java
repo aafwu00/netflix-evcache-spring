@@ -22,9 +22,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -34,7 +31,6 @@ import org.springframework.validation.annotation.Validated;
 import com.github.aafwu00.spring.netflix.evcache.client.EVCacheConfiguration;
 
 import static java.util.stream.Collectors.toList;
-import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
 
 /**
  * Configuration properties for the EVCache.
@@ -65,40 +61,6 @@ public class EVCacheProperties {
         return prefixes.stream()
                        .map(Prefix::toConfiguration)
                        .collect(toList());
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final EVCacheProperties that = (EVCacheProperties) obj;
-        return new EqualsBuilder()
-            .append(enabled, that.enabled)
-            .append(name, that.name)
-            .append(prefixes, that.prefixes)
-            .isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder()
-            .append(enabled)
-            .append(name)
-            .append(prefixes)
-            .toHashCode();
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this, SHORT_PREFIX_STYLE)
-            .append("enabled", enabled)
-            .append("name", name)
-            .append("prefixes", prefixes)
-            .toString();
     }
 
     public boolean isEnabled() {
@@ -155,46 +117,6 @@ public class EVCacheProperties {
 
         protected EVCacheConfiguration toConfiguration() {
             return new EVCacheConfiguration(name, timeToLive, allowNullValues, serverGroupRetry, enableExceptionThrowing);
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null || getClass() != obj.getClass()) {
-                return false;
-            }
-            final Prefix that = (Prefix) obj;
-            return new EqualsBuilder()
-                .append(timeToLive, that.timeToLive)
-                .append(allowNullValues, that.allowNullValues)
-                .append(serverGroupRetry, that.serverGroupRetry)
-                .append(enableExceptionThrowing, that.enableExceptionThrowing)
-                .append(name, that.name)
-                .isEquals();
-        }
-
-        @Override
-        public int hashCode() {
-            return new HashCodeBuilder()
-                .append(name)
-                .append(timeToLive)
-                .append(allowNullValues)
-                .append(serverGroupRetry)
-                .append(enableExceptionThrowing)
-                .toHashCode();
-        }
-
-        @Override
-        public String toString() {
-            return new ToStringBuilder(this, SHORT_PREFIX_STYLE)
-                .append("name", name)
-                .append("timeToLive", timeToLive)
-                .append("allowNullValues", timeToLive)
-                .append("serverGroupRetry", serverGroupRetry)
-                .append("enableExceptionThrowing", enableExceptionThrowing)
-                .toString();
         }
 
         public String getName() {
