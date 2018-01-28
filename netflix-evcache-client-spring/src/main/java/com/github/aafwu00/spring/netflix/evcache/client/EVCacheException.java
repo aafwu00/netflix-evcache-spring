@@ -22,10 +22,6 @@ package com.github.aafwu00.spring.netflix.evcache.client;
 public class EVCacheException extends RuntimeException {
     private static final long serialVersionUID = 7418170197571789545L;
 
-    public EVCacheException(final Throwable cause) {
-        super(cause);
-    }
-
     public EVCacheException(final String message) {
         super(message);
     }

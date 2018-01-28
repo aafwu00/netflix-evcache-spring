@@ -13,3 +13,8 @@ logging:
   level:
     root: off
 
+evcache:
+  server:
+    group: test
+    hostname: localhost
+    port: 11211
