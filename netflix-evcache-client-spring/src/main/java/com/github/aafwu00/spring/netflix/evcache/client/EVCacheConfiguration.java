@@ -39,6 +39,10 @@ public class EVCacheConfiguration {
      */
     private final boolean allowNullValues;
     /**
+     * Whether to convert key to digest
+     */
+    private final boolean useKeyDigest;
+    /**
      * Retry across Server Group for cache misses and exceptions
      */
     private final boolean serverGroupRetry;
@@ -53,17 +57,19 @@ public class EVCacheConfiguration {
      * @param name                    the name
      * @param timeToLive              the time to live
      * @param allowNullValues         the allow null values
+     * @param useKeyDigest            whether to convert key to digest
      * @param serverGroupRetry        the server group retry
      * @param enableExceptionThrowing the enable exception throwing
      */
     public EVCacheConfiguration(final String name,
                                 final int timeToLive,
                                 final boolean allowNullValues,
-                                final boolean serverGroupRetry,
+                                final boolean useKeyDigest, final boolean serverGroupRetry,
                                 final boolean enableExceptionThrowing) {
         this.name = notEmpty(name);
         this.timeToLive = timeToLive;
         this.allowNullValues = allowNullValues;
+        this.useKeyDigest = useKeyDigest;
         this.serverGroupRetry = serverGroupRetry;
         this.enableExceptionThrowing = enableExceptionThrowing;
         matchesPattern(name, "[^:]*$", "'name' must not contain colon(:) character");
@@ -80,6 +86,10 @@ public class EVCacheConfiguration {
 
     public boolean isAllowNullValues() {
         return allowNullValues;
+    }
+
+    public boolean isUseKeyDigest() {
+        return useKeyDigest;
     }
 
     public boolean isServerGroupRetry() {

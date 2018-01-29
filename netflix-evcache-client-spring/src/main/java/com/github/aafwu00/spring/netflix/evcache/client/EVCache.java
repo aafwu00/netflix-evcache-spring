@@ -16,14 +16,13 @@
 
 package com.github.aafwu00.spring.netflix.evcache.client;
 
-import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.cache.Cache;
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.util.ReflectionUtils;
 
 import static java.util.Objects.requireNonNull;
 
@@ -35,11 +34,16 @@ import static java.util.Objects.requireNonNull;
 public class EVCache extends AbstractValueAdaptingCache {
     private final com.netflix.evcache.EVCache cache;
     private final ConversionService conversionService;
+    private final boolean useKeyDigest;
 
-    public EVCache(final com.netflix.evcache.EVCache cache, final ConversionService conversionService, final boolean allowNullValues) {
+    public EVCache(final com.netflix.evcache.EVCache cache,
+                   final ConversionService conversionService,
+                   final boolean allowNullValues,
+                   final boolean useKeyDigest) {
         super(allowNullValues);
         this.cache = requireNonNull(cache);
         this.conversionService = requireNonNull(conversionService);
+        this.useKeyDigest = useKeyDigest;
     }
 
     @Override
@@ -104,9 +108,9 @@ public class EVCache extends AbstractValueAdaptingCache {
     }
 
     private String createKey(final Object key) {
-        // CHECKSTYLE:OFF
-        // TODO: delete whitespace?, check 250 length?
-        // CHECKSTYLE:ON
+        if (useKeyDigest) {
+            return DigestUtils.sha256Hex(convertKey(key));
+        }
         return convertKey(key);
     }
 
@@ -115,11 +119,7 @@ public class EVCache extends AbstractValueAdaptingCache {
         if (conversionService.canConvert(source, TypeDescriptor.valueOf(String.class))) {
             return conversionService.convert(key, String.class);
         }
-        final Method toString = ReflectionUtils.findMethod(key.getClass(), "toString");
-        if (toString != null && !Object.class.equals(toString.getDeclaringClass())) {
-            return key.toString();
-        }
-        throw new EVCacheException(String.format("Cannot convert %s to String. Register a Converter or override toString().", source));
+        return key.toString();
     }
 
     @Override

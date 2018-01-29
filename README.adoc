@@ -185,12 +185,16 @@ IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
 | true
 | Whether to allow for `null` values
 
+| evcache.prefix[].useKeyDigest
+| false
+| Whether to convert key to digest
+
 | evcache.prefix[].serverGroupRetry
 | true
 | Retry across Server Group for cache misses and exceptions
 
 | evcache.prefix[].enableExceptionThrowing
-| true
+| false
 | Exceptions are not propagated and null values are returned
 
 | evcache.metrics.enabled

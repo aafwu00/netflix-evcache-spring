@@ -32,19 +32,22 @@ class EVCacheConfigurationTest {
             () -> assertThatThrownBy(() -> new EVCacheConfiguration("",
                                                                     10,
                                                                     true,
-                                                                    true,
-                                                                    false)).isInstanceOf(IllegalArgumentException.class),
+                                                                    true, true,
+                                                                    false
+            )).isInstanceOf(IllegalArgumentException.class),
             () -> assertThatThrownBy(() -> new EVCacheConfiguration("test:1",
                                                                     10,
                                                                     true,
-                                                                    true,
-                                                                    false)).isInstanceOf(IllegalArgumentException.class),
+                                                                    true, true,
+                                                                    false
+            )).isInstanceOf(IllegalArgumentException.class),
             () -> assertThatThrownBy(() -> new EVCacheConfiguration("test1:",
                                                                     10,
                                                                     true,
-                                                                    true,
-                                                                    false)).isInstanceOf(IllegalArgumentException.class),
-            () -> assertThat(new EVCacheConfiguration("test-1", 10, true, true, false)).isNotNull()
+                                                                    true, true,
+                                                                    false
+            )).isInstanceOf(IllegalArgumentException.class),
+            () -> assertThat(new EVCacheConfiguration("test-1", 10, true, true, true, false)).isNotNull()
         );
     }
 
@@ -54,14 +57,16 @@ class EVCacheConfigurationTest {
             () -> assertThatThrownBy(() -> new EVCacheConfiguration("test1",
                                                                     -1,
                                                                     true,
-                                                                    true,
-                                                                    false)).isInstanceOf(IllegalArgumentException.class),
+                                                                    true, true,
+                                                                    false
+            )).isInstanceOf(IllegalArgumentException.class),
             () -> assertThatThrownBy(() -> new EVCacheConfiguration("test1",
                                                                     0,
                                                                     true,
-                                                                    true,
-                                                                    false)).isInstanceOf(IllegalArgumentException.class),
-            () -> assertThat(new EVCacheConfiguration("test1", 10, true, true, false)).isNotNull()
+                                                                    true, true,
+                                                                    false
+            )).isInstanceOf(IllegalArgumentException.class),
+            () -> assertThat(new EVCacheConfiguration("test1", 10, true, true, true, false)).isNotNull()
         );
     }
 }

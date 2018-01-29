@@ -57,7 +57,7 @@ public class TodoApp {
                      .getDynamicStringProperty("TODO-NODES",
                                                "shard1=localhost:11211,localhost:11212;shard2=localhost:11213,localhost:11214")
                      .get();
-        final EVCacheConfiguration configuration = new EVCacheConfiguration("todos", 10, true, true, false);
+        final EVCacheConfiguration configuration = new EVCacheConfiguration("todos", 10, true, true, true, false);
         return new EVCacheManager("TODO", conversionService, Collections.singletonList(configuration));
     }
 }
