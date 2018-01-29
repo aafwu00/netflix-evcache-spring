@@ -173,9 +173,11 @@ public class MyOwnEurekaNodeListProvider implements EVCacheNodeList {
         if (isNotEmpty(zone)) {
             return zone;
         }
-        final String availabilityZone = instanceInfo.getMetadata().get("zone");
-        if (isNotEmpty(availabilityZone)) {
-            return availabilityZone;
+        if (instanceInfo.getMetadata() != null) {
+            final String availabilityZone = instanceInfo.getMetadata().get("zone");
+            if (isNotEmpty(availabilityZone)) {
+                return availabilityZone;
+            }
         }
         return "UNKNOWN";
     }

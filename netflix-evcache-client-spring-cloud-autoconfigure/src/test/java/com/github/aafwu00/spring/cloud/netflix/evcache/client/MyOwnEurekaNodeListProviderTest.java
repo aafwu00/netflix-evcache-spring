@@ -16,7 +16,10 @@
 
 package com.github.aafwu00.spring.cloud.netflix.evcache.client;
 
+import java.net.InetSocketAddress;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,10 +29,11 @@ import com.netflix.appinfo.ApplicationInfoManager;
 import com.netflix.appinfo.DataCenterInfo;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.appinfo.MyDataCenterInfo;
+import com.netflix.config.ConfigurationManager;
 import com.netflix.discovery.EurekaClient;
 import com.netflix.discovery.shared.Application;
+import com.netflix.evcache.pool.EVCacheServerGroupConfig;
 import com.netflix.evcache.pool.ServerGroup;
-import com.netflix.evcache.util.EVCacheConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -56,10 +60,11 @@ class MyOwnEurekaNodeListProviderTest {
         application = mock(Application.class);
         provider = new MyOwnEurekaNodeListProvider(applicationInfoManager, eurekaClient);
         doReturn(instanceInfo).when(applicationInfoManager).getInfo();
+        ConfigurationManager.getConfigInstance().setProperty("test" + ".ignore.hosts", "server1,server2");
     }
 
     @Test
-    void name() {
+    void should_be_contain_default_server_group() {
         doReturn(InstanceInfo.InstanceStatus.UP).when(instanceInfo).getStatus();
         doReturn(application).when(eurekaClient).getApplication("test");
         doReturn(Collections.singletonList(otherInstanceInfo)).when(application).getInstances();
@@ -67,7 +72,75 @@ class MyOwnEurekaNodeListProviderTest {
         doReturn(new MyDataCenterInfo(DataCenterInfo.Name.MyOwn)).when(otherInstanceInfo).getDataCenterInfo();
         doReturn("notmatch").when(otherInstanceInfo).getHostName();
         doReturn("notmatch").when(otherInstanceInfo).getIPAddr();
-        assertThat(provider.discoverInstances("test")).containsKeys(new ServerGroup("UNKNOWN", "Default"));
+        doReturn(null).when(otherInstanceInfo).getMetadata();
+        final Map<ServerGroup, EVCacheServerGroupConfig> result = provider.discoverInstances("test");
+        final ServerGroup key = new ServerGroup("UNKNOWN", "Default");
+        assertAll(
+            () -> assertThat(result).hasSize(1).containsKey(key),
+            () -> assertThat(result.get(key).getServerGroup()).isEqualTo(key),
+            () -> assertThat(result.get(key).getInetSocketAddress()).containsOnly(new InetSocketAddress("notmatch", 11211)),
+            () -> assertThat(result.get(key).getRendPort()).isEqualTo(0),
+            () -> assertThat(result.get(key).getUdsproxyMemcachedPort()).isEqualTo(0),
+            () -> assertThat(result.get(key).getUpdsproxyMememtoPort()).isEqualTo(0)
+        );
+    }
+
+    @Test
+    void should_be_contain_use_rend_port_server() {
+        doReturn(InstanceInfo.InstanceStatus.UP).when(instanceInfo).getStatus();
+        doReturn(application).when(eurekaClient).getApplication("test");
+        doReturn(Collections.singletonList(otherInstanceInfo)).when(application).getInstances();
+        doReturn(InstanceInfo.InstanceStatus.UP).when(otherInstanceInfo).getStatus();
+        doReturn(new MyDataCenterInfo(DataCenterInfo.Name.MyOwn)).when(otherInstanceInfo).getDataCenterInfo();
+        doReturn("notmatch").when(otherInstanceInfo).getHostName();
+        doReturn("notmatch").when(otherInstanceInfo).getIPAddr();
+        final Map<String, String> metaInfo = new HashMap<>();
+        metaInfo.put("zone", "rend");
+        metaInfo.put("evcache.port", "11211");
+        metaInfo.put("evcache.group", "group1");
+        metaInfo.put("rend.batch.port", "11213");
+        metaInfo.put("rend.port", "11212");
+        metaInfo.put("udsproxy.memento.port", "11215");
+        doReturn(metaInfo).when(otherInstanceInfo).getMetadata();
+        ConfigurationManager.getConfigInstance().setProperty("evcache.use.batch.port", Boolean.FALSE);
+        final Map<ServerGroup, EVCacheServerGroupConfig> result = provider.discoverInstances("test");
+        final ServerGroup key = new ServerGroup("rend", "group1");
+        assertAll(
+            () -> assertThat(result).hasSize(1).containsKey(key),
+            () -> assertThat(result.get(key).getServerGroup()).isEqualTo(key),
+            () -> assertThat(result.get(key).getInetSocketAddress()).containsOnly(new InetSocketAddress("notmatch", 11212)),
+            () -> assertThat(result.get(key).getRendPort()).isEqualTo(11212),
+            () -> assertThat(result.get(key).getUdsproxyMemcachedPort()).isEqualTo(0),
+            () -> assertThat(result.get(key).getUpdsproxyMememtoPort()).isEqualTo(11215)
+        );
+    }
+
+    @Test
+    void should_be_contain_use_rend_batch_port_server() {
+        doReturn(InstanceInfo.InstanceStatus.UP).when(instanceInfo).getStatus();
+        doReturn(application).when(eurekaClient).getApplication("test");
+        doReturn(Collections.singletonList(otherInstanceInfo)).when(application).getInstances();
+        doReturn(InstanceInfo.InstanceStatus.UP).when(otherInstanceInfo).getStatus();
+        doReturn(new MyDataCenterInfo(DataCenterInfo.Name.MyOwn)).when(otherInstanceInfo).getDataCenterInfo();
+        doReturn("notmatch").when(otherInstanceInfo).getHostName();
+        doReturn("notmatch").when(otherInstanceInfo).getIPAddr();
+        doReturn("group2").when(otherInstanceInfo).getASGName();
+        final Map<String, String> metaInfo = new HashMap<>();
+        metaInfo.put("rend.port", "11212");
+        metaInfo.put("rend.batch.port", "11213");
+        metaInfo.put("udsproxy.memcached.port", "11214");
+        doReturn(metaInfo).when(otherInstanceInfo).getMetadata();
+        ConfigurationManager.getConfigInstance().setProperty("test.use.batch.port", Boolean.TRUE);
+        final Map<ServerGroup, EVCacheServerGroupConfig> result = provider.discoverInstances("test");
+        final ServerGroup key = new ServerGroup("UNKNOWN", "group2");
+        assertAll(
+            () -> assertThat(result).hasSize(1).containsKey(key),
+            () -> assertThat(result.get(key).getServerGroup()).isEqualTo(key),
+            () -> assertThat(result.get(key).getInetSocketAddress()).containsOnly(new InetSocketAddress("notmatch", 11213)),
+            () -> assertThat(result.get(key).getRendPort()).isEqualTo(11212),
+            () -> assertThat(result.get(key).getUdsproxyMemcachedPort()).isEqualTo(11214),
+            () -> assertThat(result.get(key).getUpdsproxyMememtoPort()).isEqualTo(0)
+        );
     }
 
     @Test
@@ -101,27 +174,22 @@ class MyOwnEurekaNodeListProviderTest {
                 assertThat(provider.discoverInstances("test")).isEmpty();
             },
             () -> {
-                EVCacheConfig.getInstance().getDynamicStringProperty("test" + ".ignore.hosts", "server1,server2");
                 doReturn(InstanceInfo.InstanceStatus.UP).when(otherInstanceInfo).getStatus();
                 doReturn("server1").when(otherInstanceInfo).getIPAddr();
-                doReturn(AmazonInfo.Builder.newBuilder().build()).when(otherInstanceInfo).getDataCenterInfo();
-                assertThat(provider.discoverInstances("test")).isEmpty();
-            },
-            () -> {
-                EVCacheConfig.getInstance().getDynamicStringProperty("test" + ".ignore.hosts", "server1,server2");
-                doReturn(InstanceInfo.InstanceStatus.UP).when(otherInstanceInfo).getStatus();
-                doReturn("server1").when(otherInstanceInfo).getHostName();
-                doReturn(AmazonInfo.Builder.newBuilder().build()).when(otherInstanceInfo).getDataCenterInfo();
+                doReturn("notmatch").when(otherInstanceInfo).getHostName();
                 assertThat(provider.discoverInstances("test")).isEmpty();
             },
             () -> {
                 doReturn(InstanceInfo.InstanceStatus.UP).when(otherInstanceInfo).getStatus();
-                doReturn(AmazonInfo.Builder.newBuilder().build()).when(otherInstanceInfo).getDataCenterInfo();
+                doReturn("notmatch").when(otherInstanceInfo).getIPAddr();
+                doReturn("server2").when(otherInstanceInfo).getHostName();
                 assertThat(provider.discoverInstances("test")).isEmpty();
             },
             () -> {
                 doReturn(InstanceInfo.InstanceStatus.UP).when(otherInstanceInfo).getStatus();
-                doReturn(new MyDataCenterInfo(DataCenterInfo.Name.MyOwn)).when(otherInstanceInfo).getDataCenterInfo();
+                doReturn("notmatch").when(otherInstanceInfo).getIPAddr();
+                doReturn("notmatch").when(otherInstanceInfo).getHostName();
+                doReturn(AmazonInfo.Builder.newBuilder().build()).when(otherInstanceInfo).getDataCenterInfo();
                 assertThat(provider.discoverInstances("test")).isEmpty();
             }
         );
