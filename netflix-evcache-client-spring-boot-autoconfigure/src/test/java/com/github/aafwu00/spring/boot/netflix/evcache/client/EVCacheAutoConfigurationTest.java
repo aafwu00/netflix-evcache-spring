@@ -159,6 +159,7 @@ class EVCacheAutoConfigurationTest {
                     "evcache.prefixes[0].time-to-live=1000",
                     "evcache.prefixes[0].server-group-retry=true",
                     "evcache.prefixes[0].enable-exception-throwing=true",
+                    "evcache.prefixes[0].allow-null-values=false",
                     "evcache.prefixes[1].name=test2",
                     "evcache.prefixes[1].server-group-retry=false");
         final EVCacheProperties properties = context.getBean(EVCacheProperties.class);
@@ -167,7 +168,9 @@ class EVCacheAutoConfigurationTest {
             () -> assertThat(properties.getPrefixes().get(0).getName()).isEqualTo("test1"),
             () -> assertThat(properties.getPrefixes().get(0).getTimeToLive()).isEqualTo(1000),
             () -> assertThat(properties.getPrefixes().get(0).isServerGroupRetry()).isTrue(),
+            () -> assertThat(properties.getPrefixes().get(0).isAllowNullValues()).isFalse(),
             () -> assertThat(properties.getPrefixes().get(1).getName()).isEqualTo("test2"),
+            () -> assertThat(properties.getPrefixes().get(1).isAllowNullValues()).isTrue(),
             () -> assertThat(properties.getPrefixes().get(1).isServerGroupRetry()).isFalse()
         );
     }

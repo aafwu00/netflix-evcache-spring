@@ -53,8 +53,10 @@ class EVCachePropertiesTest {
             () -> assertThat(properties.getPrefixes().get(0).isServerGroupRetry()).isTrue(),
             () -> assertThat(properties.getPrefixes().get(0).isEnableExceptionThrowing()).isTrue(),
             () -> assertThat(properties.getPrefixes().get(0).isUseKeyDigest()).isTrue(),
+            () -> assertThat(properties.getPrefixes().get(0).isAllowNullValues()).isTrue(),
             () -> assertThat(properties.getPrefixes().get(1).getName()).isEqualTo("test2"),
             () -> assertThat(properties.getPrefixes().get(1).isServerGroupRetry()).isFalse(),
+            () -> assertThat(properties.getPrefixes().get(1).isAllowNullValues()).isTrue(),
             () -> assertThat(properties.getPrefixes().get(1).isUseKeyDigest()).isFalse()
         );
     }
@@ -67,9 +69,11 @@ class EVCachePropertiesTest {
             () -> assertThat(configurations.get(0).getTimeToLive()).isEqualTo(1000),
             () -> assertThat(configurations.get(0).isServerGroupRetry()).isTrue(),
             () -> assertThat(configurations.get(0).isEnableExceptionThrowing()).isTrue(),
+            () -> assertThat(configurations.get(0).isAllowNullValues()).isTrue(),
             () -> assertThat(configurations.get(0).isUseKeyDigest()).isTrue(),
             () -> assertThat(configurations.get(1).getName()).isEqualTo("test2"),
             () -> assertThat(configurations.get(1).isEnableExceptionThrowing()).isFalse(),
+            () -> assertThat(configurations.get(1).isAllowNullValues()).isTrue(),
             () -> assertThat(configurations.get(1).isUseKeyDigest()).isFalse()
         );
     }
