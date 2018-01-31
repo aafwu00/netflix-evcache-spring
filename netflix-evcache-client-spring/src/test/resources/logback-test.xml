@@ -2,8 +2,7 @@
 <configuration>
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>
-                <![CDATA[[%date{yyyy-MM-dd HH:mm:ss}] %-5level %logger.%method\(%file:%line\) - %message%n]]></pattern>
+            <pattern>[%date{yyyy-MM-dd HH:mm:ss}] %-5level %logger.%method\(%file:%line\) - %message%n</pattern>
         </encoder>
     </appender>
     <root level="ERROR">
