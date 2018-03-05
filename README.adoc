@@ -1,3 +1,5 @@
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Faafwu00%2Fnetflix-evcache-spring.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Faafwu00%2Fnetflix-evcache-spring?ref=badge_shield)
+
 image:https://img.shields.io/badge/License-Apache%202.0-blue.svg["License Apache 2.0", link="https://opensource.org/licenses/Apache-2.0"]
 image:https://jitpack.io/v/aafwu00//netflix-evcache-spring.svg["Release", link=
 "https://jitpack.io/#aafwu00/netflix-evcache-spring"]
@@ -389,3 +391,7 @@ This project is licensed under the Apache License 2.0 - see the link:LICENSE[LIC
 * https://github.com/spring-projects/spring-boot[Spring Boot]
 * https://github.com/spring-cloud/spring-cloud-netflix[Spring Cloud Netflix]
 * http://nebula-plugins.github.io[Gradle Nebula Plugins]
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Faafwu00%2Fnetflix-evcache-spring.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Faafwu00%2Fnetflix-evcache-spring?ref=badge_large)
