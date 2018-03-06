@@ -86,7 +86,7 @@ subprojects {
         }
 
         checkstyle {
-            toolVersion = '8.7'
+            toolVersion = '8.8'
             ignoreFailures = false
             maxErrors = 0
             maxWarnings = 0
@@ -105,7 +105,7 @@ subprojects {
         }
 
         pmd {
-            toolVersion = '6.0.0'
+            toolVersion = '6.1.0'
             ruleSetFiles = rootProject.files('config/pmd/rulesets.xml')
             sourceSets = [project.sourceSets.main as SourceSet]
             ignoreFailures = false
