@@ -17,13 +17,18 @@
 package com.github.aafwu00.spring.boot.netflix.evcache.client;
 
 import java.util.Collection;
-import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.actuate.endpoint.PublicMetrics;
 import org.springframework.boot.actuate.metrics.Metric;
 
 import com.netflix.evcache.metrics.EVCacheMetricsFactory;
+import com.netflix.spectator.api.Counter;
+import com.netflix.spectator.api.DefaultRegistry;
+import com.netflix.spectator.api.Spectator;
+import com.netflix.spectator.api.Tag;
 
+import static com.netflix.evcache.metrics.EVCacheMetricsFactory.METRIC;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -32,18 +37,42 @@ import static java.util.stream.Collectors.toList;
  * @author Taeho Kim
  */
 public class EVCacheMetrics implements PublicMetrics {
-    @Override
-    public Collection<Metric<?>> metrics() {
-        return allMonitor().entrySet()
-                           .stream()
-                           .map(entry -> new Metric<>("evcache." + entry.getKey(), entry.getValue()))
-                           .collect(toList());
+    private final EVCacheMetricsFactory metricsFactory;
+
+    public EVCacheMetrics() {
+        Spectator.globalRegistry().add(new DefaultRegistry());
+        metricsFactory = EVCacheMetricsFactory.getInstance();
     }
 
-    private Map<String, Number> allMonitor() {
-        // CHECKSTYLE:OFF
-        // FIXME: Is right?
-        // CHECKSTYLE:ON
-        return EVCacheMetricsFactory.getInstance().getAllMonitor();
+    @Override
+    public Collection<Metric<?>> metrics() {
+        return metricsFactory.getAllCounters()
+                             .values()
+                             .stream()
+                             .filter(this::hasMetric)
+                             .map(this::metric)
+                             .collect(toList());
+    }
+
+    private boolean hasMetric(final Counter counter) {
+        for (final Tag tag : counter.id().tags()) {
+            if (StringUtils.equals(tag.key(), METRIC)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Metric<Long> metric(final Counter counter) {
+        return new Metric<>(key(counter), counter.count());
+    }
+
+    private String key(final Counter counter) {
+        for (final Tag tag : counter.id().tags()) {
+            if (StringUtils.equals(tag.key(), METRIC)) {
+                return counter.id().name() + "." + tag.value();
+            }
+        }
+        return counter.id().toString();
     }
 }

@@ -16,46 +16,60 @@
 
 package com.github.aafwu00.spring.boot.netflix.evcache.client;
 
-import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.actuate.metrics.Metric;
 
 import com.netflix.evcache.metrics.EVCacheMetricsFactory;
+import com.netflix.spectator.api.Counter;
+import com.netflix.spectator.api.DefaultRegistry;
 
+import static com.netflix.evcache.metrics.EVCacheMetricsFactory.IN_MEMORY;
+import static com.netflix.evcache.metrics.EVCacheMetricsFactory.METRIC;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
  * @author Taeho Kim
  */
 class EVCacheMetricsTest {
+    private EVCacheMetrics metrics;
+
     @BeforeEach
     void setUp() {
-        allMonitor().clear();
+        metrics = new EVCacheMetrics();
+        counters().clear();
     }
 
     @AfterEach
     void tearDown() {
-        allMonitor().clear();
+        counters().clear();
     }
 
     @Test
     void metrics() {
-        allMonitor().put("test1", 1);
-        allMonitor().put("test2", 1.5);
-        final EVCacheMetrics metrics = new EVCacheMetrics();
-        final Map<String, Number> result = new HashMap<>();
-        for (final Metric<?> metric : metrics.metrics()) {
-            result.put(metric.getName(), metric.getValue());
-        }
-        assertThat(result).containsEntry("evcache.test1", 1)
-                          .containsEntry("evcache.test2", 1.5);
+        final Counter counter1 = new DefaultRegistry().counter(IN_MEMORY, METRIC, "hit");
+        final Counter counter2 = new DefaultRegistry().counter(IN_MEMORY, METRIC, "load");
+        counter1.increment(1);
+        counter2.increment(2);
+        counters().put("test1", counter1);
+        counters().put("test2", counter2);
+        assertAll(
+            () -> assertThat(hasMetric("evcache.client.inmemorycache.hit", 1L)).isTrue(),
+            () -> assertThat(hasMetric("evcache.client.inmemorycache.load", 2L)).isTrue()
+        );
     }
 
-    private Map<String, Number> allMonitor() {
-        return EVCacheMetricsFactory.getInstance().getAllMonitor();
+    private boolean hasMetric(final String key, final Number value) {
+        return metrics.metrics()
+                      .stream()
+                      .anyMatch(metric -> StringUtils.equals(key, metric.getName()) && metric.getValue().equals(value));
+    }
+
+    private Map<String, Counter> counters() {
+        return EVCacheMetricsFactory.getInstance().getAllCounters();
     }
 }
