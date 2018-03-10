@@ -107,9 +107,9 @@ public class EVCacheProperties {
          */
         private boolean allowNullValues = true;
         /**
-         * Whether to convert key to digest
+         * Whether to convert key to hashing
          */
-        private boolean useKeyDigest;
+        private boolean keyHash;
         /**
          * Retry across Server Group for cache misses and exceptions
          */
@@ -120,7 +120,7 @@ public class EVCacheProperties {
         private boolean enableExceptionThrowing;
 
         protected EVCacheConfiguration toConfiguration() {
-            return new EVCacheConfiguration(name, timeToLive, allowNullValues, useKeyDigest, serverGroupRetry, enableExceptionThrowing);
+            return new EVCacheConfiguration(name, timeToLive, allowNullValues, keyHash, serverGroupRetry, enableExceptionThrowing);
         }
 
         public String getName() {
@@ -147,12 +147,12 @@ public class EVCacheProperties {
             this.allowNullValues = allowNullValues;
         }
 
-        public boolean isUseKeyDigest() {
-            return useKeyDigest;
+        public boolean isKeyHash() {
+            return keyHash;
         }
 
-        public void setUseKeyDigest(final boolean useKeyDigest) {
-            this.useKeyDigest = useKeyDigest;
+        public void setKeyHash(final boolean keyHash) {
+            this.keyHash = keyHash;
         }
 
         public boolean isServerGroupRetry() {

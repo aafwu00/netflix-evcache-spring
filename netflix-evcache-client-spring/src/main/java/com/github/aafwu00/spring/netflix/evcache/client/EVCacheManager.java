@@ -59,7 +59,7 @@ public class EVCacheManager extends AbstractCacheManager {
         return new EVCache(builder(configuration).build(),
                            conversionService,
                            configuration.isAllowNullValues(),
-                           configuration.isUseKeyDigest());
+                           configuration.isKeyHash());
     }
 
     private Builder builder(final EVCacheConfiguration configuration) {

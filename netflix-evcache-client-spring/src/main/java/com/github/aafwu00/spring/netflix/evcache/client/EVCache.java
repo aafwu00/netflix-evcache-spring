@@ -34,16 +34,16 @@ import static java.util.Objects.requireNonNull;
 public class EVCache extends AbstractValueAdaptingCache {
     private final com.netflix.evcache.EVCache cache;
     private final ConversionService conversionService;
-    private final boolean useKeyDigest;
+    private final boolean keyHash;
 
     public EVCache(final com.netflix.evcache.EVCache cache,
                    final ConversionService conversionService,
                    final boolean allowNullValues,
-                   final boolean useKeyDigest) {
+                   final boolean keyHash) {
         super(allowNullValues);
         this.cache = requireNonNull(cache);
         this.conversionService = requireNonNull(conversionService);
-        this.useKeyDigest = useKeyDigest;
+        this.keyHash = keyHash;
     }
 
     @Override
@@ -108,7 +108,7 @@ public class EVCache extends AbstractValueAdaptingCache {
     }
 
     private String createKey(final Object key) {
-        if (useKeyDigest) {
+        if (keyHash) {
             return DigestUtils.sha256Hex(convertKey(key));
         }
         return convertKey(key);

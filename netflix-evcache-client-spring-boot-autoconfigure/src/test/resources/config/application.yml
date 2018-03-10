@@ -5,6 +5,6 @@ evcache:
       time-to-live: 1000
       server-group-retry: true
       enableExceptionThrowing: true
-      use-key-digest: true
+      key-hash: true
     - name: test2
       server-group-retry: false
