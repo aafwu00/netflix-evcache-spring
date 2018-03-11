@@ -20,6 +20,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.actuator.HasFeatures;
 import org.springframework.cloud.netflix.archaius.ArchaiusAutoConfiguration;
@@ -48,6 +49,7 @@ import com.netflix.evcache.pool.SimpleNodeListProvider;
  * @see EVCacheAutoConfiguration
  */
 @Configuration
+@ConditionalOnProperty(value = "evcache.cloud.enabled", matchIfMissing = true)
 @ConditionalOnEVCache
 @AutoConfigureAfter({ArchaiusAutoConfiguration.class, EurekaClientAutoConfiguration.class})
 @AutoConfigureBefore(EVCacheAutoConfiguration.class)

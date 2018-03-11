@@ -72,6 +72,16 @@ class EVCacheCloudAutoConfigurationTest {
     }
 
     @Test
+    void should_not_be_loaded_EVCacheClientPoolManager_when_evcache_cloud_disabled() {
+        loadContext(EnableCachingConfiguration.class,
+                    "evcache.name=test",
+                    "evcache.prefixes[0].name=test1",
+                    "evcache.cloud.enabled=false",
+                    "spring.application.name=test");
+        assertThatThrownBy(() -> context.getBean(EVCacheClientPoolManager.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class);
+    }
+
+    @Test
     void should_be_loaded_EVCacheClientPoolManager_when_not_exists_eurekaClient() {
         loadContext(NoEurekaClientConfiguration.class,
                     "evcache.name=test",

@@ -19,6 +19,7 @@ package com.github.aafwu00.spring.netflix.evcache.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.cache.Cache;
 import org.springframework.core.convert.ConversionService;
@@ -28,25 +29,45 @@ import com.netflix.evcache.EVCacheImpl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Taeho Kim
  */
 class EVCacheManagerTest {
+    private ConversionService converterService;
+    private EVCacheManager manager;
+    private String clusterName;
+    private EVCachePostConstructCustomizer customizer;
+
+    @BeforeEach
+    void setUp() {
+        clusterName = "name";
+        converterService = mock(ConversionService.class);
+        customizer = spy(new EVCachePostConstructCustomizer() {
+            @Override
+            public Cache customize(com.github.aafwu00.spring.netflix.evcache.client.EVCache cache) {
+                return cache;
+            }
+        });
+    }
+
     @Test
     void loadCaches() {
-        final String clusterName = "name";
         final EVCacheConfiguration configuration1 = new EVCacheConfiguration("test1", 1000, true, true, true, false);
         final EVCacheConfiguration configuration2 = new EVCacheConfiguration("test2", 90, true, false, false, false);
         final List<EVCacheConfiguration> configurations = new ArrayList<>();
         configurations.add(configuration1);
         configurations.add(configuration2);
-        final ConversionService converterService = mock(ConversionService.class);
-        final EVCacheManager manager = new EVCacheManager(clusterName, converterService, configurations);
+        manager = new EVCacheManager(clusterName, converterService, configurations);
+        manager.setCustomizer(customizer);
         final List<? extends Cache> caches = new ArrayList<>(manager.loadCaches());
         assertAll(
-            () -> assertThatCache(getNativeCache(caches, 0), configuration1, clusterName),
-            () -> assertThatCache(getNativeCache(caches, 1), configuration2, clusterName)
+            () -> assertThatCache(getNativeCache(caches, 0), configuration1),
+            () -> assertThatCache(getNativeCache(caches, 1), configuration2),
+            () -> verify(customizer).customize((EVCache) caches.get(0)),
+            () -> verify(customizer).customize((EVCache) caches.get(1))
         );
     }
 
@@ -54,7 +75,7 @@ class EVCacheManagerTest {
         return (EVCacheImpl) caches.get(index).getNativeCache();
     }
 
-    private void assertThatCache(final EVCacheImpl cache, final EVCacheConfiguration configuration, final String clusterName) {
+    private void assertThatCache(final EVCacheImpl cache, final EVCacheConfiguration configuration) {
         assertAll(
             () -> assertThat(cache.getAppName()).isEqualTo(clusterName.toUpperCase()),
             () -> assertThat(cache.getCachePrefix()).isEqualTo(configuration.getName()),

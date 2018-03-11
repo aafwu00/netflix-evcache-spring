@@ -38,6 +38,7 @@ public class EVCacheManager extends AbstractCacheManager {
     private final String clusterName;
     private final ConversionService conversionService;
     private final List<EVCacheConfiguration> configurations;
+    private EVCachePostConstructCustomizer customizer = cache -> cache;
 
     public EVCacheManager(final String clusterName,
                           final ConversionService conversionService,
@@ -52,6 +53,7 @@ public class EVCacheManager extends AbstractCacheManager {
     protected Collection<? extends Cache> loadCaches() {
         return configurations.stream()
                              .map(this::create)
+                             .map(customizer::customize)
                              .collect(Collectors.toList());
     }
 
@@ -75,5 +77,9 @@ public class EVCacheManager extends AbstractCacheManager {
             builder.enableExceptionPropagation();
         }
         return builder;
+    }
+
+    public void setCustomizer(final EVCachePostConstructCustomizer customizer) {
+        this.customizer = requireNonNull(customizer);
     }
 }

@@ -1,3 +1,4 @@
 # AutoConfiguration
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.github.aafwu00.spring.cloud.netflix.evcache.client.EVCacheCloudAutoConfiguration
+com.github.aafwu00.spring.cloud.netflix.evcache.client.EVCacheCloudAutoConfiguration,\
+com.github.aafwu00.spring.cloud.netflix.evcache.client.EVCacheTraceAutoConfiguration

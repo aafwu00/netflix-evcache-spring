@@ -162,7 +162,7 @@ EVCACHE-SERVER-NODES: shard1=localhost:11211,localhost:11212;shard2=localhost:11
 IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
 
 
-.Table Eureka Client Properties
+.Table EVCache Client Properties
 |===
 | Name | Default | Description
 
@@ -271,7 +271,7 @@ evcache:
 <3> memcached server port
 <4> evcache server group, shard name of replica set
 
-.Table Eureka Server Properties
+.Table EVCache Server Properties
 |===
 | Name | Default | Description
 
@@ -365,6 +365,23 @@ evcache:
 <3> EVCache cache name, cache prefix same as `@Cacheable` `cacheNames
 
 IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
+
+.Table EVCache Cloud Client Properties
+|===
+| Name | Default | Description
+
+| evcache.cloud.enabled
+| true
+|
+
+| evcache.trace.enabled
+| true
+| Whether to use sleuth trace, If you want add dependency `spring-cloud-starter-sleuth`
+
+|===
+
+See also: https://github.com/Netflix/EVCache/wiki/Configuring-EVCache-Client , https://github.com/spring-cloud/spring-cloud-sleuth
+
 
 == Contributing
 
