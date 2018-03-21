@@ -204,7 +204,7 @@ IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
 
 |===
 
-See also: https://github.com/Netflix/EVCache/wiki/Configuring-EVCache-Client
+See also: https://github.com/Netflix/EVCache/wiki/Configuring-EVCache-Client , https://github.com/Netflix/EVCache/blob/split/docs/config.md
 
 === netflix-evcache-server-spring-cloud-starter
 
@@ -341,8 +341,8 @@ public class Application {
     }
 }
 ----
-<1> see on http://cloud.spring.io/spring-cloud-static/spring-cloud-netflix/1.4.0.RELEASE/multi/multi__service_discovery_eureka_clients.html#_registering_with_eureka
-<2> see on https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/integration.html#cache
+<1> See on http://cloud.spring.io/spring-cloud-static/spring-cloud-netflix/1.4.0.RELEASE/multi/multi__service_discovery_eureka_clients.html#_registering_with_eureka
+<2> See on https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/integration.html#cache
 
 4. Write `application.yml` code, See on link:samples/evcache-eureka-client-sample/src/main/resources/config/application.yml[Sample]
 
@@ -380,7 +380,7 @@ IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
 
 |===
 
-See also: https://github.com/Netflix/EVCache/wiki/Configuring-EVCache-Client , https://github.com/spring-cloud/spring-cloud-sleuth
+See also: https://github.com/Netflix/EVCache/wiki/Configuring-EVCache-Client , https://github.com/Netflix/EVCache/blob/split/docs/config.md , https://github.com/spring-cloud/spring-cloud-sleuth
 
 
 == Contributing
