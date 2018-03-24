@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-package sample;
+package com.github.aafwu00.netflix.evcache.spring;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
+public class EVCachePutException extends EVCacheException {
+    private static final long serialVersionUID = -6949955724904893839L;
 
-import com.github.aafwu00.netflix.evcache.server.spring.cloud.EnableEVCacheServer;
-
-/**
- * see application.yml
- *
- * @author Taeho Kim
- */
-@SpringBootApplication
-@EnableEVCacheServer
-public class EVCacheServer {
-    public static void main(final String[] args) {
-        new SpringApplicationBuilder(EVCacheServer.class).run(args);
+    public EVCachePutException(final Object key, final Object value, final Throwable cause) {
+        super("Put Error, Key:" + key + ", value:" + value, cause);
     }
 }

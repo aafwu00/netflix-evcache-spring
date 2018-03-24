@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-package sample;
+package com.github.aafwu00.netflix.evcache.spring;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
+public class EVCacheEvictException extends EVCacheException {
+    private static final long serialVersionUID = 7295628803781411701L;
 
-import com.github.aafwu00.netflix.evcache.server.spring.cloud.EnableEVCacheServer;
-
-/**
- * see application.yml
- *
- * @author Taeho Kim
- */
-@SpringBootApplication
-@EnableEVCacheServer
-public class EVCacheServer {
-    public static void main(final String[] args) {
-        new SpringApplicationBuilder(EVCacheServer.class).run(args);
+    public EVCacheEvictException(final Object key, final Throwable cause) {
+        super("Evict Error, Key:" + key, cause);
     }
 }

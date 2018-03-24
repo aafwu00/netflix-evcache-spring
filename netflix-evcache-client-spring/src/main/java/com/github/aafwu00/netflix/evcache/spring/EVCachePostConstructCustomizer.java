@@ -14,22 +14,13 @@
  * limitations under the License.
  */
 
-package sample;
+package com.github.aafwu00.netflix.evcache.spring;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-
-import com.github.aafwu00.netflix.evcache.server.spring.cloud.EnableEVCacheServer;
+import org.springframework.cache.Cache;
 
 /**
- * see application.yml
- *
  * @author Taeho Kim
  */
-@SpringBootApplication
-@EnableEVCacheServer
-public class EVCacheServer {
-    public static void main(final String[] args) {
-        new SpringApplicationBuilder(EVCacheServer.class).run(args);
-    }
+public interface EVCachePostConstructCustomizer {
+    Cache customize(EVCache cache);
 }

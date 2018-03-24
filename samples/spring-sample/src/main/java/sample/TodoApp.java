@@ -29,8 +29,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.ConversionService;
 
-import com.github.aafwu00.spring.netflix.evcache.client.EVCacheConfiguration;
-import com.github.aafwu00.spring.netflix.evcache.client.EVCacheManager;
+import com.github.aafwu00.netflix.evcache.spring.EVCacheConfiguration;
+import com.github.aafwu00.netflix.evcache.spring.EVCacheManager;
 import com.netflix.evcache.util.EVCacheConfig;
 
 import sample.repository.TodoRepository;
