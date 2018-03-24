@@ -1,8 +1,8 @@
-rootProject.name = 'netflix-evcache-spring'
+rootProject.name = 'netflix-evcache-spring-parent'
 
-include 'netflix-evcache-client-spring'
-include 'netflix-evcache-client-spring-boot-autoconfigure'
-include 'netflix-evcache-client-spring-boot-starter'
+include 'netflix-evcache-spring'
+include 'netflix-evcache-spring-boot-autoconfigure'
+include 'netflix-evcache-spring-boot-starter'
 include 'netflix-evcache-client-spring-cloud-autoconfigure'
 include 'netflix-evcache-client-spring-cloud-starter'
 include 'netflix-evcache-server-spring-cloud-autoconfigure'

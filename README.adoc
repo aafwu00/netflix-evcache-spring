@@ -46,7 +46,7 @@ docker-compose up
 
 See on link:samples[Samples]
 
-=== netflix-evcache-client-spring
+=== netflix-evcache-spring
 
 This project provides Netflix EVCache integrations for Spring Cache Abstraction.
 See on link:samples/spring-sample[spring-sample]
@@ -60,7 +60,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.aafwu00:netflix-evcache-client-spring:x.y.z' <2>
+    compile 'com.github.aafwu00:netflix-evcache-spring:x.y.z' <2>
 }
 ----
 <1> add `jitpack` repository
@@ -100,7 +100,7 @@ public class TodoRepository {
 <2> `EVCacheManager` app name + `-NODES` means memcache server address, see on : https://github.com/Netflix/EVCache/wiki/Sample-EVCache-Deployment#step-4-create-a-cache-deployment-descriptor
 <3> `@Cacheable` `cacheNames` is sames as `EVCacheConfiguration` name
 
-=== netflix-evcache-client-spring-boot-starter
+=== netflix-evcache-spring-boot-starter
 
 This project provides Netflix EVCache integrations for Spring Boot.
 See on link:samples/evcache-client-sample[evcache-client-sample]
@@ -114,7 +114,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.aafwu00:netflix-evcache-client-spring-boot-starter:x.y.z' <2>
+    compile 'com.github.aafwu00:netflix-evcache-spring-boot-starter:x.y.z' <2>
 }
 ----
 <1> add `jitpack` repository
