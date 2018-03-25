@@ -1,4 +1,4 @@
 jdk:
   - oraclejdk8
 install:
-  - ./gradlew clean build publishToMavenLocal
+  - ./gradlew clean build publishToMavenLocal -Pjitpack=true

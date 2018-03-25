@@ -1,5 +1,5 @@
 image:https://img.shields.io/badge/License-Apache%202.0-blue.svg["License Apache 2.0", link="https://opensource.org/licenses/Apache-2.0"]
-image:https://jitpack.io/v/aafwu00//netflix-evcache-spring.svg["Release", link=
+image:https://jitpack.io/v/aafwu00/netflix-evcache-spring.svg["Release", link=
 "https://jitpack.io/#aafwu00/netflix-evcache-spring"]
 image:https://circleci.com/gh/aafwu00/netflix-evcache-spring.svg?style=svg["CircleCI", link="https://circleci.com/gh/aafwu00/netflix-evcache-spring"]
 image:https://app.fossa.io/api/projects/git%2Bgithub.com%2Faafwu00%2Fnetflix-evcache-spring.svg?type=shield["FOSSA Status", link="https://app.fossa.io/projects/git%2Bgithub.com%2Faafwu00%2Fnetflix-evcache-spring?ref=badge_shield"]
@@ -44,9 +44,9 @@ docker-compose up
 
 == Example
 
-See on link:samples[Samples]
+See on link:samples[samples]
 
-=== netflix-evcache-client-spring
+=== evcache-spring
 
 This project provides Netflix EVCache integrations for Spring Cache Abstraction.
 See on link:samples/spring-sample[spring-sample]
@@ -60,7 +60,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.aafwu00:netflix-evcache-client-spring:x.y.z' <2>
+    compile 'com.github.aafwu00:evcache-spring:x.y.z' <2>
 }
 ----
 <1> add `jitpack` repository
@@ -100,10 +100,10 @@ public class TodoRepository {
 <2> `EVCacheManager` app name + `-NODES` means memcache server address, see on : https://github.com/Netflix/EVCache/wiki/Sample-EVCache-Deployment#step-4-create-a-cache-deployment-descriptor
 <3> `@Cacheable` `cacheNames` is sames as `EVCacheConfiguration` name
 
-=== netflix-evcache-client-spring-boot-starter
+=== evcache-spring-boot-starter
 
 This project provides Netflix EVCache integrations for Spring Boot.
-See on link:samples/evcache-client-sample[evcache-client-sample]
+See on link:samples/spring-boot-sample[spring-boot-sample]
 
 1. Dependency Management
 
@@ -114,7 +114,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.aafwu00:netflix-evcache-client-spring-boot-starter:x.y.z' <2>
+    compile 'com.github.aafwu00:evcache-spring-boot-starter:x.y.z' <2>
 }
 ----
 <1> add `jitpack` repository
@@ -143,17 +143,17 @@ public class TodoRepository {
 <1> see on https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/integration.html#cache
 <2> `@Cacheable` `cacheNames` is sames as `evcache.prefixes[].name`
 
-3. Write `application.yml` code, See on link:samples/evcache-client-sample/src/main/resources/config/application.yml[Sample]
+3. Write `application.yml` code, See on link:samples/spring-boot-sample/src/main/resources/config/application.yml[Sample]
 
 [source,yml]
 ----
 evcache:
-  name: EVCACHE-SERVER # <1>
+  name: EVCACHE # <1>
   prefixes:
     - name: todos # <2>
       enable-exception-throwing: false
 
-EVCACHE-SERVER-NODES: shard1=localhost:11211,localhost:11212;shard2=localhost:11213,localhost:11214
+EVCACHE-NODES: shard1=localhost:11211,localhost:11212;shard2=localhost:11213,localhost:11214
 ----
 <1> EVCache App Name
 <2> EVCache cache name, cache prefix same as `@Cacheable` `cacheNames`
@@ -162,7 +162,7 @@ EVCACHE-SERVER-NODES: shard1=localhost:11211,localhost:11212;shard2=localhost:11
 IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
 
 
-.Table EVCache Client Properties
+.Table EVCache Properties
 |===
 | Name | Default | Description
 
@@ -206,20 +206,23 @@ IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
 
 See also: https://github.com/Netflix/EVCache/wiki/Configuring-EVCache-Client , https://github.com/Netflix/EVCache/blob/split/docs/config.md
 
-=== netflix-evcache-server-spring-cloud-starter
+=== evcar-spring-cloud-starter
 
-This project is not an original `EVCar`(`EVCache` + `Sidecar`). EVCache Server created by Netflix.
+WARNING: This project is not an original `EVCar`(`EVCache` + `Sidecar`).
+EVCache Server composed `memcached` and `Prana`.
 `EVCar` is not released at this time, so I combined the functions of `Eureka` + `Sidecar`.
 You can find some hints about the function of `EVCar` below.
 
 Hint on: https://github.com/Netflix/EVCache/issues/49 and https://github.com/Netflix/EVCache/tree/nflx-specific/evcar
 
-Example EVCache Server, See on link:samples/evcache-server-sample[evcache-server-sample]
+Example EVCar, See on link:samples/evcar-sample[evcar-sample]
 
 1. Start Eureka Server
 See on link:samples/eureka-server-sample[eureka-server-sample]
 
-2. Dependency Management
+2. Start memcached
+
+3. Dependency Management
 
 [source,gradle]
 ----
@@ -228,90 +231,89 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.aafwu00:netflix-evcache-server-spring-cloud-starter:x.y.z' <2>
+    compile 'com.github.aafwu00:evcar-spring-cloud-starter:x.y.z' <2>
 }
 ----
 <1> add `jitpack` repository
 <2> add dependency
 
-3. Write java source code
+4. Write java source code
 
 [source,java]
 ----
 @SpringBootApplication
-@EnableEVCacheServer # <1>
+@EnableEVCar # <1>
 public class Application {
     public static void main(final String[] args) {
         new SpringApplicationBuilder(Application.class).run(args);
     }
 }
 ----
-<1> Using `@EnableEVCacheServer` annotation, that's all
+<1> Using `@EnableEVCar` annotation, that's all
 
-4. Write `application.yml` code, See on link:samples/evcache-server-sample/src/main/resources/config/application.yml[Sample]
+5. Write `application.yml` code, See on link:samples/evcar-sample/src/main/resources/config/application.yml[Sample]
 
 [source,yml]
 ----
 spring:
   application:
-    name: EVCACHE-SERVER # <1>
+    name: EVCACHE # <1>
 
 eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/ # <2>
 
-evcache:
-  server:
-    port: 11211 # <3>
-    group: shard1 # <4>
+evcar:
+  port: 11211 # <3>
+  group: shard1 # <4>
 ----
-<1> EVCache Server App Name
+<1> EVCache App Name
 <2> see on http://cloud.spring.io/spring-cloud-static/spring-cloud-netflix/1.4.0.RELEASE/multi/multi__service_discovery_eureka_clients.html#_registering_with_eureka
 <3> memcached server port
 <4> evcache server group, shard name of replica set
 
-.Table EVCache Server Properties
+.Table EVCache Sidcar Properties
 |===
 | Name | Default | Description
 
-| evcache.server.enabled
+| evcar.enabled
 | true
 |
 
-| evcache.server.hostname
+| evcar.hostname
 |
 | Hostname of Memcached Or Rend, If blank using localhost
 
-| evcache.server.port
+| evcar.port
 | 11211
 | Default Port of Memcached Or Rend
 
-| evcache.server.group
+| evcar.group
 | Default
 | Server Group Name, shard name
 
-| evcache.server.health.eureka.enabled
+| evcar.health.eureka.enabled
 | true
 | Eureka Health Check for Memcached
 
-| evcache.server.metrics.enabled
+| evcar.metrics.enabled
 | true
 | Spring Boot Metrics for Memcached
 
-| evcache.server.health.memcached.enabled
+| evcar.health.memcached.enabled
 | true
 | Spring Boot Health Check for Memcached
 
 |===
 
-=== netflix-evcache-client-spring-cloud-starter
+=== evcache-spring-cloud-starter
 
 This project provides Netflix EVCache And Eureka integrations for Spring Cloud.
-see link:samples/evcache-client-sample[evcache-client-sample]
+see link:samples/spring-boot-sample[spring-boot-sample]
 
-1. Run evcache server.
-See on <<netflix-evcache-server-spring-cloud-starter>>
+1. Run evcar.
+See on <<evcar-spring-cloud-starter>>
 
 2. Dependency Management
 
@@ -322,7 +324,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.aafwu00:netflix-evcache-client-spring-cloud-starter:x.y.z' <2>
+    compile 'com.github.aafwu00:evcache-spring-cloud-starter:x.y.z' <2>
 }
 ----
 <1> add `jitpack` repository
@@ -344,7 +346,7 @@ public class Application {
 <1> See on http://cloud.spring.io/spring-cloud-static/spring-cloud-netflix/1.4.0.RELEASE/multi/multi__service_discovery_eureka_clients.html#_registering_with_eureka
 <2> See on https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/integration.html#cache
 
-4. Write `application.yml` code, See on link:samples/evcache-eureka-client-sample/src/main/resources/config/application.yml[Sample]
+4. Write `application.yml` code, See on link:samples/spring-cloud-sample/src/main/resources/config/application.yml[Sample]
 
 [source,yml]
 ----
@@ -354,19 +356,19 @@ eureka:
       defaultZone: http://localhost:8761/eureka/ # <1>
 
 evcache:
-  name: EVCACHE-SERVER # <2>
+  name: EVCACHE # <2>
   prefixes:
     - name: todos # <3>
       timeToLive: 5
       server-group-retry: true
 ----
 <1> see on http://cloud.spring.io/spring-cloud-static/spring-cloud-netflix/1.4.0.RELEASE/multi/multi__service_discovery_eureka_clients.html#_registering_with_eureka
-<2> EVCache Server App Name(`spring.application.name`)
+<2> EVCache App Name(`spring.application.name`)
 <3> EVCache cache name, cache prefix same as `@Cacheable` `cacheNames
 
 IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
 
-.Table EVCache Cloud Client Properties
+.Table EVCache Cloud Properties
 |===
 | Name | Default | Description
 

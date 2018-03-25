@@ -1,9 +1,0 @@
-dependencies {
-    compile project(':netflix-evcache-client-spring-boot-autoconfigure')
-
-    compile 'org.springframework.cloud:spring-cloud-netflix-eureka-client', optional
-    compile 'org.springframework.cloud:spring-cloud-sleuth-core', optional
-
-    compile 'org.springframework.boot:spring-boot-starter-validation', optional
-    compile 'org.springframework.boot:spring-boot-actuator', optional
-}
