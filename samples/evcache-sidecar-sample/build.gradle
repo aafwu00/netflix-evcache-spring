@@ -1,0 +1,3 @@
+dependencies {
+    compile project(':netflix-evcache-sidecar-spring-cloud-starter')
+}

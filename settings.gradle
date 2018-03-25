@@ -5,13 +5,13 @@ include 'netflix-evcache-spring-boot-autoconfigure'
 include 'netflix-evcache-spring-boot-starter'
 include 'netflix-evcache-spring-cloud-autoconfigure'
 include 'netflix-evcache-spring-cloud-starter'
-include 'netflix-evcache-server-spring-cloud-autoconfigure'
-include 'netflix-evcache-server-spring-cloud-starter'
+include 'netflix-evcache-sidecar-spring-cloud-autoconfigure'
+include 'netflix-evcache-sidecar-spring-cloud-starter'
 
 if (!hasProperty("jitpack")) {
     include 'samples:spring-sample'
     include 'samples:spring-boot-sample'
     include 'samples:spring-cloud-sample'
-    include 'samples:evcache-server-sample'
+    include 'samples:evcache-sidecar-sample'
     include 'samples:eureka-server-sample'
 }
