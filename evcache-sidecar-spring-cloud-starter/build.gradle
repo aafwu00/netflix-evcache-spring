@@ -1,5 +1,5 @@
 dependencies {
-    compile project(':netflix-evcache-sidecar-spring-cloud-autoconfigure')
+    compile project(':evcache-sidecar-spring-cloud-autoconfigure')
 
     compile 'org.springframework.boot:spring-boot-starter-actuator'
     compile 'org.springframework.boot:spring-boot-starter-validation'

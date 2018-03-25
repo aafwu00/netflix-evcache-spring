@@ -1,5 +1,5 @@
 dependencies {
-    compile project(':netflix-evcache-spring-boot-autoconfigure')
+    compile project(':evcache-spring-boot-autoconfigure')
 
     compile 'org.springframework.boot:spring-boot-starter-cache'
     

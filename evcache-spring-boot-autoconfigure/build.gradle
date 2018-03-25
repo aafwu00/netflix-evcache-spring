@@ -1,5 +1,5 @@
 dependencies {
-    compile project(':netflix-evcache-spring')
+    compile project(':evcache-spring')
     compile 'org.springframework.boot:spring-boot-autoconfigure'
     compile 'org.springframework.cloud:spring-cloud-netflix-core', optional
     compile 'org.springframework.cloud:spring-cloud-commons', optional

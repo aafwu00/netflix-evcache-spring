@@ -1,12 +1,12 @@
-rootProject.name = 'netflix-evcache-spring-parent'
+rootProject.name = 'netflix-evcache-spring'
 
-include 'netflix-evcache-spring'
-include 'netflix-evcache-spring-boot-autoconfigure'
-include 'netflix-evcache-spring-boot-starter'
-include 'netflix-evcache-spring-cloud-autoconfigure'
-include 'netflix-evcache-spring-cloud-starter'
-include 'netflix-evcache-sidecar-spring-cloud-autoconfigure'
-include 'netflix-evcache-sidecar-spring-cloud-starter'
+include 'evcache-spring'
+include 'evcache-spring-boot-autoconfigure'
+include 'evcache-spring-boot-starter'
+include 'evcache-spring-cloud-autoconfigure'
+include 'evcache-spring-cloud-starter'
+include 'evcache-sidecar-spring-cloud-autoconfigure'
+include 'evcache-sidecar-spring-cloud-starter'
 
 if (!hasProperty("jitpack")) {
     include 'samples:spring-sample'
