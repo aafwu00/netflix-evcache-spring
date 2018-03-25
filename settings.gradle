@@ -10,8 +10,8 @@ include 'netflix-evcache-server-spring-cloud-starter'
 
 if (!hasProperty("jitpack")) {
     include 'samples:spring-sample'
-    include 'samples:evcache-client-sample'
-    include 'samples:evcache-eureka-client-sample'
+    include 'samples:spring-boot-sample'
+    include 'samples:spring-cloud-sample'
     include 'samples:evcache-server-sample'
     include 'samples:eureka-server-sample'
 }

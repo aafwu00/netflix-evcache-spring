@@ -1,6 +1,6 @@
 spring:
   application:
-    name: evcache-cloud-client
+    name: todo
 
 eureka:
   instance:

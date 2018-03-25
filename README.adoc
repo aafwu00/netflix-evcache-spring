@@ -44,7 +44,7 @@ docker-compose up
 
 == Example
 
-See on link:samples[Samples]
+See on link:samples[samples]
 
 === netflix-evcache-spring
 
@@ -103,7 +103,7 @@ public class TodoRepository {
 === netflix-evcache-spring-boot-starter
 
 This project provides Netflix EVCache integrations for Spring Boot.
-See on link:samples/evcache-client-sample[evcache-client-sample]
+See on link:samples/spring-boot-sample[spring-boot-sample]
 
 1. Dependency Management
 
@@ -143,7 +143,7 @@ public class TodoRepository {
 <1> see on https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/integration.html#cache
 <2> `@Cacheable` `cacheNames` is sames as `evcache.prefixes[].name`
 
-3. Write `application.yml` code, See on link:samples/evcache-client-sample/src/main/resources/config/application.yml[Sample]
+3. Write `application.yml` code, See on link:samples/spring-boot-sample/src/main/resources/config/application.yml[Sample]
 
 [source,yml]
 ----
@@ -308,7 +308,7 @@ evcache:
 === netflix-evcache-spring-cloud-starter
 
 This project provides Netflix EVCache And Eureka integrations for Spring Cloud.
-see link:samples/evcache-client-sample[evcache-client-sample]
+see link:samples/spring-boot-sample[spring-boot-sample]
 
 1. Run evcache server.
 See on <<netflix-evcache-server-spring-cloud-starter>>
@@ -344,7 +344,7 @@ public class Application {
 <1> See on http://cloud.spring.io/spring-cloud-static/spring-cloud-netflix/1.4.0.RELEASE/multi/multi__service_discovery_eureka_clients.html#_registering_with_eureka
 <2> See on https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/integration.html#cache
 
-4. Write `application.yml` code, See on link:samples/evcache-eureka-client-sample/src/main/resources/config/application.yml[Sample]
+4. Write `application.yml` code, See on link:samples/spring-cloud-sample/src/main/resources/config/application.yml[Sample]
 
 [source,yml]
 ----
