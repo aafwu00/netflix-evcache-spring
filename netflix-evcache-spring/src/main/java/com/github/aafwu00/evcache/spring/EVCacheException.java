@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-package sample;
-
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-
-import com.github.aafwu00.evcache.sidecar.spring.cloud.EnableEVCacheSidecar;
+package com.github.aafwu00.evcache.spring;
 
 /**
- * see application.yml
- *
  * @author Taeho Kim
  */
-@SpringBootApplication
-@EnableEVCacheSidecar
-public class EVCacheSidecar {
-    public static void main(final String[] args) {
-        new SpringApplicationBuilder(EVCacheSidecar.class).run(args);
+public class EVCacheException extends RuntimeException {
+    private static final long serialVersionUID = 7418170197571789545L;
+
+    public EVCacheException(final String message) {
+        super(message);
+    }
+
+    public EVCacheException(final String message, final Throwable cause) {
+        super(message, cause);
     }
 }

@@ -14,22 +14,13 @@
  * limitations under the License.
  */
 
-package sample;
+package com.github.aafwu00.evcache.spring;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-
-import com.github.aafwu00.evcache.sidecar.spring.cloud.EnableEVCacheSidecar;
+import org.springframework.cache.Cache;
 
 /**
- * see application.yml
- *
  * @author Taeho Kim
  */
-@SpringBootApplication
-@EnableEVCacheSidecar
-public class EVCacheSidecar {
-    public static void main(final String[] args) {
-        new SpringApplicationBuilder(EVCacheSidecar.class).run(args);
-    }
+public interface EVCachePostConstructCustomizer {
+    Cache customize(EVCache cache);
 }

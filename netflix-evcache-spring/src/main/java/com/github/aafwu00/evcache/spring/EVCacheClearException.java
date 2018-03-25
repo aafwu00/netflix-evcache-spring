@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-package sample;
+package com.github.aafwu00.evcache.spring;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
+public class EVCacheClearException extends EVCacheException {
+    private static final long serialVersionUID = 5304958959623530104L;
 
-import com.github.aafwu00.evcache.sidecar.spring.cloud.EnableEVCacheSidecar;
-
-/**
- * see application.yml
- *
- * @author Taeho Kim
- */
-@SpringBootApplication
-@EnableEVCacheSidecar
-public class EVCacheSidecar {
-    public static void main(final String[] args) {
-        new SpringApplicationBuilder(EVCacheSidecar.class).run(args);
+    public EVCacheClearException() {
+        super("Not Supported Operation");
     }
 }
