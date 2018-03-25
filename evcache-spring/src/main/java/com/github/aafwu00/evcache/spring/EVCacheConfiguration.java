@@ -57,7 +57,7 @@ public class EVCacheConfiguration {
      * @param name                    the name
      * @param timeToLive              the time to live
      * @param allowNullValues         the allow null values
-     * @param keyHash            whether to convert key to digest
+     * @param keyHash                 whether to convert key to digest
      * @param serverGroupRetry        the server group retry
      * @param enableExceptionThrowing the enable exception throwing
      */

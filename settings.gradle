@@ -5,13 +5,13 @@ include 'evcache-spring-boot-autoconfigure'
 include 'evcache-spring-boot-starter'
 include 'evcache-spring-cloud-autoconfigure'
 include 'evcache-spring-cloud-starter'
-include 'evcache-sidecar-spring-cloud-autoconfigure'
-include 'evcache-sidecar-spring-cloud-starter'
+include 'evcar-spring-cloud-autoconfigure'
+include 'evcar-spring-cloud-starter'
 
 if (!hasProperty("jitpack")) {
     include 'samples:spring-sample'
     include 'samples:spring-boot-sample'
     include 'samples:spring-cloud-sample'
-    include 'samples:evcache-sidecar-sample'
+    include 'samples:evcar-sample'
     include 'samples:eureka-server-sample'
 }
