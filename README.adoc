@@ -305,7 +305,7 @@ evcache:
 
 |===
 
-=== netflix-evcache-client-spring-cloud-starter
+=== netflix-evcache-spring-cloud-starter
 
 This project provides Netflix EVCache And Eureka integrations for Spring Cloud.
 see link:samples/evcache-client-sample[evcache-client-sample]
@@ -322,7 +322,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.aafwu00:netflix-evcache-client-spring-cloud-starter:x.y.z' <2>
+    compile 'com.github.aafwu00:netflix-evcache-spring-cloud-starter:x.y.z' <2>
 }
 ----
 <1> add `jitpack` repository

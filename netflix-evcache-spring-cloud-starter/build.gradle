@@ -1,5 +1,5 @@
 dependencies {
-    compile project(':netflix-evcache-client-spring-cloud-autoconfigure')
+    compile project(':netflix-evcache-spring-cloud-autoconfigure')
     compile project(':netflix-evcache-spring-boot-starter')
 
     compile 'org.springframework.cloud:spring-cloud-starter-netflix-archaius'
