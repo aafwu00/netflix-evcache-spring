@@ -16,6 +16,17 @@
 
 package com.github.aafwu00.spring.cloud.netflix.evcache.client;
 
+import com.github.aafwu00.spring.boot.netflix.evcache.client.ConditionalOnEVCache;
+import com.github.aafwu00.spring.boot.netflix.evcache.client.EVCacheAutoConfiguration;
+import com.github.aafwu00.spring.boot.netflix.evcache.client.EVCacheProperties;
+import com.netflix.appinfo.ApplicationInfoManager;
+import com.netflix.discovery.EurekaClient;
+import com.netflix.evcache.EVCache;
+import com.netflix.evcache.connection.ConnectionFactoryBuilder;
+import com.netflix.evcache.connection.IConnectionBuilder;
+import com.netflix.evcache.pool.EVCacheClientPoolManager;
+import com.netflix.evcache.pool.EVCacheNodeList;
+import com.netflix.evcache.pool.SimpleNodeListProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -28,17 +39,6 @@ import org.springframework.cloud.netflix.eureka.EurekaClientAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-
-import com.github.aafwu00.spring.boot.netflix.evcache.client.ConditionalOnEVCache;
-import com.github.aafwu00.spring.boot.netflix.evcache.client.EVCacheAutoConfiguration;
-import com.netflix.appinfo.ApplicationInfoManager;
-import com.netflix.discovery.EurekaClient;
-import com.netflix.evcache.EVCache;
-import com.netflix.evcache.connection.ConnectionFactoryBuilder;
-import com.netflix.evcache.connection.IConnectionBuilder;
-import com.netflix.evcache.pool.EVCacheClientPoolManager;
-import com.netflix.evcache.pool.EVCacheNodeList;
-import com.netflix.evcache.pool.SimpleNodeListProvider;
 
 /**
  * Spring configuration for configuring EVCache defaults to be Eureka based
@@ -56,6 +56,8 @@ import com.netflix.evcache.pool.SimpleNodeListProvider;
 @EnableConfigurationProperties
 @PropertySource("classpath:evcache/evcache.properties")
 public class EVCacheCloudAutoConfiguration {
+
+
     @Bean
     public HasFeatures evcacheCloudClientFeature() {
         return HasFeatures.namedFeature("Netflix EVCache Cloud Client", EVCache.class);
@@ -73,12 +75,24 @@ public class EVCacheCloudAutoConfiguration {
         return new SimpleNodeListProvider();
     }
 
+
+
     @Bean
+    @ConditionalOnProperty(value = "evcache.use.myowneureka.node.list.provider.enabled", matchIfMissing = true)
     @ConditionalOnBean({ApplicationInfoManager.class, EurekaClient.class})
     @ConditionalOnMissingBean(EVCacheNodeList.class)
     public EVCacheNodeList myOwnEurekaNodeListProvider(final ApplicationInfoManager applicationInfoManager,
-                                                       final EurekaClient eurekaClient) {
+                                                     final EurekaClient eurekaClient) {
         return new MyOwnEurekaNodeListProvider(applicationInfoManager, eurekaClient);
+    }
+
+    @Bean
+    @ConditionalOnProperty(value = "evcache.use.awseurekanode.node.list.provider.enabled", matchIfMissing = false)
+    @ConditionalOnBean({ApplicationInfoManager.class, EurekaClient.class, EVCacheProperties.class})
+    @ConditionalOnMissingBean(EVCacheNodeList.class)
+    public EVCacheNodeList awsEurekaNodeListProvider(final ApplicationInfoManager applicationInfoManager,
+                                                     final EurekaClient eurekaClient, final EVCacheProperties evCacheProperties) {
+        return new AwsEurekaNodeListProvider(applicationInfoManager, eurekaClient, evCacheProperties.getName());
     }
 
     @Bean
