@@ -37,7 +37,6 @@ import static org.mockito.Mockito.verify;
  */
 class EVCacheManagerTest {
     private ConversionService converterService;
-    private EVCacheManager manager;
     private String clusterName;
     private EVCachePostConstructCustomizer customizer;
 
@@ -60,7 +59,7 @@ class EVCacheManagerTest {
         final List<EVCacheConfiguration> configurations = new ArrayList<>();
         configurations.add(configuration1);
         configurations.add(configuration2);
-        manager = new EVCacheManager(clusterName, converterService, configurations);
+        final EVCacheManager manager = new EVCacheManager(clusterName, converterService, configurations);
         manager.setCustomizer(customizer);
         final List<? extends Cache> caches = new ArrayList<>(manager.loadCaches());
         assertAll(

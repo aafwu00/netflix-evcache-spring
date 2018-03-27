@@ -44,7 +44,6 @@ import static org.mockito.Mockito.mock;
  * @author Taeho Kim
  */
 class MyOwnEurekaNodeListProviderTest {
-    private ApplicationInfoManager applicationInfoManager;
     private EurekaClient eurekaClient;
     private InstanceInfo instanceInfo;
     private InstanceInfo otherInstanceInfo;
@@ -53,11 +52,11 @@ class MyOwnEurekaNodeListProviderTest {
 
     @BeforeEach
     void setUp() {
-        applicationInfoManager = mock(ApplicationInfoManager.class);
         eurekaClient = mock(EurekaClient.class);
         instanceInfo = mock(InstanceInfo.class);
         otherInstanceInfo = mock(InstanceInfo.class);
         application = mock(Application.class);
+        final ApplicationInfoManager applicationInfoManager = mock(ApplicationInfoManager.class);
         provider = new MyOwnEurekaNodeListProvider(applicationInfoManager, eurekaClient);
         doReturn(instanceInfo).when(applicationInfoManager).getInfo();
         ConfigurationManager.getConfigInstance().setProperty("test" + ".ignore.hosts", "server1,server2");

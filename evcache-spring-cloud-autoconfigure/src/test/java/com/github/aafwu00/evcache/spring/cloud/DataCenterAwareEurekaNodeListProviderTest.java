@@ -64,7 +64,8 @@ class DataCenterAwareEurekaNodeListProviderTest {
 
     private void assertThatDelegateIsExactlyInstanceOf(DataCenterInfo.Name dataCenter, Class<? extends EVCacheNodeList> clazz) {
         doReturn(dataCenter).when(dataCenterInfo).getName();
-        DataCenterAwareEurekaNodeListProvider provider = new DataCenterAwareEurekaNodeListProvider(applicationInfoManager, eurekaClient);
+        final DataCenterAwareEurekaNodeListProvider provider = new DataCenterAwareEurekaNodeListProvider(applicationInfoManager,
+                                                                                                         eurekaClient);
         assertThat(getField(provider, "delegate")).isExactlyInstanceOf(clazz);
     }
 }
