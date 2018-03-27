@@ -76,9 +76,9 @@ public class EVCacheCloudAutoConfiguration {
     @Bean
     @ConditionalOnBean({ApplicationInfoManager.class, EurekaClient.class})
     @ConditionalOnMissingBean(EVCacheNodeList.class)
-    public EVCacheNodeList myOwnEurekaNodeListProvider(final ApplicationInfoManager applicationInfoManager,
-                                                       final EurekaClient eurekaClient) {
-        return new MyOwnEurekaNodeListProvider(applicationInfoManager, eurekaClient);
+    public EVCacheNodeList eurekaNodeListProvider(final ApplicationInfoManager applicationInfoManager,
+                                                  final EurekaClient eurekaClient) {
+        return new DataCenterAwareEurekaNodeListProvider(applicationInfoManager, eurekaClient);
     }
 
     @Bean

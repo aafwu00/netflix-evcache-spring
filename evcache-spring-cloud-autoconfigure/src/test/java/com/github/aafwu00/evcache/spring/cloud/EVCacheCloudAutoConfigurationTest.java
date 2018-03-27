@@ -28,6 +28,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 import com.netflix.appinfo.ApplicationInfoManager;
+import com.netflix.appinfo.DataCenterInfo;
+import com.netflix.appinfo.InstanceInfo;
+import com.netflix.appinfo.MyDataCenterInfo;
 import com.netflix.discovery.EurekaClient;
 import com.netflix.evcache.connection.ConnectionFactoryBuilder;
 import com.netflix.evcache.pool.EVCacheClientPoolManager;
@@ -37,6 +40,7 @@ import com.netflix.evcache.pool.SimpleNodeListProvider;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.springframework.boot.test.util.EnvironmentTestUtils.addEnvironment;
 
@@ -65,7 +69,7 @@ class EVCacheCloudAutoConfigurationTest {
         assertAll(
             () -> assertThat(context.getBean(EVCacheClientPoolManager.class)).isNotNull(),
             () -> assertThat(context.getBean(ConnectionFactoryBuilder.class)).isNotNull(),
-            () -> assertThat(context.getBean(MyOwnEurekaNodeListProvider.class)).isNotNull(),
+            () -> assertThat(context.getBean(DataCenterAwareEurekaNodeListProvider.class)).isNotNull(),
             () -> assertThat(context.getBean(Environment.class)
                                     .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isFalse()
         );
@@ -105,7 +109,7 @@ class EVCacheCloudAutoConfigurationTest {
             () -> assertThat(context.getBean(ConnectionFactoryBuilder.class)).isNotNull(),
             () -> assertThat(context.getBean(EVCacheNodeList.class)).isNotNull()
                                                                     .isNotInstanceOfAny(SimpleNodeListProvider.class,
-                                                                                        MyOwnEurekaNodeListProvider.class)
+                                                                                        DataCenterAwareEurekaNodeListProvider.class)
         );
     }
 
@@ -138,7 +142,12 @@ class EVCacheCloudAutoConfigurationTest {
     static class EnableCachingConfiguration {
         @Bean
         ApplicationInfoManager applicationInfoManager() {
-            return mock(ApplicationInfoManager.class);
+            final ApplicationInfoManager result = mock(ApplicationInfoManager.class);
+            final InstanceInfo instanceInfo = mock(InstanceInfo.class);
+            doReturn(instanceInfo).when(result).getInfo();
+            final DataCenterInfo dataCenterInfo = new MyDataCenterInfo(DataCenterInfo.Name.MyOwn);
+            doReturn(dataCenterInfo).when(instanceInfo).getDataCenterInfo();
+            return result;
         }
 
         @Bean
