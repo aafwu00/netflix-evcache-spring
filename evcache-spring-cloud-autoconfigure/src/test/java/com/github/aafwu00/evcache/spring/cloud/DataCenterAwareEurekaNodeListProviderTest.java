@@ -45,23 +45,30 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
  * @author Taeho Kim
  */
 class DataCenterAwareEurekaNodeListProviderTest {
-    private ApplicationInfoManager applicationInfoManager;
-    private EurekaClient eurekaClient;
+    private InstanceInfo instanceInfo;
     private DataCenterInfo dataCenterInfo;
+    private DataCenterAwareEurekaNodeListProvider provider;
 
     @BeforeEach
     void setUp() {
-        applicationInfoManager = mock(ApplicationInfoManager.class);
-        eurekaClient = mock(DiscoveryClient.class);
-        final InstanceInfo instanceInfo = mock(InstanceInfo.class);
+        final ApplicationInfoManager applicationInfoManager = mock(ApplicationInfoManager.class);
+        final EurekaClient eurekaClient = mock(DiscoveryClient.class);
+        instanceInfo = mock(InstanceInfo.class);
         doReturn(instanceInfo).when(applicationInfoManager).getInfo();
         dataCenterInfo = mock(DataCenterInfo.class);
         doReturn(dataCenterInfo).when(instanceInfo).getDataCenterInfo();
+        provider = new DataCenterAwareEurekaNodeListProvider(applicationInfoManager, eurekaClient);
     }
 
     @Test
     void should_be_MyOwnEurekaNodeListProvider_when_dataCenter_is_MyOwn() {
         assertThatDelegateIsExactlyInstanceOf(MyOwn, MyOwnEurekaNodeListProvider.class);
+    }
+
+    @Test
+    void should_be_MyOwnEurekaNodeListProvider_when_dataCenterInfo_is_null() {
+        doReturn(null).when(instanceInfo).getDataCenterInfo();
+        assertThatDelegateIsExactlyInstanceOf(Amazon, MyOwnEurekaNodeListProvider.class);
     }
 
     @Test
@@ -72,9 +79,8 @@ class DataCenterAwareEurekaNodeListProviderTest {
     @Test
     void discoverInstances() throws IOException {
         final EVCacheNodeList delegate = mock(EVCacheNodeList.class);
-        final DataCenterAwareEurekaNodeListProvider provider = new DataCenterAwareEurekaNodeListProvider(applicationInfoManager,
-                                                                                                         eurekaClient);
         setField(provider, "delegate", delegate);
+        provider.afterPropertiesSet();
         final Map<ServerGroup, EVCacheServerGroupConfig> result = new HashMap<>();
         doReturn(result).when(delegate).discoverInstances("appName");
         assertThat(provider.discoverInstances("appName")).isSameAs(result);
@@ -83,8 +89,6 @@ class DataCenterAwareEurekaNodeListProviderTest {
 
     private void assertThatDelegateIsExactlyInstanceOf(DataCenterInfo.Name dataCenter, Class<? extends EVCacheNodeList> clazz) {
         doReturn(dataCenter).when(dataCenterInfo).getName();
-        final DataCenterAwareEurekaNodeListProvider provider = new DataCenterAwareEurekaNodeListProvider(applicationInfoManager,
-                                                                                                         eurekaClient);
         provider.afterPropertiesSet();
         assertThat(getField(provider, "delegate")).isExactlyInstanceOf(clazz);
     }

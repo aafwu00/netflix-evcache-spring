@@ -31,6 +31,7 @@ import com.netflix.appinfo.ApplicationInfoManager;
 import com.netflix.appinfo.DataCenterInfo;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.appinfo.MyDataCenterInfo;
+import com.netflix.discovery.DiscoveryClient;
 import com.netflix.discovery.EurekaClient;
 import com.netflix.evcache.connection.ConnectionFactoryBuilder;
 import com.netflix.evcache.pool.EVCacheClientPoolManager;
@@ -153,7 +154,7 @@ class EVCacheCloudAutoConfigurationTest {
 
         @Bean
         EurekaClient eurekaClient() {
-            return mock(EurekaClient.class);
+            return mock(DiscoveryClient.class);
         }
     }
 

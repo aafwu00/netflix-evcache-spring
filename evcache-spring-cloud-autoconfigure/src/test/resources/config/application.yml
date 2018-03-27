@@ -1,0 +1,4 @@
+evcache:
+  cloud:
+    enabled: false
+    node-list-mode: myown

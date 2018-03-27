@@ -1,10 +1,15 @@
 evcache:
+  enabled: false
   name: test
   prefixes:
     - name: test1
       time-to-live: 1000
-      server-group-retry: true
+      allowNullValues: true
+      serverGroupRetry: true
       enableExceptionThrowing: true
-      key-hash: true
+      keyHash: true
     - name: test2
+      allow-null-values: false
       server-group-retry: false
+      enable-exception-throwing: false
+      key-hash: false

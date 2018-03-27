@@ -30,6 +30,7 @@ import com.netflix.appinfo.DataCenterInfo;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.appinfo.MyDataCenterInfo;
 import com.netflix.config.ConfigurationManager;
+import com.netflix.config.DeploymentContext;
 import com.netflix.discovery.EurekaClient;
 import com.netflix.discovery.shared.Application;
 import com.netflix.evcache.pool.EVCacheServerGroupConfig;
@@ -60,6 +61,7 @@ class MyOwnEurekaNodeListProviderTest {
         provider = new MyOwnEurekaNodeListProvider(applicationInfoManager, eurekaClient);
         doReturn(instanceInfo).when(applicationInfoManager).getInfo();
         ConfigurationManager.getConfigInstance().setProperty("test" + ".ignore.hosts", "server1,server2");
+        com.netflix.config.ConfigurationManager.getDeploymentContext().setValue(DeploymentContext.ContextKey.zone, "");
     }
 
     @Test
@@ -74,6 +76,29 @@ class MyOwnEurekaNodeListProviderTest {
         doReturn(null).when(otherInstanceInfo).getMetadata();
         final Map<ServerGroup, EVCacheServerGroupConfig> result = provider.discoverInstances("test");
         final ServerGroup key = new ServerGroup("UNKNOWN", "Default");
+        assertAll(
+            () -> assertThat(result).hasSize(1).containsKey(key),
+            () -> assertThat(result.get(key).getServerGroup()).isEqualTo(key),
+            () -> assertThat(result.get(key).getInetSocketAddress()).containsOnly(new InetSocketAddress("notmatch", 11211)),
+            () -> assertThat(result.get(key).getRendPort()).isEqualTo(0),
+            () -> assertThat(result.get(key).getUdsproxyMemcachedPort()).isEqualTo(0),
+            () -> assertThat(result.get(key).getUpdsproxyMememtoPort()).isEqualTo(0)
+        );
+    }
+
+    @Test
+    void should_be_contain_zone_server_group_when_otherInstanceInfo_dataCenterInfo_is_null() {
+        doReturn(InstanceInfo.InstanceStatus.UP).when(instanceInfo).getStatus();
+        doReturn(application).when(eurekaClient).getApplication("test");
+        doReturn(Collections.singletonList(otherInstanceInfo)).when(application).getInstances();
+        doReturn(InstanceInfo.InstanceStatus.UP).when(otherInstanceInfo).getStatus();
+        doReturn(null).when(otherInstanceInfo).getDataCenterInfo();
+        doReturn("notmatch").when(otherInstanceInfo).getHostName();
+        doReturn("notmatch").when(otherInstanceInfo).getIPAddr();
+        doReturn(null).when(otherInstanceInfo).getMetadata();
+        com.netflix.config.ConfigurationManager.getDeploymentContext().setValue(DeploymentContext.ContextKey.zone, "us-east-1");
+        final Map<ServerGroup, EVCacheServerGroupConfig> result = provider.discoverInstances("test");
+        final ServerGroup key = new ServerGroup("us-east-1", "Default");
         assertAll(
             () -> assertThat(result).hasSize(1).containsKey(key),
             () -> assertThat(result.get(key).getServerGroup()).isEqualTo(key),

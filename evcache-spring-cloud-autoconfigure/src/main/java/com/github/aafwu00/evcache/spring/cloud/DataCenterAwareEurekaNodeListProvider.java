@@ -30,6 +30,7 @@ import com.netflix.evcache.pool.ServerGroup;
 
 import static com.netflix.appinfo.DataCenterInfo.Name.Amazon;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -69,8 +70,8 @@ public class DataCenterAwareEurekaNodeListProvider implements EVCacheNodeList, I
     }
 
     private boolean isAmazonDataCenter(final InstanceInfo instanceInfo) {
-        return isNull(instanceInfo.getDataCenterInfo())
-            || Amazon == instanceInfo.getDataCenterInfo().getName();
+        return nonNull(instanceInfo.getDataCenterInfo())
+            && Amazon == instanceInfo.getDataCenterInfo().getName();
     }
 
     private AmazonEurekaNodeListProvider amazonEurekaNodeListProvider() {

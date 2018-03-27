@@ -39,11 +39,13 @@ import com.netflix.spectator.api.Id;
 import static com.netflix.config.ConfigurationManager.getDeploymentContext;
 import static java.util.Collections.emptyMap;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.commons.lang3.math.NumberUtils.toInt;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 /**
  * {@link EVCacheNodeList} implementation defaults to be Eureka based for MyOWN DataCenter.
@@ -53,6 +55,8 @@ import static org.apache.commons.lang3.math.NumberUtils.toInt;
  */
 public class MyOwnEurekaNodeListProvider implements EVCacheNodeList {
     private static final int DEFAULT_EVCACHE_PORT = 11211;
+    private static final String DEFAULT_GROUP_NAME = "Default";
+    private static final String DEFAULT_ZONE = "UNKNOWN";
     private final ApplicationInfoManager applicationInfoManager;
     private final EurekaClient eurekaClient;
 
@@ -91,7 +95,7 @@ public class MyOwnEurekaNodeListProvider implements EVCacheNodeList {
     }
 
     private boolean isAvailableStatus(final InstanceInfo instanceInfo) {
-        return instanceInfo.getStatus() != null
+        return nonNull(instanceInfo.getStatus())
             && InstanceInfo.InstanceStatus.OUT_OF_SERVICE != instanceInfo.getStatus()
             && InstanceInfo.InstanceStatus.DOWN != instanceInfo.getStatus();
     }
@@ -121,7 +125,7 @@ public class MyOwnEurekaNodeListProvider implements EVCacheNodeList {
 
     private String groupName(final InstanceInfo instanceInfo) {
         return defaultIfBlank(getString(instanceInfo.getMetadata(), "evcache.group"),
-                              defaultString(instanceInfo.getASGName(), "Default"));
+                              defaultString(instanceInfo.getASGName(), DEFAULT_GROUP_NAME));
     }
 
     private String getString(final Map<String, String> metadata, final String key) {
@@ -173,13 +177,13 @@ public class MyOwnEurekaNodeListProvider implements EVCacheNodeList {
         if (isNotEmpty(zone)) {
             return zone;
         }
-        if (instanceInfo.getMetadata() != null) {
+        if (!isEmpty(instanceInfo.getMetadata())) {
             final String availabilityZone = instanceInfo.getMetadata().get("zone");
             if (isNotEmpty(availabilityZone)) {
                 return availabilityZone;
             }
         }
-        return "UNKNOWN";
+        return DEFAULT_ZONE;
     }
 
     private EVCacheServerGroupConfig createServerGroupConfig(final ServerGroup serverGroup,

@@ -39,7 +39,7 @@ class EVCarPropertiesTest {
     @Test
     void should_be_loaded_yml() {
         assertAll(
-            () -> assertThat(properties.isEnabled()).isTrue(),
+            () -> assertThat(properties.isEnabled()).isFalse(),
             () -> assertThat(properties.getGroup()).isEqualTo("test"),
             () -> assertThat(properties.getHostname()).isEqualTo("localhost"),
             () -> assertThat(properties.getPort()).isEqualTo(11211)

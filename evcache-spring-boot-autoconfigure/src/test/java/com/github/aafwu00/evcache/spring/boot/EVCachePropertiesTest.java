@@ -46,7 +46,7 @@ class EVCachePropertiesTest {
     @Test
     void should_be_loaded_yml() {
         assertAll(
-            () -> assertThat(properties.isEnabled()).isTrue(),
+            () -> assertThat(properties.isEnabled()).isFalse(),
             () -> assertThat(properties.getName()).isEqualTo("test"),
             () -> assertThat(properties.getPrefixes().get(0).getName()).isEqualTo("test1"),
             () -> assertThat(properties.getPrefixes().get(0).getTimeToLive()).isEqualTo(1000),
@@ -56,7 +56,8 @@ class EVCachePropertiesTest {
             () -> assertThat(properties.getPrefixes().get(0).isAllowNullValues()).isTrue(),
             () -> assertThat(properties.getPrefixes().get(1).getName()).isEqualTo("test2"),
             () -> assertThat(properties.getPrefixes().get(1).isServerGroupRetry()).isFalse(),
-            () -> assertThat(properties.getPrefixes().get(1).isAllowNullValues()).isTrue(),
+            () -> assertThat(properties.getPrefixes().get(1).isEnableExceptionThrowing()).isFalse(),
+            () -> assertThat(properties.getPrefixes().get(1).isAllowNullValues()).isFalse(),
             () -> assertThat(properties.getPrefixes().get(1).isKeyHash()).isFalse()
         );
     }
@@ -72,8 +73,9 @@ class EVCachePropertiesTest {
             () -> assertThat(configurations.get(0).isAllowNullValues()).isTrue(),
             () -> assertThat(configurations.get(0).isKeyHash()).isTrue(),
             () -> assertThat(configurations.get(1).getName()).isEqualTo("test2"),
+            () -> assertThat(configurations.get(1).isServerGroupRetry()).isFalse(),
             () -> assertThat(configurations.get(1).isEnableExceptionThrowing()).isFalse(),
-            () -> assertThat(configurations.get(1).isAllowNullValues()).isTrue(),
+            () -> assertThat(configurations.get(1).isAllowNullValues()).isFalse(),
             () -> assertThat(configurations.get(1).isKeyHash()).isFalse()
         );
     }

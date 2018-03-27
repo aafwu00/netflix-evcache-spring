@@ -24,6 +24,7 @@ import org.springframework.cache.support.AbstractValueAdaptingCache;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -69,7 +70,7 @@ public class EVCache extends AbstractValueAdaptingCache {
     @Override
     public <T> T get(final Object key, final Callable<T> valueLoader) {
         final Object cached = lookup(key);
-        if (cached != null) {
+        if (nonNull(cached)) {
             return (T) fromStoreValue(cached);
         }
         try {
