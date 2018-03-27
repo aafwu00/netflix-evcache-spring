@@ -19,35 +19,53 @@ package com.github.aafwu00.evcache.spring.cloud;
 import java.io.IOException;
 import java.util.Map;
 
-import org.springframework.aop.framework.Advised;
-import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.InitializingBean;
 
 import com.netflix.appinfo.ApplicationInfoManager;
 import com.netflix.appinfo.InstanceInfo;
-import com.netflix.discovery.DiscoveryClient;
 import com.netflix.discovery.EurekaClient;
 import com.netflix.evcache.pool.EVCacheNodeList;
 import com.netflix.evcache.pool.EVCacheServerGroupConfig;
 import com.netflix.evcache.pool.ServerGroup;
-import com.netflix.evcache.pool.eureka.EurekaNodeListProvider;
 
 import static com.netflix.appinfo.DataCenterInfo.Name.Amazon;
 import static java.util.Objects.isNull;
-import static org.springframework.aop.support.AopUtils.isAopProxy;
+import static java.util.Objects.requireNonNull;
 
-public class DataCenterAwareEurekaNodeListProvider implements EVCacheNodeList {
-    private final EVCacheNodeList delegate;
+/**
+ * {@link EVCacheNodeList} implementation defaults to be delegate for DataCenter.
+ *
+ * @author Taeho Kim
+ * @see MyOwnEurekaNodeListProvider
+ * @see AmazonEurekaNodeListProvider
+ */
+public class DataCenterAwareEurekaNodeListProvider implements EVCacheNodeList, InitializingBean {
+    private final ApplicationInfoManager applicationInfoManager;
+    private final EurekaClient eurekaClient;
+    private EVCacheNodeList delegate;
 
     public DataCenterAwareEurekaNodeListProvider(final ApplicationInfoManager applicationInfoManager, final EurekaClient eurekaClient) {
-        delegate = createNodeListProvider(applicationInfoManager, eurekaClient);
+        this.applicationInfoManager = requireNonNull(applicationInfoManager);
+        this.eurekaClient = requireNonNull(eurekaClient);
     }
 
-    private EVCacheNodeList createNodeListProvider(final ApplicationInfoManager applicationInfoManager, final EurekaClient eurekaClient) {
-        final InstanceInfo instanceInfo = applicationInfoManager.getInfo();
-        if (isAmazonDataCenter(instanceInfo)) {
-            return amazonEurekaNodeListProvider(applicationInfoManager, eurekaClient);
+    @Override
+    public Map<ServerGroup, EVCacheServerGroupConfig> discoverInstances(final String appName) throws IOException {
+        return delegate.discoverInstances(appName);
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        if (isNull(delegate)) {
+            delegate = createNodeListProvider();
         }
-        return myOwnEurekaNodeListProvider(applicationInfoManager, eurekaClient);
+    }
+
+    private EVCacheNodeList createNodeListProvider() {
+        if (isAmazonDataCenter(applicationInfoManager.getInfo())) {
+            return amazonEurekaNodeListProvider();
+        }
+        return myOwnEurekaNodeListProvider();
     }
 
     private boolean isAmazonDataCenter(final InstanceInfo instanceInfo) {
@@ -55,31 +73,11 @@ public class DataCenterAwareEurekaNodeListProvider implements EVCacheNodeList {
             || Amazon == instanceInfo.getDataCenterInfo().getName();
     }
 
-    private EurekaNodeListProvider amazonEurekaNodeListProvider(final ApplicationInfoManager applicationInfoManager,
-                                                                final EurekaClient eurekaClient) {
-        return new EurekaNodeListProvider(applicationInfoManager, casting(eurekaClient));
+    private AmazonEurekaNodeListProvider amazonEurekaNodeListProvider() {
+        return new AmazonEurekaNodeListProvider(applicationInfoManager, eurekaClient);
     }
 
-    private DiscoveryClient casting(final EurekaClient eurekaClient) {
-        if (isAopProxy(eurekaClient)) {
-            try {
-                return DiscoveryClient.class.cast(Advised.class.cast(eurekaClient).getTargetSource().getTarget());
-                // CHECKSTYLE:OFF
-            } catch (final Exception ex) {
-                // CHECKSTYLE:ON
-                throw new BeanCreationException("eurekaClient", "proxy casting exception", ex);
-            }
-        }
-        return DiscoveryClient.class.cast(eurekaClient);
-    }
-
-    private MyOwnEurekaNodeListProvider myOwnEurekaNodeListProvider(final ApplicationInfoManager applicationInfoManager,
-                                                                    final EurekaClient eurekaClient) {
+    private MyOwnEurekaNodeListProvider myOwnEurekaNodeListProvider() {
         return new MyOwnEurekaNodeListProvider(applicationInfoManager, eurekaClient);
-    }
-
-    @Override
-    public Map<ServerGroup, EVCacheServerGroupConfig> discoverInstances(final String appName) throws IOException {
-        return delegate.discoverInstances(appName);
     }
 }

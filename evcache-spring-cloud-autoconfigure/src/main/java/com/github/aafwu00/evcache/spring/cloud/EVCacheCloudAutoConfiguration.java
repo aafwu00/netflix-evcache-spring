@@ -53,7 +53,7 @@ import com.netflix.evcache.pool.SimpleNodeListProvider;
 @ConditionalOnEVCache
 @AutoConfigureAfter({ArchaiusAutoConfiguration.class, EurekaClientAutoConfiguration.class})
 @AutoConfigureBefore(EVCacheAutoConfiguration.class)
-@EnableConfigurationProperties
+@EnableConfigurationProperties(EVCacheCloudProperties.class)
 @PropertySource("classpath:evcache/evcache.properties")
 public class EVCacheCloudAutoConfiguration {
     @Bean
@@ -77,8 +77,9 @@ public class EVCacheCloudAutoConfiguration {
     @ConditionalOnBean({ApplicationInfoManager.class, EurekaClient.class})
     @ConditionalOnMissingBean(EVCacheNodeList.class)
     public EVCacheNodeList eurekaNodeListProvider(final ApplicationInfoManager applicationInfoManager,
-                                                  final EurekaClient eurekaClient) {
-        return new DataCenterAwareEurekaNodeListProvider(applicationInfoManager, eurekaClient);
+                                                  final EurekaClient eurekaClient,
+                                                  final EVCacheCloudProperties properties) {
+        return properties.createEVCacheNodeList(applicationInfoManager, eurekaClient);
     }
 
     @Bean

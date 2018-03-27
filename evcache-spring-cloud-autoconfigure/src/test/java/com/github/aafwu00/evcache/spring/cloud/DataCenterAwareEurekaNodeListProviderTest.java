@@ -16,6 +16,10 @@
 
 package com.github.aafwu00.evcache.spring.cloud;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,14 +29,17 @@ import com.netflix.appinfo.InstanceInfo;
 import com.netflix.discovery.DiscoveryClient;
 import com.netflix.discovery.EurekaClient;
 import com.netflix.evcache.pool.EVCacheNodeList;
-import com.netflix.evcache.pool.eureka.EurekaNodeListProvider;
+import com.netflix.evcache.pool.EVCacheServerGroupConfig;
+import com.netflix.evcache.pool.ServerGroup;
 
 import static com.netflix.appinfo.DataCenterInfo.Name.Amazon;
 import static com.netflix.appinfo.DataCenterInfo.Name.MyOwn;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.util.ReflectionTestUtils.getField;
+import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 /**
  * @author Taeho Kim
@@ -58,14 +65,27 @@ class DataCenterAwareEurekaNodeListProviderTest {
     }
 
     @Test
-    void should_be_EurekaNodeListProvider_when_dataCenter_is_Amazon() {
-        assertThatDelegateIsExactlyInstanceOf(Amazon, EurekaNodeListProvider.class);
+    void should_be_AmazonEurekaNodeListProvider_when_dataCenter_is_Amazon() {
+        assertThatDelegateIsExactlyInstanceOf(Amazon, AmazonEurekaNodeListProvider.class);
+    }
+
+    @Test
+    void discoverInstances() throws IOException {
+        final EVCacheNodeList delegate = mock(EVCacheNodeList.class);
+        final DataCenterAwareEurekaNodeListProvider provider = new DataCenterAwareEurekaNodeListProvider(applicationInfoManager,
+                                                                                                         eurekaClient);
+        setField(provider, "delegate", delegate);
+        final Map<ServerGroup, EVCacheServerGroupConfig> result = new HashMap<>();
+        doReturn(result).when(delegate).discoverInstances("appName");
+        assertThat(provider.discoverInstances("appName")).isSameAs(result);
+        verify(delegate).discoverInstances("appName");
     }
 
     private void assertThatDelegateIsExactlyInstanceOf(DataCenterInfo.Name dataCenter, Class<? extends EVCacheNodeList> clazz) {
         doReturn(dataCenter).when(dataCenterInfo).getName();
         final DataCenterAwareEurekaNodeListProvider provider = new DataCenterAwareEurekaNodeListProvider(applicationInfoManager,
                                                                                                          eurekaClient);
+        provider.afterPropertiesSet();
         assertThat(getField(provider, "delegate")).isExactlyInstanceOf(clazz);
     }
 }

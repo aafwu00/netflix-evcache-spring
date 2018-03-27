@@ -63,7 +63,7 @@ class EVCacheAutoConfigurationTest {
     }
 
     @Test
-    void should_be_not_loaded_CacheManager_when_no_configuration() {
+    void should_be_not_loaded_CacheManager_when_has_no_configuration() {
         loadContext(NoCacheableConfiguration.class);
         assertThatThrownBy(() -> context.getBean(CacheManager.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class);
     }
@@ -90,7 +90,7 @@ class EVCacheAutoConfigurationTest {
     }
 
     @Test
-    void should_be_not_loaded_EVCacheManager_when_evcache_enable_is_false() {
+    void should_be_not_loaded_EVCacheManager_when_disable_evcache() {
         loadContext(EnableCachingConfiguration.class, "evcache.enabled=false");
         assertAll(
             () -> assertThat(context.getBean(CacheManager.class)).isNotNull(),
@@ -143,7 +143,7 @@ class EVCacheAutoConfigurationTest {
     }
 
     @Test
-    void should_be_not_loaded_EVCacheMetrics_when_evcache_metrics_enabled_is_false() {
+    void should_be_not_loaded_EVCacheMetrics_when_disable_evcache_metrics() {
         loadContext(EnableCachingConfiguration.class,
                     "evcache.name=test",
                     "evcache.prefixes[0].name=test1",

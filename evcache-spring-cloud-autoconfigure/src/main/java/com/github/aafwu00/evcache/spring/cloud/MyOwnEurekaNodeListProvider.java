@@ -68,7 +68,7 @@ public class MyOwnEurekaNodeListProvider implements EVCacheNodeList {
             return emptyMap();
         }
         final Application app = eurekaClient.getApplication(appName);
-        if (app == null) {
+        if (isNull(app)) {
             return emptyMap();
         }
         final Map<ServerGroup, EVCacheServerGroupConfig> result = new ConcurrentHashMap<>();
@@ -206,7 +206,7 @@ public class MyOwnEurekaNodeListProvider implements EVCacheNodeList {
     }
 
     private int getIntValue(final Map<String, String> metadata, final String key, final int defaultValue) {
-        if (metadata == null) {
+        if (isNull(metadata)) {
             return defaultValue;
         }
         return toInt(metadata.get(key), defaultValue);
