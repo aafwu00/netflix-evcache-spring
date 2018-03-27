@@ -7,13 +7,4 @@ evcache:
       enableExceptionThrowing: true
     - name: test2
       server-group-retry: false
-  shard:
-    - name: shard1
-      replica:
-        - localhost:11211
-        - localhost:11212
-    - name: shard2
-      replica:
-        - localhost:11213
-        - localhost:11214
-   
+
