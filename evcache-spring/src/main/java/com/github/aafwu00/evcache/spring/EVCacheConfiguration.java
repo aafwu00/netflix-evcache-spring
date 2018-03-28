@@ -52,7 +52,7 @@ public class EVCacheConfiguration {
     private final boolean enableExceptionThrowing;
 
     /**
-     * Instantiates a new Ev cache configuration.
+     * Instantiates a new EVCache configuration.
      *
      * @param name                    the name
      * @param timeToLive              the time to live
@@ -64,7 +64,8 @@ public class EVCacheConfiguration {
     public EVCacheConfiguration(final String name,
                                 final int timeToLive,
                                 final boolean allowNullValues,
-                                final boolean keyHash, final boolean serverGroupRetry,
+                                final boolean keyHash,
+                                final boolean serverGroupRetry,
                                 final boolean enableExceptionThrowing) {
         this.name = notEmpty(name);
         this.timeToLive = timeToLive;
