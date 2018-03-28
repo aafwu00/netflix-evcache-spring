@@ -8,7 +8,7 @@ include 'evcache-spring-cloud-starter'
 include 'evcar-spring-cloud-autoconfigure'
 include 'evcar-spring-cloud-starter'
 
-if (!hasProperty("jitpack")) {
+if (!hasProperty('exclude-ci')) {
     include 'samples:spring-sample'
     include 'samples:spring-boot-sample'
     include 'samples:spring-cloud-sample'
