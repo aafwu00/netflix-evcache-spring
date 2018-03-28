@@ -106,7 +106,7 @@ subprojects {
         }
 
         pmd {
-            toolVersion = '6.1.0'
+            toolVersion = '6.2.0'
             ruleSetFiles = rootProject.files('config/pmd/rulesets.xml')
             sourceSets = [project.sourceSets.main as SourceSet]
             ignoreFailures = false
@@ -114,7 +114,7 @@ subprojects {
         }
 
         jacoco {
-            toolVersion = '0.8.0'
+            toolVersion = '0.8.1'
         }
 
         jacocoTestReport {
