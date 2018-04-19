@@ -87,7 +87,7 @@ subprojects {
         }
 
         checkstyle {
-            toolVersion = '8.8'
+            toolVersion = '8.9'
             ignoreFailures = false
             maxErrors = 0
             maxWarnings = 0
