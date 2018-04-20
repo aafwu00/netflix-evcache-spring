@@ -9,8 +9,6 @@ management:
 logging:
   level:
     root: info
-    com.github.aafwu00: debug
-    com.netflix: debug
 
 evcache:
   name: TODO
@@ -19,5 +17,5 @@ evcache:
       time-to-live: 10
       server-group-retry: true
 
-TODO-NODES: shard1=localhost:11211,localhost:11212;shard2=localhost:11213,localhost:11214
+TODO-NODES: shard1=localhost:11211
 TODO.use.inmemory.cache: true
