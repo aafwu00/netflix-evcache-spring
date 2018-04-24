@@ -135,7 +135,6 @@ subprojects {
         bootRepackage.enabled = false
     }
 
-
     if (project.name.contains('autoconfigure')) {
         apply plugin: 'propdeps'
         apply plugin: 'propdeps-maven'
