@@ -21,16 +21,16 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "build.gradle" }}-{{ checksum "evcache-spring/build.gradle" }}-{{ checksum "evcache-spring-boot-autoconfigure/build.gradle" }}-{{ checksum "evcache-spring-boot-starter/build.gradle" }}-{{ checksum "evcache-spring-cloud-autoconfigure/build.gradle" }}-{{ checksum "evcache-spring-cloud-starter/build.gradle" }}-{{ checksum "evcar-spring-cloud-autoconfigure/build.gradle" }}-{{ checksum "evcar-spring-cloud-starter/build.gradle" }}
+            - v1-dependencies-{{ checksum "build.gradle" }}-{{ checksum "evcache-client-spring/build.gradle" }}-{{ checksum "evcache-client-spring-boot-autoconfigure/build.gradle" }}-{{ checksum "evcache-client-spring-boot-starter/build.gradle" }}-{{ checksum "evcache-client-spring-cloud-autoconfigure/build.gradle" }}-{{ checksum "evcache-client-spring-cloud-starter/build.gradle" }}-{{ checksum "evcache-server-spring-cloud-autoconfigure/build.gradle" }}-{{ checksum "evcache-server-spring-cloud-starter/build.gradle" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies--------
 
-      - run: ./gradlew :evcache-spring-cloud-starter:dependencies :evcar-spring-cloud-starter:dependencies -Pexclude-ci
+      - run: ./gradlew :evcache-client-spring-cloud-starter:dependencies :evcache-server-spring-cloud-starter:dependencies -Pexclude-ci
 
       - save_cache:
           paths:
             - ~/.gradle
-          key: v1-dependencies-{{ checksum "build.gradle" }}-{{ checksum "evcache-spring/build.gradle" }}-{{ checksum "evcache-spring-boot-autoconfigure/build.gradle" }}-{{ checksum "evcache-spring-boot-starter/build.gradle" }}-{{ checksum "evcache-spring-cloud-autoconfigure/build.gradle" }}-{{ checksum "evcache-spring-cloud-starter/build.gradle" }}-{{ checksum "evcar-spring-cloud-autoconfigure/build.gradle" }}-{{ checksum "evcar-spring-cloud-starter/build.gradle" }}
+          key: v1-dependencies-{{ checksum "build.gradle" }}-{{ checksum "evcache-client-spring/build.gradle" }}-{{ checksum "evcache-client-spring-boot-autoconfigure/build.gradle" }}-{{ checksum "evcache-client-spring-boot-starter/build.gradle" }}-{{ checksum "evcache-client-spring-cloud-autoconfigure/build.gradle" }}-{{ checksum "evcache-client-spring-cloud-starter/build.gradle" }}-{{ checksum "evcache-server-spring-cloud-autoconfigure/build.gradle" }}-{{ checksum "evcache-server-spring-cloud-starter/build.gradle" }}
 
       # run tests!
       - run: ./gradlew check jacocoTestReport -Pexclude-ci

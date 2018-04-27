@@ -1,0 +1,8 @@
+dependencies {
+    compile project(':evcache-client-spring-cloud-autoconfigure')
+    compile project(':evcache-client-spring-boot-starter')
+
+    compile 'org.springframework.cloud:spring-cloud-starter-netflix-archaius'
+    compile 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    compile 'org.springframework.cloud:spring-cloud-starter-sleuth', optional
+}

@@ -1,5 +1,5 @@
 dependencies {
-    compile project(':evcache-spring-boot-starter')
+    compile project(':evcache-client-spring-boot-starter')
 
     compile 'org.springframework.boot:spring-boot-starter-validation'
     compile 'org.springframework.boot:spring-boot-starter-actuator'

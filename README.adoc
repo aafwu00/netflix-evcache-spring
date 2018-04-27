@@ -46,7 +46,7 @@ docker-compose up
 
 See on link:samples[samples]
 
-=== evcache-spring
+=== evcache-client-spring
 
 This project provides Netflix EVCache integrations for Spring Cache Abstraction.
 See on link:samples/spring-sample[spring-sample]
@@ -60,7 +60,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.aafwu00:evcache-spring:x.y.z' <2>
+    compile 'com.github.aafwu00:evcache-client-spring:x.y.z' <2>
 }
 ----
 <1> add `jitpack` repository
@@ -100,7 +100,7 @@ public class TodoRepository {
 <2> `EVCacheManager` app name + `-NODES` means memcache server address, see on : https://github.com/Netflix/EVCache/wiki/Sample-EVCache-Deployment#step-4-create-a-cache-deployment-descriptor
 <3> `@Cacheable` `cacheNames` is sames as `EVCacheConfiguration` name
 
-=== evcache-spring-boot-starter
+=== evcache-client-spring-boot-starter
 
 This project provides Netflix EVCache integrations for Spring Boot.
 See on link:samples/spring-boot-sample[spring-boot-sample]
@@ -114,7 +114,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.aafwu00:evcache-spring-boot-starter:x.y.z' <2>
+    compile 'com.github.aafwu00:evcache-client-spring-boot-starter:x.y.z' <2>
 }
 ----
 <1> add `jitpack` repository
@@ -202,16 +202,16 @@ IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
 
 See also: https://github.com/Netflix/EVCache/wiki/Configuring-EVCache-Client , https://github.com/Netflix/EVCache/blob/split/docs/config.md
 
-=== evcar-spring-cloud-starter
+=== evcache-server-spring-cloud-starter
 
 WARNING: This project is not an original `EVCar`(`EVCache` + `Sidecar`).
-EVCache Server composed `memcached` and `Prana`.
+EVCache Server composed `memcached` and `Prana(Sidecar)`.
 `EVCar` is not released at this time, so I combined the functions of `Eureka` + `Sidecar`.
 You can find some hints about the function of `EVCar` below.
 
 Hint on: https://github.com/Netflix/EVCache/issues/49 and https://github.com/Netflix/EVCache/tree/nflx-specific/evcar
 
-Example EVCar, See on link:samples/evcar-sample[evcar-sample]
+Example EVCache Server, See on link:samples/evcache-server-sample[evcache-server-sample]
 
 1. Start Eureka Server
 See on link:samples/eureka-server-sample[eureka-server-sample]
@@ -227,7 +227,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.aafwu00:evcar-spring-cloud-starter:x.y.z' <2>
+    compile 'com.github.aafwu00:evcache-server-spring-cloud-starter:x.y.z' <2>
 }
 ----
 <1> add `jitpack` repository
@@ -303,7 +303,7 @@ evcar:
 
 |===
 
-=== evcache-spring-cloud-starter
+=== evcache-client-spring-cloud-starter
 
 This project provides Netflix EVCache And Eureka integrations for Spring Cloud.
 see link:samples/spring-boot-sample[spring-boot-sample]
@@ -320,7 +320,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.aafwu00:evcache-spring-cloud-starter:x.y.z' <2>
+    compile 'com.github.aafwu00:evcache-client-spring-cloud-starter:x.y.z' <2>
 }
 ----
 <1> add `jitpack` repository
