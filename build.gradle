@@ -2,7 +2,7 @@ buildscript {
     ext {
         springBootVersion = '1.5.12.RELEASE'
         springCloudVersion = 'Edgware.SR3'
-        evcacheVersion = '5.0.19-rc.1'
+        evcacheVersion = '4.125.0'
     }
     repositories {
         maven { url 'https://plugins.gradle.org/m2/' }

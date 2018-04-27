@@ -1,6 +1,7 @@
 package sample;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -15,6 +16,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.couchbase.mock.Bucket;
+import com.couchbase.mock.BucketConfiguration;
 import com.couchbase.mock.CouchbaseMock;
 
 import static com.couchbase.mock.memcached.Storage.StorageType.CACHE;
@@ -36,9 +39,15 @@ class TodoBootAppTest {
     private MockMvc mvc;
 
     @BeforeAll
-    static void beforeAll() throws IOException {
-        server = new CouchbaseMock("localhost", 11210, 1, 1024, "memcached::memcache");
+    static void beforeAll() throws IOException, InterruptedException {
+        final BucketConfiguration config = new BucketConfiguration();
+        config.bucketStartPort = 11211;
+        config.numNodes = 1;
+        config.type = Bucket.BucketType.MEMCACHED;
+        config.name = "memcached";
+        server = new CouchbaseMock(11210, Collections.singletonList(config));
         server.start();
+        server.waitForStartup();
     }
 
     @AfterAll
@@ -63,6 +72,7 @@ class TodoBootAppTest {
            .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
            .andExpect(jsonPath("$[0].title", is("first")))
            .andExpect(jsonPath("$[1].title", is("second")));
+        assertThat(server.getBuckets().get("memcached").getMasterItems(CACHE)).isNotEmpty();
         server.getBuckets().get("memcached").getMasterItems(CACHE)
               .forEach(item -> assertThat(item.getKeySpec().key).isEqualTo("todos:findAll"));
     }

@@ -25,7 +25,6 @@ import javax.validation.constraints.Pattern;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.validation.annotation.Validated;
 
 import com.github.aafwu00.evcache.spring.EVCacheConfiguration;
@@ -38,7 +37,7 @@ import static java.util.stream.Collectors.toList;
  * @author Taeho Kim
  */
 @Validated
-@ConfigurationProperties(prefix = "evcache")
+@ConfigurationProperties("evcache")
 public class EVCacheProperties {
     /**
      * Enable EVCache
@@ -54,7 +53,6 @@ public class EVCacheProperties {
      */
     @NotEmpty
     @Valid
-    @NestedConfigurationProperty
     private List<Prefix> prefixes;
 
     protected List<EVCacheConfiguration> toConfigurations() {
@@ -107,10 +105,6 @@ public class EVCacheProperties {
          */
         private boolean allowNullValues = true;
         /**
-         * Whether to convert key to hashing
-         */
-        private boolean keyHash;
-        /**
          * Retry across Server Group for cache misses and exceptions
          */
         private boolean serverGroupRetry = true;
@@ -120,7 +114,7 @@ public class EVCacheProperties {
         private boolean enableExceptionThrowing;
 
         protected EVCacheConfiguration toConfiguration() {
-            return new EVCacheConfiguration(name, timeToLive, allowNullValues, keyHash, serverGroupRetry, enableExceptionThrowing);
+            return new EVCacheConfiguration(name, timeToLive, allowNullValues, serverGroupRetry, enableExceptionThrowing);
         }
 
         public String getName() {
@@ -145,14 +139,6 @@ public class EVCacheProperties {
 
         public void setAllowNullValues(final boolean allowNullValues) {
             this.allowNullValues = allowNullValues;
-        }
-
-        public boolean isKeyHash() {
-            return keyHash;
-        }
-
-        public void setKeyHash(final boolean keyHash) {
-            this.keyHash = keyHash;
         }
 
         public boolean isServerGroupRetry() {

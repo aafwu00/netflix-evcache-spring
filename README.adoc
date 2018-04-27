@@ -186,10 +186,6 @@ IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
 | true
 | Whether to allow for `null` values
 
-| evcache.prefix[].keyHash
-| false
-| Whether to convert key to hashing
-
 | evcache.prefix[].serverGroupRetry
 | true
 | Retry across Server Group for cache misses and exceptions

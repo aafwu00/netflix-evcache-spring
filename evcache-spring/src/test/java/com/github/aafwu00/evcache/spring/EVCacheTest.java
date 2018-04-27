@@ -48,7 +48,7 @@ class EVCacheTest {
     void setUp() {
         source = mock(com.netflix.evcache.EVCache.class);
         converterService = mock(ConversionService.class);
-        cache = new EVCache(source, converterService, true, false);
+        cache = new EVCache(source, converterService, true);
         doReturn(false).when(converterService)
                        .canConvert(TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class));
     }
@@ -84,7 +84,7 @@ class EVCacheTest {
                 doReturn(false).when(converterService)
                                .canConvert(TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class));
                 doReturn(1).when(source).get(DigestUtils.sha256Hex("1"));
-                assertThat(new EVCache(source, converterService, true, true).lookup(1)).isEqualTo(1);
+                assertThat(new EVCache(source, converterService, true).lookup(1)).isEqualTo(1);
             }
         );
     }

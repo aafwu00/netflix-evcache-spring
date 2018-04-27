@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cloud.netflix.archaius.ArchaiusAutoConfiguration;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,10 +34,9 @@ import com.netflix.appinfo.InstanceInfo;
 import com.netflix.appinfo.MyDataCenterInfo;
 import com.netflix.discovery.DiscoveryClient;
 import com.netflix.discovery.EurekaClient;
-import com.netflix.evcache.connection.ConnectionFactoryBuilder;
+import com.netflix.evcache.connection.IConnectionFactoryProvider;
 import com.netflix.evcache.pool.EVCacheClientPoolManager;
-import com.netflix.evcache.pool.EVCacheNodeList;
-import com.netflix.evcache.pool.SimpleNodeListProvider;
+import com.netflix.evcache.util.EVCacheConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -69,11 +69,44 @@ class EVCacheCloudAutoConfigurationTest {
                     "spring.application.name=test");
         assertAll(
             () -> assertThat(context.getBean(EVCacheClientPoolManager.class)).isNotNull(),
-            () -> assertThat(context.getBean(ConnectionFactoryBuilder.class)).isNotNull(),
-            () -> assertThat(context.getBean(EVCacheCloudProperties.class)).isNotNull(),
-            () -> assertThat(context.getBean(DataCenterAwareEurekaNodeListProvider.class)).isNotNull(),
+            () -> assertThat(context.getBean(IConnectionFactoryProvider.class)).isNotNull(),
             () -> assertThat(context.getBean(Environment.class)
-                                    .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isFalse()
+                                    .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isFalse(),
+            () -> assertThat(EVCacheConfig.getInstance()
+                                          .getDynamicBooleanProperty("evcache.use.simple.node.list.provider", true)
+                                          .get()).isFalse()
+        );
+    }
+
+    @Test
+    void should_be_loaded_EVCacheClientPoolManager_when_simpleNodeListProvider_is_false() {
+        loadContext(EnableCachingConfiguration.class,
+                    "evcache.name=test",
+                    "evcache.prefixes[0].name=test1",
+                    "spring.application.name=test",
+                    "evcache.use.simple.node.list.provider=false");
+        assertAll(
+            () -> assertThat(context.getBean(EVCacheClientPoolManager.class)).isNotNull(),
+            () -> assertThat(context.getBean(IConnectionFactoryProvider.class)).isNotNull(),
+            () -> assertThat(context.getBean(Environment.class)
+                                    .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isFalse(),
+            () -> assertThat(EVCacheConfig.getInstance()
+                                          .getDynamicBooleanProperty("evcache.use.simple.node.list.provider", true)
+                                          .get()).isFalse()
+        );
+    }
+
+    @Test
+    void should_be_loaded_EVCacheClientPoolManager_when_exists_EVCacheClientPoolManager() {
+        loadContext(ExistsEVCacheClientPoolManagerConfiguration.class,
+                    "evcache.name=test",
+                    "evcache.prefixes[0].name=test1",
+                    "spring.application.name=test");
+        assertAll(
+            () -> assertThat(context.getBean(EVCacheClientPoolManager.class)).isNotNull(),
+            () -> assertThat(context.getBean(IConnectionFactoryProvider.class)).isNotNull(),
+            () -> assertThat(context.getBean(Environment.class)
+                                    .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isNull()
         );
     }
 
@@ -84,47 +117,61 @@ class EVCacheCloudAutoConfigurationTest {
                     "evcache.prefixes[0].name=test1",
                     "evcache.cloud.enabled=false",
                     "spring.application.name=test");
-        assertThatThrownBy(() -> context.getBean(EVCacheClientPoolManager.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class);
+        assertAll(
+            () -> assertThatThrownBy(() -> context.getBean(EVCacheClientPoolManager.class)).isExactlyInstanceOf(
+                NoSuchBeanDefinitionException.class),
+            () -> assertThat(context.getBean(Environment.class)
+                                    .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isNull()
+        );
     }
 
     @Test
-    void should_be_loaded_EVCacheClientPoolManager_when_not_exists_eurekaClient() {
+    void should_not_be_loaded_EVCacheClientPoolManager_when_simpleNodeListProvider_is_true() {
+        loadContext(EnableCachingConfiguration.class,
+                    "evcache.name=test",
+                    "evcache.prefixes[0].name=test1",
+                    "evcache.cloud.enabled=false",
+                    "evcache.use.simple.node.list.provider=true");
+        assertAll(
+            () -> assertThatThrownBy(() -> context.getBean(EVCacheClientPoolManager.class)).isExactlyInstanceOf(
+                NoSuchBeanDefinitionException.class)
+        );
+    }
+
+    @Test
+    void should_not_be_loaded_EVCacheClientPoolManager_when_not_exists_eurekaClient() {
         loadContext(NoEurekaClientConfiguration.class,
                     "evcache.name=test",
                     "evcache.prefixes[0].name=test1",
                     "spring.application.name=test");
         assertAll(
-            () -> assertThat(context.getBean(EVCacheClientPoolManager.class)).isNotNull(),
-            () -> assertThat(context.getBean(ConnectionFactoryBuilder.class)).isNotNull(),
-            () -> assertThat(context.getBean(SimpleNodeListProvider.class)).isNotNull()
-        );
-    }
-
-    @Test
-    void should_be_loaded_EVCacheClientPoolManager_when_exists_evcacheNodeList() {
-        loadContext(ExistsEVCacheNodeListConfiguration.class,
-                    "evcache.name=test",
-                    "evcache.prefixes[0].name=test1",
-                    "spring.application.name=test");
-        assertAll(
-            () -> assertThat(context.getBean(EVCacheClientPoolManager.class)).isNotNull(),
-            () -> assertThat(context.getBean(ConnectionFactoryBuilder.class)).isNotNull(),
-            () -> assertThat(context.getBean(EVCacheNodeList.class)).isNotNull()
-                                                                    .isNotInstanceOfAny(SimpleNodeListProvider.class,
-                                                                                        DataCenterAwareEurekaNodeListProvider.class)
+            () -> assertThatThrownBy(() -> context.getBean(EVCacheClientPoolManager.class)).isExactlyInstanceOf(
+                NoSuchBeanDefinitionException.class),
+            () -> assertThat(context.getBean(Environment.class)
+                                    .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isNull()
         );
     }
 
     @Test
     void should_be_not_loaded_EVCacheClientPoolManager_when_not_exists_not_evcacheManager() {
         loadContext(EnableCachingConfiguration.class, "spring.cache.type=none", "spring.application.name=test");
-        assertThatThrownBy(() -> context.getBean(EVCacheClientPoolManager.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class);
+        assertAll(
+            () -> assertThatThrownBy(() -> context.getBean(EVCacheClientPoolManager.class)).isExactlyInstanceOf(
+                NoSuchBeanDefinitionException.class),
+            () -> assertThat(context.getBean(Environment.class)
+                                    .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isNull()
+        );
     }
 
     @Test
     void should_be_not_loaded_EVCacheClientPoolManager_when_cache_type_is_none() {
         loadContext(NoCacheableConfiguration.class, "spring.cache.type=none", "spring.application.name=test");
-        assertThatThrownBy(() -> context.getBean(EVCacheClientPoolManager.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class);
+        assertAll(
+            () -> assertThatThrownBy(() -> context.getBean(EVCacheClientPoolManager.class)).isExactlyInstanceOf(
+                NoSuchBeanDefinitionException.class),
+            () -> assertThat(context.getBean(Environment.class)
+                                    .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isNull()
+        );
     }
 
     private void loadContext(final Class<?> configuration, final String... pairs) {
@@ -132,6 +179,7 @@ class EVCacheCloudAutoConfigurationTest {
         context.register(configuration);
         context.register(EVCacheCloudAutoConfiguration.class);
         context.register(CacheAutoConfiguration.class);
+        context.register(ArchaiusAutoConfiguration.class);
         context.refresh();
     }
 
@@ -160,10 +208,10 @@ class EVCacheCloudAutoConfigurationTest {
 
     @Configuration
     @EnableCaching
-    static class ExistsEVCacheNodeListConfiguration {
+    static class ExistsEVCacheClientPoolManagerConfiguration extends EnableCachingConfiguration {
         @Bean
-        EVCacheNodeList evcacheNodeList() {
-            return mock(EVCacheNodeList.class);
+        EVCacheClientPoolManager evCacheClientPoolManager() {
+            return mock(EVCacheClientPoolManager.class);
         }
     }
 

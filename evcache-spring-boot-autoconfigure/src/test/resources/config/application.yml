@@ -7,9 +7,7 @@ evcache:
       allowNullValues: true
       serverGroupRetry: true
       enableExceptionThrowing: true
-      keyHash: true
     - name: test2
       allow-null-values: false
       server-group-retry: false
       enable-exception-throwing: false
-      key-hash: false

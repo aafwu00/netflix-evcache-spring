@@ -1,0 +1,25 @@
+{
+  "properties": [
+    {
+      "sourceType": "com.github.aafwu00.evcache.spring.cloud.EVCacheCloudAutoConfiguration",
+      "defaultValue": true,
+      "name": "evcache.cloud.enabled",
+      "description": "Enable EVCache Cloud",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "com.github.aafwu00.evcache.spring.cloud.EVCacheTraceAutoConfiguration",
+      "defaultValue": true,
+      "name": "evcache.trace.enabled",
+      "description": "Enable EVCache Trace",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "com.github.aafwu00.evcache.spring.cloud.EVCacheCloudAutoConfiguration",
+      "defaultValue": false,
+      "name": "evcache.use.simple.node.list.provider",
+      "description": "Use com.netflix.evcache.SimpleNodeListProvider",
+      "type": "java.lang.Boolean"
+    }
+  ]
+}

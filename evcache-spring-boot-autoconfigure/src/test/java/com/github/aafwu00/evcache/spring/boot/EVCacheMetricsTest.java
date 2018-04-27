@@ -16,21 +16,15 @@
 
 package com.github.aafwu00.evcache.spring.boot;
 
-import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.netflix.evcache.EVCache.Call;
 import com.netflix.evcache.metrics.EVCacheMetricsFactory;
-import com.netflix.spectator.api.Counter;
-import com.netflix.spectator.api.DefaultRegistry;
+import com.netflix.evcache.metrics.Stats;
 
-import static com.netflix.evcache.metrics.EVCacheMetricsFactory.ATTEMPT;
-import static com.netflix.evcache.metrics.EVCacheMetricsFactory.INTERNAL;
-import static com.netflix.evcache.metrics.EVCacheMetricsFactory.IN_MEMORY;
-import static com.netflix.evcache.metrics.EVCacheMetricsFactory.METRIC;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -39,43 +33,49 @@ import static org.junit.jupiter.api.Assertions.assertAll;
  */
 class EVCacheMetricsTest {
     private EVCacheMetrics metrics;
+    private Stats stats;
 
     @BeforeEach
     void setUp() {
         metrics = new EVCacheMetrics();
-        counters().clear();
+        EVCacheMetricsFactory.getAllMetrics().clear();
+        stats = EVCacheMetricsFactory.getStats("test", "prefix");
+        stats.operationCompleted(Call.GET, 1);
+        stats.operationCompleted(Call.GET_AND_TOUCH, 1);
+        stats.operationCompleted(Call.SET, 1);
+        stats.operationCompleted(Call.REPLACE, 1);
+        stats.operationCompleted(Call.DELETE, 1);
+        stats.operationCompleted(Call.BULK, 1);
+        stats.operationCompleted(Call.APPEND_OR_ADD, 1);
+        stats.operationCompleted(Call.ADD, 1);
+        stats.operationCompleted(Call.APPEND, 1);
+        stats.operationCompleted(Call.INCR, 1);
+        stats.operationCompleted(Call.DECR, 1);
     }
 
     @AfterEach
     void tearDown() {
-        counters().clear();
+        EVCacheMetricsFactory.getAllMetrics().clear();
     }
 
     @Test
     void metrics() {
-        final Counter counter1 = new DefaultRegistry().counter(IN_MEMORY, METRIC, "hit");
-        final Counter counter2 = new DefaultRegistry().counter(INTERNAL, METRIC, "load");
-        final Counter counter3 = new DefaultRegistry().counter(IN_MEMORY, ATTEMPT, "do-not-contain");
-        counter1.increment(1);
-        counter2.increment(2);
-        counter3.increment(3);
-        counters().put("test1", counter1);
-        counters().put("test2", counter2);
-        counters().put("test3", counter3);
         assertAll(
-            () -> assertThat(hasMetric("evcache.client.inmemorycache.hit", 1L)).isTrue(),
-            () -> assertThat(hasMetric("internal-evc.client.load", 2L)).isTrue(),
-            () -> assertThat(hasMetric("evcache.client.inmemorycache.do-not-contain", 3L)).isFalse()
+            () -> assertThat(hasMetric("evcache.test:prefix.cache.hits")).isTrue(),
+            () -> assertThat(hasMetric("evcache.test:prefix.cache.miss")).isTrue(),
+            () -> assertThat(hasMetric("evcache.test:prefix.get.call")).isTrue(),
+            () -> assertThat(hasMetric("evcache.test:prefix.get.duration")).isTrue(),
+            () -> assertThat(hasMetric("evcache.test:prefix.set.call")).isTrue(),
+            () -> assertThat(hasMetric("evcache.test:prefix.bulk.hits")).isTrue(),
+            () -> assertThat(hasMetric("evcache.test:prefix.bulk.miss")).isTrue(),
+            () -> assertThat(hasMetric("evcache.test:prefix.bulk.call")).isTrue(),
+            () -> assertThat(hasMetric("evcache.test:prefix.bulk.duration")).isTrue()
         );
     }
 
-    private boolean hasMetric(final String key, final Number value) {
+    private boolean hasMetric(final String key) {
         return metrics.metrics()
                       .stream()
-                      .anyMatch(metric -> StringUtils.equals(key, metric.getName()) && metric.getValue().equals(value));
-    }
-
-    private Map<String, Counter> counters() {
-        return EVCacheMetricsFactory.getInstance().getAllCounters();
+                      .anyMatch(metric -> StringUtils.equals(key, metric.getName()));
     }
 }

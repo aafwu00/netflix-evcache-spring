@@ -1,0 +1,18 @@
+{
+  "properties": [
+    {
+      "sourceType": "com.github.aafwu00.evcache.spring.boot.EVCacheAutoConfiguration",
+      "defaultValue": true,
+      "name": "evcache.use.simple.node.list.provider",
+      "description": "Use com.netflix.evcache.SimpleNodeListProvider",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "com.github.aafwu00.evcache.spring.boot.EVCacheAutoConfiguration",
+      "defaultValue": true,
+      "name": "evcache.metrics.enabled",
+      "description": "Enable EVCache Metrics",
+      "type": "java.lang.Boolean"
+    }
+  ]
+}

@@ -17,6 +17,7 @@
 package com.github.aafwu00.evcache.spring.boot;
 
 import java.util.List;
+import java.util.Properties;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.endpoint.PublicMetrics;
@@ -36,8 +37,9 @@ import org.springframework.cloud.client.actuator.HasFeatures;
 import org.springframework.cloud.netflix.archaius.ArchaiusAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.PropertiesPropertySource;
 
 import com.github.aafwu00.evcache.spring.EVCacheManager;
 
@@ -55,7 +57,6 @@ import com.github.aafwu00.evcache.spring.EVCacheManager;
 @AutoConfigureAfter(ArchaiusAutoConfiguration.class)
 @AutoConfigureBefore(CacheAutoConfiguration.class)
 @EnableConfigurationProperties(EVCacheProperties.class)
-@PropertySource("classpath:evcache/evcache.properties")
 public class EVCacheAutoConfiguration {
     @Bean
     public HasFeatures evcacheClientFeature() {
@@ -64,10 +65,21 @@ public class EVCacheAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public CacheManager cacheManager(final CacheManagerCustomizers customizers,
+    public CacheManager cacheManager(final ConfigurableEnvironment environment,
+                                     final CacheManagerCustomizers customizers,
                                      final ConversionService conversionService,
                                      final EVCacheProperties properties) {
+        appendProperty(environment);
         return customizers.customize(new EVCacheManager(properties.getName(), conversionService, properties.toConfigurations()));
+    }
+
+    private void appendProperty(final ConfigurableEnvironment environment) {
+        if (environment.containsProperty("evcache.use.simple.node.list.provider")) {
+            return;
+        }
+        final Properties source = new Properties();
+        source.setProperty("evcache.use.simple.node.list.provider", "true");
+        environment.getPropertySources().addLast(new PropertiesPropertySource("evcacheSpringBoot", source));
     }
 
     @Bean

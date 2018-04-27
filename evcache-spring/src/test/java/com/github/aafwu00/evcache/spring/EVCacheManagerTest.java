@@ -46,7 +46,7 @@ class EVCacheManagerTest {
         converterService = mock(ConversionService.class);
         customizer = spy(new EVCachePostConstructCustomizer() {
             @Override
-            public Cache customize(EVCache cache) {
+            public Cache customize(final EVCache cache) {
                 return cache;
             }
         });
@@ -54,8 +54,8 @@ class EVCacheManagerTest {
 
     @Test
     void loadCaches() {
-        final EVCacheConfiguration configuration1 = new EVCacheConfiguration("test1", 1000, true, true, true, false);
-        final EVCacheConfiguration configuration2 = new EVCacheConfiguration("test2", 90, false, false, false, true);
+        final EVCacheConfiguration configuration1 = new EVCacheConfiguration("test1", 1000, true, true, true);
+        final EVCacheConfiguration configuration2 = new EVCacheConfiguration("test2", 90, false, false, false);
         final List<EVCacheConfiguration> configurations = new ArrayList<>();
         configurations.add(configuration1);
         configurations.add(configuration2);

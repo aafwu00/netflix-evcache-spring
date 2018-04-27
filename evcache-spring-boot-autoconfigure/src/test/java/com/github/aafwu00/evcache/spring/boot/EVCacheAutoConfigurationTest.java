@@ -28,6 +28,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.support.NoOpCacheManager;
 import org.springframework.cache.support.SimpleCacheManager;
+import org.springframework.cloud.netflix.archaius.ArchaiusAutoConfiguration;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,6 +37,7 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.env.Environment;
 
 import com.github.aafwu00.evcache.spring.EVCacheManager;
+import com.netflix.evcache.util.EVCacheConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -63,12 +65,6 @@ class EVCacheAutoConfigurationTest {
     }
 
     @Test
-    void should_be_not_loaded_CacheManager_when_has_no_configuration() {
-        loadContext(NoCacheableConfiguration.class);
-        assertThatThrownBy(() -> context.getBean(CacheManager.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class);
-    }
-
-    @Test
     void should_be_loaded_EVCacheManager() {
         loadContext(EnableCachingConfiguration.class, "evcache.name=test", "evcache.prefixes[0].name=test1");
         assertAll(
@@ -76,7 +72,36 @@ class EVCacheAutoConfigurationTest {
             () -> assertThat(context.getBean(EVCacheMetrics.class)).isNotNull(),
             () -> assertThat(context.getBean(Environment.class)
                                     .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isTrue(),
+            () -> assertThat(EVCacheConfig.getInstance()
+                                          .getDynamicBooleanProperty("evcache.use.simple.node.list.provider", false)
+                                          .get()).isTrue(),
             () -> verify(cacheManagerCustomizer).customize(any(EVCacheManager.class))
+        );
+    }
+
+    @Test
+    void should_be_loaded_EVCacheManager_when_simpleNodeListProvider_is_true() {
+        loadContext(EnableCachingConfiguration.class,
+                    "evcache.name=test",
+                    "evcache.prefixes[0].name=test1",
+                    "evcache.use.simple.node.list.provider=true");
+        assertAll(
+            () -> assertThat(context.getBean(EVCacheManager.class)).isNotNull(),
+            () -> assertThat(context.getBean(EVCacheMetrics.class)).isNotNull(),
+            () -> assertThat(EVCacheConfig.getInstance()
+                                          .getDynamicBooleanProperty("evcache.use.simple.node.list.provider", false)
+                                          .get()).isTrue(),
+            () -> verify(cacheManagerCustomizer).customize(any(EVCacheManager.class))
+        );
+    }
+
+    @Test
+    void should_be_not_loaded_CacheManager_when_has_no_configuration() {
+        loadContext(NoCacheableConfiguration.class);
+        assertAll(
+            () -> assertThatThrownBy(() -> context.getBean(CacheManager.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class),
+            () -> assertThat(context.getBean(Environment.class)
+                                    .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isNull()
         );
     }
 
@@ -85,7 +110,9 @@ class EVCacheAutoConfigurationTest {
         loadContext(ExistsCacheManagerConfiguration.class, "evcache.name=test", "evcache.prefixes[0].name=test1");
         assertAll(
             () -> assertThatThrownBy(() -> context.getBean(EVCacheManager.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class),
-            () -> assertThatThrownBy(() -> context.getBean(EVCacheMetrics.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class)
+            () -> assertThatThrownBy(() -> context.getBean(EVCacheMetrics.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class),
+            () -> assertThat(context.getBean(Environment.class)
+                                    .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isNull()
         );
     }
 
@@ -94,7 +121,9 @@ class EVCacheAutoConfigurationTest {
         loadContext(EnableCachingConfiguration.class, "evcache.enabled=false");
         assertAll(
             () -> assertThat(context.getBean(CacheManager.class)).isNotNull(),
-            () -> assertThatThrownBy(() -> context.getBean(EVCacheManager.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class)
+            () -> assertThatThrownBy(() -> context.getBean(EVCacheManager.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class),
+            () -> assertThat(context.getBean(Environment.class)
+                                    .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isNull()
         );
     }
 
@@ -103,7 +132,9 @@ class EVCacheAutoConfigurationTest {
         loadContext(EnableCachingConfiguration.class, "spring.cache.type=none", "evcache.enabled=true");
         assertAll(
             () -> assertThat(context.getBean(CacheManager.class)).isInstanceOf(NoOpCacheManager.class),
-            () -> assertThatThrownBy(() -> context.getBean(EVCacheManager.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class)
+            () -> assertThatThrownBy(() -> context.getBean(EVCacheManager.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class),
+            () -> assertThat(context.getBean(Environment.class)
+                                    .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isNull()
         );
     }
 
@@ -180,6 +211,7 @@ class EVCacheAutoConfigurationTest {
         context.register(configuration);
         context.register(EVCacheAutoConfiguration.class);
         context.register(CacheAutoConfiguration.class);
+        context.register(ArchaiusAutoConfiguration.class);
         context.refresh();
     }
 

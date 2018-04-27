@@ -16,29 +16,33 @@
 
 package com.github.aafwu00.evcache.spring.cloud;
 
+import java.util.Properties;
+
+import javax.inject.Provider;
+
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.actuator.HasFeatures;
 import org.springframework.cloud.netflix.archaius.ArchaiusAutoConfiguration;
 import org.springframework.cloud.netflix.eureka.EurekaClientAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.PropertiesPropertySource;
 
 import com.github.aafwu00.evcache.spring.boot.ConditionalOnEVCache;
 import com.github.aafwu00.evcache.spring.boot.EVCacheAutoConfiguration;
 import com.netflix.appinfo.ApplicationInfoManager;
+import com.netflix.discovery.DiscoveryClient;
 import com.netflix.discovery.EurekaClient;
 import com.netflix.evcache.EVCache;
-import com.netflix.evcache.connection.ConnectionFactoryBuilder;
-import com.netflix.evcache.connection.IConnectionBuilder;
+import com.netflix.evcache.connection.ConnectionFactoryProvider;
+import com.netflix.evcache.connection.IConnectionFactoryProvider;
 import com.netflix.evcache.pool.EVCacheClientPoolManager;
-import com.netflix.evcache.pool.EVCacheNodeList;
-import com.netflix.evcache.pool.SimpleNodeListProvider;
+
+import static org.springframework.aop.framework.AopProxyUtils.getSingletonTarget;
+import static org.springframework.aop.support.AopUtils.isAopProxy;
 
 /**
  * Spring configuration for configuring EVCache defaults to be Eureka based
@@ -49,12 +53,10 @@ import com.netflix.evcache.pool.SimpleNodeListProvider;
  * @see EVCacheAutoConfiguration
  */
 @Configuration
-@ConditionalOnProperty(value = "evcache.cloud.enabled", matchIfMissing = true)
 @ConditionalOnEVCache
+@ConditionalOnEVCacheCloud
 @AutoConfigureAfter({ArchaiusAutoConfiguration.class, EurekaClientAutoConfiguration.class})
 @AutoConfigureBefore(EVCacheAutoConfiguration.class)
-@EnableConfigurationProperties(EVCacheCloudProperties.class)
-@PropertySource("classpath:evcache/evcache.properties")
 public class EVCacheCloudAutoConfiguration {
     @Bean
     public HasFeatures evcacheCloudClientFeature() {
@@ -63,29 +65,33 @@ public class EVCacheCloudAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public IConnectionBuilder connectionBuilder() {
-        return new ConnectionFactoryBuilder();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean({ApplicationInfoManager.class, EurekaClient.class, EVCacheNodeList.class})
-    public EVCacheNodeList simpleNodeListProvider() {
-        return new SimpleNodeListProvider();
-    }
-
-    @Bean
-    @ConditionalOnBean({ApplicationInfoManager.class, EurekaClient.class})
-    @ConditionalOnMissingBean(EVCacheNodeList.class)
-    public EVCacheNodeList eurekaNodeListProvider(final ApplicationInfoManager applicationInfoManager,
-                                                  final EurekaClient eurekaClient,
-                                                  final EVCacheCloudProperties properties) {
-        return properties.createEVCacheNodeList(applicationInfoManager, eurekaClient);
+    public IConnectionFactoryProvider connectionFactoryProvider() {
+        return new ConnectionFactoryProvider();
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public EVCacheClientPoolManager evcacheClientPoolManager(final IConnectionBuilder connectionBuilder,
-                                                             final EVCacheNodeList evcacheNodeList) {
-        return new EVCacheClientPoolManager(connectionBuilder, evcacheNodeList);
+    public EVCacheClientPoolManager evcacheClientPoolManager(final ConfigurableEnvironment environment,
+                                                             final ApplicationInfoManager applicationInfoManager,
+                                                             final EurekaClient eurekaClient,
+                                                             final Provider<IConnectionFactoryProvider> connectionFactoryProvider) {
+        appendProperty(environment);
+        return new EVCacheClientPoolManager(applicationInfoManager, discoveryClient(eurekaClient), connectionFactoryProvider);
+    }
+
+    private void appendProperty(final ConfigurableEnvironment environment) {
+        if (environment.containsProperty("evcache.use.simple.node.list.provider")) {
+            return;
+        }
+        final Properties source = new Properties();
+        source.setProperty("evcache.use.simple.node.list.provider", "false");
+        environment.getPropertySources().addLast(new PropertiesPropertySource("evcacheSpringCloud", source));
+    }
+
+    private DiscoveryClient discoveryClient(final EurekaClient eurekaClient) {
+        if (isAopProxy(eurekaClient)) {
+            return DiscoveryClient.class.cast(getSingletonTarget(eurekaClient));
+        }
+        return DiscoveryClient.class.cast(eurekaClient);
     }
 }

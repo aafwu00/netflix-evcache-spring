@@ -18,7 +18,6 @@ package com.github.aafwu00.evcache.spring;
 
 import java.util.concurrent.Callable;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.cache.Cache;
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 import org.springframework.core.convert.ConversionService;
@@ -35,16 +34,13 @@ import static java.util.Objects.requireNonNull;
 public class EVCache extends AbstractValueAdaptingCache {
     private final com.netflix.evcache.EVCache cache;
     private final ConversionService conversionService;
-    private final boolean keyHash;
 
     public EVCache(final com.netflix.evcache.EVCache cache,
                    final ConversionService conversionService,
-                   final boolean allowNullValues,
-                   final boolean keyHash) {
+                   final boolean allowNullValues) {
         super(allowNullValues);
         this.cache = requireNonNull(cache);
         this.conversionService = requireNonNull(conversionService);
-        this.keyHash = keyHash;
     }
 
     @Override
@@ -109,9 +105,6 @@ public class EVCache extends AbstractValueAdaptingCache {
     }
 
     private String createKey(final Object key) {
-        if (keyHash) {
-            return DigestUtils.sha256Hex(convertKey(key));
-        }
         return convertKey(key);
     }
 

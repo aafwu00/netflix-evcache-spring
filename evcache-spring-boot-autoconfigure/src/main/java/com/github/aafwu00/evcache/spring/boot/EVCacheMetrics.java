@@ -16,20 +16,22 @@
 
 package com.github.aafwu00.evcache.spring.boot;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.actuate.endpoint.PublicMetrics;
 import org.springframework.boot.actuate.metrics.Metric;
 
 import com.netflix.evcache.metrics.EVCacheMetricsFactory;
-import com.netflix.spectator.api.Counter;
+import com.netflix.evcache.metrics.Stats;
 import com.netflix.spectator.api.DefaultRegistry;
 import com.netflix.spectator.api.Spectator;
-import com.netflix.spectator.api.Tag;
 
-import static com.netflix.evcache.metrics.EVCacheMetricsFactory.METRIC;
 import static java.util.stream.Collectors.toList;
+import static org.springframework.util.ClassUtils.isAssignableValue;
 
 /**
  * A {@link PublicMetrics} implementation that provides EVCache statistics.
@@ -37,42 +39,47 @@ import static java.util.stream.Collectors.toList;
  * @author Taeho Kim
  */
 public class EVCacheMetrics implements PublicMetrics {
-    private final EVCacheMetricsFactory metricsFactory;
-
     public EVCacheMetrics() {
         Spectator.globalRegistry().add(new DefaultRegistry());
-        metricsFactory = EVCacheMetricsFactory.getInstance();
     }
 
     @Override
     public Collection<Metric<?>> metrics() {
-        return metricsFactory.getAllCounters()
-                             .values()
-                             .stream()
-                             .filter(this::hasMetric)
-                             .map(this::metric)
-                             .collect(toList());
+        return EVCacheMetricsFactory.getAllMetrics()
+                                    .entrySet()
+                                    .stream()
+                                    .filter(this::isEVCacheMetrics)
+                                    .map(this::toMetric)
+                                    .flatMap(Collection::stream)
+                                    .collect(toList());
     }
 
-    private boolean hasMetric(final Counter counter) {
-        for (final Tag tag : counter.id().tags()) {
-            if (StringUtils.equals(tag.key(), METRIC)) {
-                return true;
-            }
+    private boolean isEVCacheMetrics(final Map.Entry<String, Stats> entry) {
+        return isAssignableValue(com.netflix.evcache.metrics.EVCacheMetrics.class, entry.getValue());
+    }
+
+    private List<Metric<Number>> toMetric(final Map.Entry<String, Stats> entry) {
+        final List<Metric<Number>> result = new ArrayList<>();
+        final com.netflix.evcache.metrics.EVCacheMetrics state = com.netflix.evcache.metrics.EVCacheMetrics.class.cast(entry.getValue());
+        add(result, entry.getKey(), "cache.hits", state::getCacheHits);
+        add(result, entry.getKey(), "cache.miss", state::getCacheMiss);
+        if (state.getGetCalls() != 0) {
+            add(result, entry.getKey(), "hit.rate", state::getHitRate);
         }
-        return false;
-    }
-
-    private Metric<Long> metric(final Counter counter) {
-        return new Metric<>(key(counter), counter.count());
-    }
-
-    private String key(final Counter counter) {
-        for (final Tag tag : counter.id().tags()) {
-            if (StringUtils.equals(tag.key(), METRIC)) {
-                return counter.id().name() + "." + tag.value();
-            }
+        add(result, entry.getKey(), "get.call", state::getGetCalls);
+        add(result, entry.getKey(), "get.duration", state::getGetDuration);
+        add(result, entry.getKey(), "set.call", state::getSetCalls);
+        add(result, entry.getKey(), "bulk.hits", state::getBulkHits);
+        add(result, entry.getKey(), "bulk.miss", state::getBulkMiss);
+        add(result, entry.getKey(), "bulk.call", state::getBulkCalls);
+        if (state.getBulkCalls() != 0) {
+            add(result, entry.getKey(), "bulk.hit.rate", state::getBulkHitRate);
         }
-        return counter.id().toString();
+        add(result, entry.getKey(), "bulk.duration", state::getBulkDuration);
+        return result;
+    }
+
+    private void add(final List<Metric<Number>> result, final String key, final String name, final Supplier<Number> value) {
+        result.add(new Metric<>("evcache." + key + "." + name, value.get()));
     }
 }

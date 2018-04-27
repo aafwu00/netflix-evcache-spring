@@ -48,17 +48,15 @@ class EVCachePropertiesTest {
         assertAll(
             () -> assertThat(properties.isEnabled()).isFalse(),
             () -> assertThat(properties.getName()).isEqualTo("test"),
-            () -> assertThat(properties.getPrefixes().get(0).getName()).isEqualTo("test1"),
-            () -> assertThat(properties.getPrefixes().get(0).getTimeToLive()).isEqualTo(1000),
-            () -> assertThat(properties.getPrefixes().get(0).isServerGroupRetry()).isTrue(),
-            () -> assertThat(properties.getPrefixes().get(0).isEnableExceptionThrowing()).isTrue(),
-            () -> assertThat(properties.getPrefixes().get(0).isKeyHash()).isTrue(),
-            () -> assertThat(properties.getPrefixes().get(0).isAllowNullValues()).isTrue(),
-            () -> assertThat(properties.getPrefixes().get(1).getName()).isEqualTo("test2"),
-            () -> assertThat(properties.getPrefixes().get(1).isServerGroupRetry()).isFalse(),
-            () -> assertThat(properties.getPrefixes().get(1).isEnableExceptionThrowing()).isFalse(),
-            () -> assertThat(properties.getPrefixes().get(1).isAllowNullValues()).isFalse(),
-            () -> assertThat(properties.getPrefixes().get(1).isKeyHash()).isFalse()
+            () -> assertThat(first(properties.getPrefixes()).getName()).isEqualTo("test1"),
+            () -> assertThat(first(properties.getPrefixes()).getTimeToLive()).isEqualTo(1000),
+            () -> assertThat(first(properties.getPrefixes()).isServerGroupRetry()).isTrue(),
+            () -> assertThat(first(properties.getPrefixes()).isEnableExceptionThrowing()).isTrue(),
+            () -> assertThat(first(properties.getPrefixes()).isAllowNullValues()).isTrue(),
+            () -> assertThat(second(properties.getPrefixes()).getName()).isEqualTo("test2"),
+            () -> assertThat(second(properties.getPrefixes()).isServerGroupRetry()).isFalse(),
+            () -> assertThat(second(properties.getPrefixes()).isEnableExceptionThrowing()).isFalse(),
+            () -> assertThat(second(properties.getPrefixes()).isAllowNullValues()).isFalse()
         );
     }
 
@@ -66,18 +64,24 @@ class EVCachePropertiesTest {
     void should_be_converted_to_configurations() {
         final List<EVCacheConfiguration> configurations = properties.toConfigurations();
         assertAll(
-            () -> assertThat(configurations.get(0).getName()).isEqualTo("test1"),
-            () -> assertThat(configurations.get(0).getTimeToLive()).isEqualTo(1000),
-            () -> assertThat(configurations.get(0).isServerGroupRetry()).isTrue(),
-            () -> assertThat(configurations.get(0).isEnableExceptionThrowing()).isTrue(),
-            () -> assertThat(configurations.get(0).isAllowNullValues()).isTrue(),
-            () -> assertThat(configurations.get(0).isKeyHash()).isTrue(),
-            () -> assertThat(configurations.get(1).getName()).isEqualTo("test2"),
-            () -> assertThat(configurations.get(1).isServerGroupRetry()).isFalse(),
-            () -> assertThat(configurations.get(1).isEnableExceptionThrowing()).isFalse(),
-            () -> assertThat(configurations.get(1).isAllowNullValues()).isFalse(),
-            () -> assertThat(configurations.get(1).isKeyHash()).isFalse()
+            () -> assertThat(first(configurations).getName()).isEqualTo("test1"),
+            () -> assertThat(first(configurations).getTimeToLive()).isEqualTo(1000),
+            () -> assertThat(first(configurations).isServerGroupRetry()).isTrue(),
+            () -> assertThat(first(configurations).isEnableExceptionThrowing()).isTrue(),
+            () -> assertThat(first(configurations).isAllowNullValues()).isTrue(),
+            () -> assertThat(second(configurations).getName()).isEqualTo("test2"),
+            () -> assertThat(second(configurations).isServerGroupRetry()).isFalse(),
+            () -> assertThat(second(configurations).isEnableExceptionThrowing()).isFalse(),
+            () -> assertThat(second(configurations).isAllowNullValues()).isFalse()
         );
+    }
+
+    private <T> T first(final List<T> list) {
+        return list.get(0);
+    }
+
+    private <T> T second(final List<T> list) {
+        return list.get(1);
     }
 
     @Configuration
