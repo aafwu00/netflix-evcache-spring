@@ -1,8 +1,8 @@
 buildscript {
     ext {
-        springBootVersion = '1.5.12.RELEASE'
+        springBootVersion = '1.5.13.RELEASE'
         springCloudVersion = 'Edgware.SR3'
-        evcacheVersion = '4.125.0'
+        evcacheVersion = '4.127.0'
     }
     repositories {
         maven { url 'https://plugins.gradle.org/m2/' }
@@ -10,8 +10,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.netflix.nebula:nebula-release-plugin:6.3.2'
-        classpath 'com.netflix.nebula:nebula-project-plugin:3.4.1'
+        classpath 'com.netflix.nebula:nebula-release-plugin:6.3.3'
+        classpath 'com.netflix.nebula:nebula-project-plugin:4.0.1'
         classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:3.3.0'
         classpath 'com.netflix.nebula:gradle-lint-plugin:9.3.1'
 
@@ -87,7 +87,7 @@ subprojects {
         }
 
         checkstyle {
-            toolVersion = '8.9'
+            toolVersion = '8.10'
             ignoreFailures = false
             maxErrors = 0
             maxWarnings = 0
@@ -106,7 +106,7 @@ subprojects {
         }
 
         pmd {
-            toolVersion = '6.2.0'
+            toolVersion = '6.3.0'
             ruleSetFiles = rootProject.files('config/pmd/rulesets.xml')
             sourceSets = [project.sourceSets.main as SourceSet]
             ignoreFailures = false
@@ -166,14 +166,14 @@ subprojects {
     }
 
     dependencies {
-        testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.1.1'
-        testCompile 'org.junit.jupiter:junit-jupiter-api:5.1.1'
+        testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.2.0'
+        testCompile 'org.junit.jupiter:junit-jupiter-api:5.2.0'
         testCompile 'org.apiguardian:apiguardian-api:1.0.0'
 
-        testCompile 'com.github.sbrannen:spring-test-junit5:1.0.3'
+        testCompile 'com.github.sbrannen:spring-test-junit5:1.2.0'
         testCompile 'org.springframework.boot:spring-boot-starter-test'
 
-        testCompile 'org.assertj:assertj-core:3.9.1'
+        testCompile 'org.assertj:assertj-core:3.10.0'
 
         if (project.name.contains('autoconfigure')) {
             compile 'org.springframework.boot:spring-boot-configuration-processor', optional

@@ -45,10 +45,13 @@ public class MemcachedHealthCheckHandler implements HealthCheckHandler {
 
     @Override
     public InstanceInfo.InstanceStatus getStatus(final InstanceInfo.InstanceStatus instanceStatus) {
-        final String code = healthIndicator.health().getStatus().getCode();
         return Arrays.stream(InstanceInfo.InstanceStatus.values())
-                     .filter(status -> equalsIgnoreCase(status.name(), code))
+                     .filter(this::sameStatusName)
                      .findFirst()
                      .orElse(UNKNOWN);
+    }
+
+    private boolean sameStatusName(final InstanceInfo.InstanceStatus status) {
+        return equalsIgnoreCase(status.name(), healthIndicator.health().getStatus().getCode());
     }
 }
