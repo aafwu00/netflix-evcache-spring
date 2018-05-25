@@ -1,3 +1,4 @@
 # AutoConfiguration
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.github.aafwu00.evcache.server.spring.cloud.EVCacheServerAutoConfiguration
+com.github.aafwu00.evcache.server.spring.cloud.EVCacheServerAutoConfiguration,\
+com.github.aafwu00.evcache.server.spring.cloud.EVCacheServerHealthAutoConfiguration

@@ -1,6 +1,8 @@
 eureka:
   instance:
     prefer-ip-address: true
+    data-center-info:
+
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
@@ -13,8 +15,5 @@ logging:
   level:
     root: off
 
-evcar:
-  enabled: false
-  group: test
-  hostname: localhost
-  port: 11211
+evcache:
+  asg-name: test

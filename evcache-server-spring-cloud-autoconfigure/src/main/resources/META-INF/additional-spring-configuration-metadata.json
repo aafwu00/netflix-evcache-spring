@@ -1,0 +1,99 @@
+{
+  "properties": [
+    {
+      "sourceType": "com.github.aafwu00.evcache.server.spring.cloud.EVCacheServerAutoConfiguration",
+      "defaultValue": "DEFAULT",
+      "name": "evcache.asg-name",
+      "description": "Use AWS autoscaling group name(EVCache Group Name), when Eureka ASGname if blank",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.github.aafwu00.evcache.server.spring.cloud.EVCacheServerAutoConfiguration",
+      "defaultValue": "defaultZone",
+      "name": "evcache.availability-zone",
+      "description": "Avaiable Zone, when DataCenter is not Amazon",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.github.aafwu00.evcache.server.spring.cloud.EVCacheServerAutoConfiguration",
+      "name": "evcache.public-hostname",
+      "description": "Public Hostname, when DataCenter is not Amazon",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.github.aafwu00.evcache.server.spring.cloud.EVCacheServerAutoConfiguration",
+      "name": "evcache.public-ipv4",
+      "description": "Public IP Address, when DataCenter is not Amazon",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.github.aafwu00.evcache.server.spring.cloud.EVCacheServerAutoConfiguration",
+      "defaultValue": 11211,
+      "name": "evcache.port",
+      "description": "see on https://github.com/Netflix/EVCache/wiki/Configuring-EVCache-Client",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.github.aafwu00.evcache.server.spring.cloud.EVCacheServerAutoConfiguration",
+      "defaultValue": 11443,
+      "name": "evcache.secure.port",
+      "description": "see on https://github.com/Netflix/EVCache/wiki/Configuring-EVCache-Client",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.github.aafwu00.evcache.server.spring.cloud.EVCacheServerAutoConfiguration",
+      "defaultValue": 11211,
+      "name": "rend.port",
+      "description": "see on https://github.com/Netflix/EVCache/wiki/Configuring-EVCache-Client",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.github.aafwu00.evcache.server.spring.cloud.EVCacheServerAutoConfiguration",
+      "name": "rend.batch.port",
+      "description": "see on https://github.com/Netflix/EVCache/wiki/Configuring-EVCache-Client",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.github.aafwu00.evcache.server.spring.cloud.EVCacheServerAutoConfiguration",
+      "defaultValue": 22211,
+      "name": "udsproxy.memcached.port",
+      "description": "see on https://github.com/Netflix/EVCache/wiki/Configuring-EVCache-Client",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.github.aafwu00.evcache.server.spring.cloud.EVCacheServerAutoConfiguration",
+      "defaultValue": 22212,
+      "name": "udsproxy.memento.port",
+      "description": "see on https://github.com/Netflix/EVCache/wiki/Configuring-EVCache-Client",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "com.github.aafwu00.evcache.server.spring.cloud.EVCacheServerHealthAutoConfiguration",
+      "defaultValue": true,
+      "name": "evcache.server.health.enabled",
+      "description": "Enable EVCache Server Health",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "com.github.aafwu00.evcache.server.spring.cloud.EVCacheServerHealthAutoConfiguration",
+      "defaultValue": true,
+      "name": "evcache.server.health.eureka.enabled",
+      "description": "Enable EVCache Server Eureka Health",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "com.github.aafwu00.evcache.server.spring.cloud.EVCacheServerHealthAutoConfiguration",
+      "defaultValue": true,
+      "name": "evcache.server.health.memcached.enabled",
+      "description": "Enable EVCache Server Memcached Health",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "com.github.aafwu00.evcache.server.spring.cloud.EVCacheServerHealthAutoConfiguration",
+      "defaultValue": true,
+      "name": "evcache.server.metrics.enabled",
+      "description": "Enable EVCache Server Metrics",
+      "type": "java.lang.Boolean"
+    }
+  ]
+}

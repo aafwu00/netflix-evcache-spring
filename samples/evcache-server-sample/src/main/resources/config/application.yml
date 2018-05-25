@@ -16,9 +16,8 @@ management:
 server:
   port: 11111
 
-evcar:
+evcache:
   port: 11211
-  group: shard1
 
 logging:
   level:

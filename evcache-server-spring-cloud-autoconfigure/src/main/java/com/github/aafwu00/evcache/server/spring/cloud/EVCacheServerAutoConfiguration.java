@@ -20,68 +20,112 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.cloud.client.actuator.HasFeatures;
+import org.springframework.cloud.commons.util.InetUtils;
 import org.springframework.cloud.netflix.eureka.EurekaClientAutoConfiguration;
 import org.springframework.cloud.netflix.eureka.EurekaInstanceConfigBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
 
+import com.netflix.appinfo.AmazonInfo;
+import com.netflix.appinfo.AmazonInfo.MetaDataKey;
+import com.netflix.appinfo.DataCenterInfo;
+
 import static java.util.Objects.requireNonNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.springframework.cloud.netflix.eureka.EurekaClientConfigBean.DEFAULT_ZONE;
 
 /**
  * EVCache Server Configuration that setting up {@link com.netflix.appinfo.EurekaInstanceConfig}.
  * <p>
  * look on {@code org.springframework.cloud.netflix.sidecar.SidecarConfiguration}
- * look on {@code com.github.aafwu00.spring.cloud.evcache.client.MyOwnEurekaNodeListProvider}
  *
  * @author Taeho Kim
  * @see EurekaClientAutoConfiguration
- * @see com.netflix.evcache.pool.eureka.EurekaNodeListProvider
+ * @see com.netflix.evcache.pool.DiscoveryNodeListProvider
  */
 @Configuration
-@ConditionalOnProperty(value = "evcar.enabled", matchIfMissing = true)
+@ConditionalOnBean(EVCacheServerMarkerConfiguration.Marker.class)
 @AutoConfigureAfter(EurekaClientAutoConfiguration.class)
-@EnableConfigurationProperties(EVCacheServerProperties.class)
 public class EVCacheServerAutoConfiguration {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EVCacheServerAutoConfiguration.class);
     private final ConfigurableEnvironment environment;
+    private final InetUtils inetUtils;
     private final EurekaInstanceConfigBean eurekaInstanceConfigBean;
-    private final EVCacheServerProperties properties;
 
     public EVCacheServerAutoConfiguration(final ConfigurableEnvironment environment,
-                                          final EurekaInstanceConfigBean eurekaInstanceConfigBean,
-                                          final EVCacheServerProperties properties) {
+                                          final InetUtils inetUtils,
+                                          final EurekaInstanceConfigBean eurekaInstanceConfigBean) {
         this.environment = requireNonNull(environment);
+        this.inetUtils = requireNonNull(inetUtils);
         this.eurekaInstanceConfigBean = requireNonNull(eurekaInstanceConfigBean);
-        this.properties = requireNonNull(properties);
     }
 
     @Bean
-    public HasFeatures evcarFeature() {
+    public HasFeatures evcacheServerFeature() {
         return HasFeatures.namedFeature("EVCache Server", EVCacheServerAutoConfiguration.class);
     }
 
     @PostConstruct
-    public void init() {
-        final Map<String, String> metadataMap = eurekaInstanceConfigBean.getMetadataMap();
-        putIfAbsent(metadataMap, "evcache.port", Integer.toString(properties.getPort()));
-        putIfAbsent(metadataMap, "evcache.group", properties.getGroup());
-        putIfAbsentWhenContainProperty(metadataMap, "rend.port");
-        putIfAbsentWhenContainProperty(metadataMap, "rend.batch.port");
-        putIfAbsentWhenContainProperty(metadataMap, "udsproxy.memcached.port");
-        putIfAbsentWhenContainProperty(metadataMap, "udsproxy.memento.port");
+    public void initialize() {
+        handleEureka();
     }
 
-    private void putIfAbsent(final Map<String, String> metadataMap, final String key, final String defaultValue) {
-        metadataMap.putIfAbsent(key, environment.getProperty(key, defaultValue));
+    private void handleEureka() {
+        handleEurekaASGName();
+        handleEurekaDataCenter();
+        handleEurekaMetadata();
     }
 
-    private void putIfAbsentWhenContainProperty(final Map<String, String> metadataMap, final String key) {
+    private void handleEurekaASGName() {
+        if (isBlank(eurekaInstanceConfigBean.getASGName())) {
+            eurekaInstanceConfigBean.setASGName(environment.getProperty("evcache.asg-name", "DEFAULT"));
+            LOGGER.warn("eureka ASG Name is Missing, set `{}`", eurekaInstanceConfigBean.getASGName());
+        }
+    }
+
+    private void handleEurekaDataCenter() {
+        final DataCenterInfo dataCenter = eurekaInstanceConfigBean.getDataCenterInfo();
+        if (DataCenterInfo.Name.Amazon == dataCenter.getName() && (dataCenter instanceof AmazonInfo)) {
+            return;
+        }
+        final AmazonInfo amazonInfo = createAmazonInfo();
+        eurekaInstanceConfigBean.setDataCenterInfo(amazonInfo);
+        LOGGER.warn("DataCenter is Not Amazon, To changed, `{}`", amazonInfo);
+    }
+
+    private AmazonInfo createAmazonInfo() {
+        final InetUtils.HostInfo hostInfo = inetUtils.findFirstNonLoopbackHostInfo();
+        final AmazonInfo.Builder builder = AmazonInfo.Builder.newBuilder();
+        addMetadata(builder, MetaDataKey.availabilityZone, DEFAULT_ZONE);
+        addMetadata(builder, MetaDataKey.publicHostname, hostInfo.getHostname());
+        addMetadata(builder, MetaDataKey.publicIpv4, hostInfo.getIpAddress());
+        return builder.build();
+    }
+
+    private void addMetadata(final AmazonInfo.Builder builder, final MetaDataKey key, final String defaultValue) {
+        builder.addMetadata(key, environment.getProperty("evcache." + key.getName(), defaultValue));
+    }
+
+    private void handleEurekaMetadata() {
+        final Map<String, String> metadata = eurekaInstanceConfigBean.getMetadataMap();
+        putIfAbsentWhenContainProperty(metadata, "evcache.port");
+        putIfAbsentWhenContainProperty(metadata, "evcache.secure.port");
+        putIfAbsentWhenContainProperty(metadata, "rend.port");
+        putIfAbsentWhenContainProperty(metadata, "rend.batch.port");
+        putIfAbsentWhenContainProperty(metadata, "udsproxy.memcached.port");
+        putIfAbsentWhenContainProperty(metadata, "udsproxy.memento.port");
+    }
+
+    private void putIfAbsentWhenContainProperty(final Map<String, String> metadata, final String key) {
         if (environment.containsProperty(key)) {
-            metadataMap.putIfAbsent(key, environment.getProperty(key));
+            final String value = metadata.putIfAbsent(key, environment.getProperty(key));
+            LOGGER.info("eureka metadata set key:`{}`, value:`{}`", key, value);
         }
     }
 }

@@ -16,24 +16,23 @@
 
 package com.github.aafwu00.evcache.server.spring.cloud;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
- * Annotation to activate EVCache Server related configuration
+ * Responsible for adding in a marker bean to activate
  * {@link EVCacheServerAutoConfiguration}
  * {@link EVCacheServerHealthAutoConfiguration}
  *
  * @author Taeho Kim
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Import(EVCacheServerMarkerConfiguration.class)
-public @interface EnableEVCacheServer {
+@Configuration
+public class EVCacheServerMarkerConfiguration {
+    @Bean
+    public Marker evcacheServerMarkerBean() {
+        return new Marker();
+    }
+
+    class Marker {
+    }
 }

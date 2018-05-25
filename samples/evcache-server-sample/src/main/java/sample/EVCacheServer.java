@@ -28,8 +28,8 @@ import com.github.aafwu00.evcache.server.spring.cloud.EnableEVCacheServer;
  */
 @SpringBootApplication
 @EnableEVCacheServer
-public class EVCar {
+public class EVCacheServer {
     public static void main(final String[] args) {
-        new SpringApplicationBuilder(EVCar.class).run(args);
+        new SpringApplicationBuilder(EVCacheServer.class).run(args);
     }
 }

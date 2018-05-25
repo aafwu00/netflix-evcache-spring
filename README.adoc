@@ -238,14 +238,14 @@ dependencies {
 [source,java]
 ----
 @SpringBootApplication
-@EnableEVCar # <1>
+@EnableEVCacheServer # <1>
 public class Application {
     public static void main(final String[] args) {
         new SpringApplicationBuilder(Application.class).run(args);
     }
 }
 ----
-<1> Using `@EnableEVCar` annotation, that's all
+<1> Using `@EnableEVCacheServer` annotation, that's all
 
 5. Write `application.yml` code, See on link:samples/evcar-sample/src/main/resources/config/application.yml[Sample]
 
@@ -260,9 +260,8 @@ eureka:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/ # <2>
 
-evcar:
+evcache:
   port: 11211 # <3>
-  group: shard1 # <4>
 ----
 <1> EVCache App Name
 <2> see on http://cloud.spring.io/spring-cloud-static/spring-cloud-netflix/1.4.0.RELEASE/multi/multi__service_discovery_eureka_clients.html#_registering_with_eureka
@@ -273,31 +272,37 @@ evcar:
 |===
 | Name | Default | Description
 
-| evcar.enabled
-| true
-|
-
-| evcar.hostname
+| evcache.public-hostname
 |
 | Hostname of Memcached Or Rend, If blank using localhost
 
-| evcar.port
+| evcache.public-ipv4
+|
+| Ip Address of Memcached Or Rend, If blank using localhost ip
+
+| evcache.availability-zone
+|
+| Ip Address of Memcached Or Rend, If blank using localhost ip
+
+| evcache.asg-name
+| DEFAULT
+| Use AWS autoscaling group name(EVCache Group Name), when Eureka ASG name if blank
+
+
+| evcache.port
 | 11211
 | Default Port of Memcached Or Rend
 
-| evcar.group
-| Default
-| Server Group Name, shard name
 
-| evcar.health.eureka.enabled
+| evcache.server.health.eureka.enabled
 | true
 | Eureka Health Check for Memcached
 
-| evcar.metrics.enabled
+| evcache.server.metrics.enabled
 | true
 | Spring Boot Metrics for Memcached
 
-| evcar.health.memcached.enabled
+| evcache.server.health.memcached.enabled
 | true
 | Spring Boot Health Check for Memcached
 
@@ -308,7 +313,7 @@ evcar:
 This project provides Netflix EVCache And Eureka integrations for Spring Cloud.
 see link:samples/spring-boot-sample[spring-boot-sample]
 
-1. Run evcar.
+1. Run evcache server.
 See on <<evcar-spring-cloud-starter>>
 
 2. Dependency Management
