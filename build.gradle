@@ -152,10 +152,7 @@ subprojects {
 
     configurations {
         all.collect { configuration ->
-            configuration.exclude group: 'log4j', module: 'log4j'
             configuration.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
-            configuration.exclude group: 'org.slf4j', module: 'slf4j-jcl'
-            configuration.exclude group: 'org.slf4j', module: 'slf4j-jdk14'
         }
     }
 
@@ -168,12 +165,13 @@ subprojects {
     dependencies {
         testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.2.0'
         testCompile 'org.junit.jupiter:junit-jupiter-api:5.2.0'
-        testCompile 'org.apiguardian:apiguardian-api:1.0.0'
 
         testCompile 'com.github.sbrannen:spring-test-junit5:1.2.0'
         testCompile 'org.springframework.boot:spring-boot-starter-test'
 
         testCompile 'org.assertj:assertj-core:3.10.0'
+
+        testCompile 'com.couchbase.mock:CouchbaseMock:1.5.19'
 
         if (project.name.contains('autoconfigure')) {
             compile 'org.springframework.boot:spring-boot-configuration-processor', optional

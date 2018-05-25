@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: todo
+
+evcache:
+  name: TODO
+  prefixes:
+    - name: todos
+      time-to-live: 1000
+
+TODO-NODES: shard1=localhost:11211

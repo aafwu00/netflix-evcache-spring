@@ -37,7 +37,7 @@ import com.netflix.appinfo.AmazonInfo.MetaDataKey;
 import com.netflix.appinfo.DataCenterInfo;
 
 import static java.util.Objects.requireNonNull;
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.springframework.cloud.netflix.eureka.EurekaClientConfigBean.DEFAULT_ZONE;
 
 /**
@@ -83,15 +83,15 @@ public class EVCacheServerAutoConfiguration {
     }
 
     private void handleEurekaASGName() {
-        if (isBlank(eurekaInstanceConfigBean.getASGName())) {
-            eurekaInstanceConfigBean.setASGName(environment.getProperty("evcache.asg-name", "DEFAULT"));
-            LOGGER.warn("eureka ASG Name is Missing, set `{}`", eurekaInstanceConfigBean.getASGName());
+        if (isNotBlank(eurekaInstanceConfigBean.getASGName())) {
+            return;
         }
+        eurekaInstanceConfigBean.setASGName(environment.getProperty("evcache.asg-name", "DEFAULT"));
+        LOGGER.warn("eureka ASG Name is Missing, set `{}`", eurekaInstanceConfigBean.getASGName());
     }
 
     private void handleEurekaDataCenter() {
-        final DataCenterInfo dataCenter = eurekaInstanceConfigBean.getDataCenterInfo();
-        if (DataCenterInfo.Name.Amazon == dataCenter.getName() && (dataCenter instanceof AmazonInfo)) {
+        if (isAmazonDataCenter()) {
             return;
         }
         final AmazonInfo amazonInfo = createAmazonInfo();
@@ -99,10 +99,17 @@ public class EVCacheServerAutoConfiguration {
         LOGGER.warn("DataCenter is Not Amazon, To changed, `{}`", amazonInfo);
     }
 
+    private boolean isAmazonDataCenter() {
+        final DataCenterInfo dataCenter = eurekaInstanceConfigBean.getDataCenterInfo();
+        return DataCenterInfo.Name.Amazon == dataCenter.getName() && (dataCenter instanceof AmazonInfo);
+    }
+
     private AmazonInfo createAmazonInfo() {
         final InetUtils.HostInfo hostInfo = inetUtils.findFirstNonLoopbackHostInfo();
         final AmazonInfo.Builder builder = AmazonInfo.Builder.newBuilder();
         addMetadata(builder, MetaDataKey.availabilityZone, DEFAULT_ZONE);
+        addMetadata(builder, MetaDataKey.amiId, "n/a");
+        addMetadata(builder, MetaDataKey.instanceId, eurekaInstanceConfigBean.getInstanceId());
         addMetadata(builder, MetaDataKey.publicHostname, hostInfo.getHostname());
         addMetadata(builder, MetaDataKey.publicIpv4, hostInfo.getIpAddress());
         return builder.build();
@@ -123,9 +130,10 @@ public class EVCacheServerAutoConfiguration {
     }
 
     private void putIfAbsentWhenContainProperty(final Map<String, String> metadata, final String key) {
-        if (environment.containsProperty(key)) {
-            final String value = metadata.putIfAbsent(key, environment.getProperty(key));
-            LOGGER.info("eureka metadata set key:`{}`, value:`{}`", key, value);
+        if (!environment.containsProperty(key)) {
+            return;
         }
+        final String value = metadata.putIfAbsent(key, environment.getProperty(key));
+        LOGGER.info("eureka metadata set key:`{}`, value:`{}`", key, value);
     }
 }

@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: todo
+
+evcache:
+  name: TODO
+  prefixes:
+    - name: todos
+      time-to-live: 1000
+
+eureka:
+  client:
+    enabled: false
