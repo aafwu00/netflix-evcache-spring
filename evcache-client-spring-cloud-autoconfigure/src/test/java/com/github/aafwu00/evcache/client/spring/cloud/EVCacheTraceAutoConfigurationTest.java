@@ -57,20 +57,20 @@ class EVCacheTraceAutoConfigurationTest {
 
     @Test
     void should_be_loaded_EVCacheManagerTraceCustomizer() {
-        loadContext(EnableCachingConfiguration.class, "evcache.name=test", "evcache.prefixes[0].name=test1");
+        loadContext(EnableCachingConfiguration.class, "evcache.clusters[0].appName=test", "evcache.clusters[0].cachePrefix=test1");
         assertThat(context.getBean(EVCacheManagerTraceCustomizer.class)).isNotNull();
     }
 
     @Test
     void should_be_customized_EVCacheManager() {
-        loadContext(MockConfiguration.class, "evcache.name=test", "evcache.prefixes[0].name=test1");
+        loadContext(MockConfiguration.class, "evcache.clusters[0].appName=test", "evcache.clusters[0].cachePrefix=test1");
         verify(context.getBean(EVCacheManagerTraceCustomizer.class)).customize(any());
     }
 
     @Test
     void should_be_not_loaded_EVCacheManagerTraceCustomizer_when_not_disabled() {
         loadContext(EnableCachingConfiguration.class,
-                    "evcache.name=test", "evcache.prefixes[0].name=test1", "evcache.trace.enabled=false");
+                    "evcache.clusters[0].appName=test", "evcache.clusters[0].cachePrefix=test1", "evcache.trace.enabled=false");
         assertThatThrownBy(() -> context.getBean(EVCacheManagerTraceCustomizer.class))
             .isExactlyInstanceOf(NoSuchBeanDefinitionException.class);
     }

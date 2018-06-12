@@ -67,7 +67,7 @@ class EVCacheAutoConfigurationTest {
 
     @Test
     void should_be_loaded_EVCacheManager() {
-        loadContext(EnableCachingConfiguration.class, "evcache.name=test", "evcache.prefixes[0].name=test1");
+        loadContext(EnableCachingConfiguration.class, "evcache.clusters[0].appName=test", "evcache.clusters[0].cachePrefix=test1");
         assertAll(
             () -> assertThat(context.getBean(EVCacheManager.class)).isNotNull(),
             () -> assertThat(context.getBean(EVCacheMetrics.class)).isNotNull(),
@@ -92,7 +92,7 @@ class EVCacheAutoConfigurationTest {
 
     @Test
     void should_be_not_loaded_EVCacheManager_when_cacheManager_already_exists() {
-        loadContext(ExistsCacheManagerConfiguration.class, "evcache.name=test", "evcache.prefixes[0].name=test1");
+        loadContext(ExistsCacheManagerConfiguration.class, "evcache.clusters[0].appName=test", "evcache.clusters[0].cachePrefix=test1");
         assertAll(
             () -> assertThatThrownBy(() -> context.getBean(EVCacheManager.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class),
             () -> assertThatThrownBy(() -> context.getBean(EVCacheMetrics.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class),
@@ -123,11 +123,6 @@ class EVCacheAutoConfigurationTest {
         );
     }
 
-    @Test
-    void should_be_thrown_exception_when_evcache_name_is_blank() {
-        assertThatThrownExceptionWhenContextLoadWithInvalidEnvironment("evcache.name=");
-    }
-
     private void assertThatThrownExceptionWhenContextLoadWithInvalidEnvironment(final String... paris) {
         assertThatThrownBy(() -> loadContext(EnableCachingConfiguration.class,
                                              paris)).isExactlyInstanceOf(UnsatisfiedDependencyException.class)
@@ -135,34 +130,34 @@ class EVCacheAutoConfigurationTest {
     }
 
     @Test
-    void should_be_thrown_exception_when_evcache_prefixes_is_empty() {
-        assertThatThrownExceptionWhenContextLoadWithInvalidEnvironment("evcache.name=test");
+    void should_be_thrown_exception_when_evcache_cachePrefix_is_empty() {
+        assertThatThrownExceptionWhenContextLoadWithInvalidEnvironment("evcache.clusters[0].appName=test");
     }
 
     @Test
-    void should_be_thrown_exception_when_evcache_prefixes_name_is_blank() {
-        assertThatThrownExceptionWhenContextLoadWithInvalidEnvironment("evcache.name=test",
-                                                                       "evcache.prefixes[0].name=");
+    void should_be_thrown_exception_when_evcache_cachePrefix_is_blank() {
+        assertThatThrownExceptionWhenContextLoadWithInvalidEnvironment("evcache.clusters[0].appName=test",
+                                                                       "evcache.clusters[0].cachePrefix=");
     }
 
     @Test
-    void should_be_thrown_exception_when_evcache_prefixes_name_contains_colon() {
-        assertThatThrownExceptionWhenContextLoadWithInvalidEnvironment("evcache.name=test",
-                                                                       "evcache.prefixes[0].name=test:123");
+    void should_be_thrown_exception_when_evcache_cachePrefix_contains_colon() {
+        assertThatThrownExceptionWhenContextLoadWithInvalidEnvironment("evcache.clusters[0].appName=test",
+                                                                       "evcache.clusters[0].cachePrefix=test:123");
     }
 
     @Test
-    void should_be_thrown_exception_when_evcache_prefixes_ttl_is_less_then_zero() {
-        assertThatThrownExceptionWhenContextLoadWithInvalidEnvironment("evcache.name=test",
-                                                                       "evcache.prefixes[0].name=test1",
-                                                                       "evcache.prefixes[0].timeToLive=-1");
+    void should_be_thrown_exception_when_evcache_cluster_ttl_is_less_then_zero() {
+        assertThatThrownExceptionWhenContextLoadWithInvalidEnvironment("evcache.clusters[0].appName=test",
+                                                                       "evcache.clusters[0].cachePrefix=test1",
+                                                                       "evcache.clusters[0].timeToLive=-1");
     }
 
     @Test
     void should_be_not_loaded_EVCacheMetrics_when_disable_evcache_metrics() {
         loadContext(EnableCachingConfiguration.class,
-                    "evcache.name=test",
-                    "evcache.prefixes[0].name=test1",
+                    "evcache.clusters[0].appName=test",
+                    "evcache.clusters[0].cachePrefix=test1",
                     "evcache.metrics.enabled=false");
         assertThatThrownBy(() -> context.getBean(EVCacheMetrics.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class);
     }
@@ -170,25 +165,35 @@ class EVCacheAutoConfigurationTest {
     @Test
     void should_be_loaded_EVCacheProperties() {
         loadContext(EnableCachingConfiguration.class,
-                    "evcache.name=test",
-                    "evcache.prefixes[0].name=test1",
-                    "evcache.prefixes[0].time-to-live=1000",
-                    "evcache.prefixes[0].server-group-retry=true",
-                    "evcache.prefixes[0].enable-exception-throwing=true",
-                    "evcache.prefixes[0].allow-null-values=false",
-                    "evcache.prefixes[1].name=test2",
-                    "evcache.prefixes[1].server-group-retry=false");
+                    "evcache.clusters[0].appName=test",
+                    "evcache.clusters[0].cachePrefix=test1",
+                    "evcache.clusters[0].time-to-live=1000",
+                    "evcache.clusters[0].server-group-retry=true",
+                    "evcache.clusters[0].enable-exception-throwing=true",
+                    "evcache.clusters[0].allow-null-values=false",
+                    "evcache.clusters[1].appName=test",
+                    "evcache.clusters[1].cachePrefix=test2",
+                    "evcache.clusters[1].server-group-retry=false");
         final EVCacheProperties properties = context.getBean(EVCacheProperties.class);
         assertAll(
-            () -> assertThat(properties.getName()).isEqualTo("test"),
-            () -> assertThat(properties.getPrefixes().get(0).getName()).isEqualTo("test1"),
-            () -> assertThat(properties.getPrefixes().get(0).getTimeToLive()).isEqualTo(1000),
-            () -> assertThat(properties.getPrefixes().get(0).isServerGroupRetry()).isTrue(),
-            () -> assertThat(properties.getPrefixes().get(0).isAllowNullValues()).isFalse(),
-            () -> assertThat(properties.getPrefixes().get(1).getName()).isEqualTo("test2"),
-            () -> assertThat(properties.getPrefixes().get(1).isAllowNullValues()).isTrue(),
-            () -> assertThat(properties.getPrefixes().get(1).isServerGroupRetry()).isFalse()
+            () -> assertThat(first(properties).getAppName()).isEqualTo("test"),
+            () -> assertThat(first(properties).getCachePrefix()).isEqualTo("test1"),
+            () -> assertThat(first(properties).getTimeToLive()).isEqualTo(1000),
+            () -> assertThat(first(properties).isServerGroupRetry()).isTrue(),
+            () -> assertThat(first(properties).isAllowNullValues()).isFalse(),
+            () -> assertThat(second(properties).getAppName()).isEqualTo("test"),
+            () -> assertThat(second(properties).getCachePrefix()).isEqualTo("test2"),
+            () -> assertThat(second(properties).isAllowNullValues()).isTrue(),
+            () -> assertThat(second(properties).isServerGroupRetry()).isFalse()
         );
+    }
+
+    private EVCacheProperties.Cluster first(final EVCacheProperties properties) {
+        return properties.getClusters().get(0);
+    }
+
+    private EVCacheProperties.Cluster second(final EVCacheProperties properties) {
+        return properties.getClusters().get(1);
     }
 
     private void loadContext(final Class<?> configuration, final String... pairs) {

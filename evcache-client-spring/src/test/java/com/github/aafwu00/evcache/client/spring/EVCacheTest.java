@@ -55,8 +55,9 @@ class EVCacheTest {
 
     @Test
     void name() {
+        doReturn("Test").when(source).getAppName();
         doReturn("name").when(source).getCachePrefix();
-        assertThat(cache.getName()).isEqualTo("name");
+        assertThat(cache.getName()).isEqualTo("Test.name");
     }
 
     @Test
@@ -99,7 +100,9 @@ class EVCacheTest {
             () -> {
                 doThrow(com.netflix.evcache.EVCacheException.class).when(source).get("1");
                 assertThatThrownBy(() -> cache.lookup(1)).isExactlyInstanceOf(EVCacheGetException.class);
-            }
+            },
+            () -> assertThatThrownBy(() -> cache.lookup(null)).isExactlyInstanceOf(IllegalArgumentException.class)
+                                                              .hasMessage("Key cannot be null")
         );
     }
 
@@ -113,7 +116,9 @@ class EVCacheTest {
             () -> {
                 doThrow(com.netflix.evcache.EVCacheException.class).when(source).set("1", 2);
                 assertThatThrownBy(() -> cache.put(1, 2)).isExactlyInstanceOf(EVCachePutException.class);
-            }
+            },
+            () -> assertThatThrownBy(() -> cache.put(null, null)).isExactlyInstanceOf(IllegalArgumentException.class)
+                                                                 .hasMessage("Key cannot be null")
         );
     }
 
@@ -129,7 +134,9 @@ class EVCacheTest {
                 doReturn(null).when(source).get("1");
                 assertThat(cache.putIfAbsent(1, 2).get()).isEqualTo(2);
                 verify(source).set("1", 2);
-            }
+            },
+            () -> assertThatThrownBy(() -> cache.putIfAbsent(null, null)).isExactlyInstanceOf(IllegalArgumentException.class)
+                                                                         .hasMessage("Key cannot be null")
         );
     }
 
@@ -143,7 +150,9 @@ class EVCacheTest {
             () -> {
                 doThrow(com.netflix.evcache.EVCacheException.class).when(source).delete("1");
                 assertThatThrownBy(() -> cache.evict(1)).isExactlyInstanceOf(EVCacheEvictException.class);
-            }
+            },
+            () -> assertThatThrownBy(() -> cache.evict(null)).isExactlyInstanceOf(IllegalArgumentException.class)
+                                                             .hasMessage("Key cannot be null")
         );
     }
 
@@ -173,7 +182,9 @@ class EVCacheTest {
                 doReturn(2).when(callable).call();
                 assertThat(cache.get(1, callable)).isEqualTo(2);
                 verify(source).set("1", 2);
-            }
+            },
+            () -> assertThatThrownBy(() -> cache.get(null, callable)).isExactlyInstanceOf(IllegalArgumentException.class)
+                                                                     .hasMessage("Key cannot be null")
         );
     }
 }

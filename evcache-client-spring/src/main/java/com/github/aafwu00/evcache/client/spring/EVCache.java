@@ -22,6 +22,7 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.util.Assert;
 
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
@@ -45,7 +46,7 @@ public class EVCache extends AbstractValueAdaptingCache {
 
     @Override
     public String getName() {
-        return cache.getCachePrefix();
+        return cache.getAppName() + "." + cache.getCachePrefix();
     }
 
     @Override
@@ -109,6 +110,7 @@ public class EVCache extends AbstractValueAdaptingCache {
     }
 
     private String convertKey(final Object key) {
+        Assert.notNull(key, "Key cannot be null");
         final TypeDescriptor source = TypeDescriptor.forObject(key);
         if (conversionService.canConvert(source, TypeDescriptor.valueOf(String.class))) {
             return conversionService.convert(key, String.class);

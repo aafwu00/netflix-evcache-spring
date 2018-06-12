@@ -20,9 +20,9 @@ logging:
     com.netflix: debug
 
 evcache:
-  name: evcache
-  prefixes:
-    - name: todos
+  clusters:
+    - app-name: evcache
+      cache-prefix: todos
       time-to-live: 5
       server-group-retry: true
       enable-exception-throwing: false

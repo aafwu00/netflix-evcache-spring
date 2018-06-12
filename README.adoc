@@ -81,16 +81,17 @@ public class TodoApp {
                                                "shard1=localhost:11211,localhost:11212;shard2=localhost:11213,localhost:11214") # <2>
                      .get();
         final EVCacheConfiguration configuration = new EVCacheConfiguration();
-        configuration.setName("todos");
+        configuration.setAppName("TODO");
+        configuration.setCachePrefix("todos");
         configuration.setTimeToLive(10);
         configuration.setServerGroupRetry(true);
-        return new EVCacheManager("TODO", conversionService, Collections.singletonList(configuration)); # <1>
+        return new EVCacheManager(Collections.singletonList(configuration), conversionService); # <1>
     }
 }
 
 @Repository
 public class TodoRepository {
-    @Cacheable(cacheNames = "todos", key = "'findAll'") # <3>
+    @Cacheable(cacheNames = "TODO.todos", key = "'findAll'") # <3>
     public List<Todo> findAll() {
         return ...;
     }
@@ -98,7 +99,7 @@ public class TodoRepository {
 ----
 <1> `EVCacheManager` app name is `TODO`
 <2> `EVCacheManager` app name + `-NODES` means memcache server address, see on : https://github.com/Netflix/EVCache/wiki/Sample-EVCache-Deployment#step-4-create-a-cache-deployment-descriptor
-<3> `@Cacheable` `cacheNames` is sames as `EVCacheConfiguration` name
+<3> `cacheNames` is sames as `appName + . + cachePrefix`
 
 === evcache-client-spring-boot-starter
 
@@ -134,29 +135,29 @@ public class Application {
 
 @Repository
 public class TodoRepository {
-    @Cacheable(cacheNames = "todos", key = "'findAll'") # <2>
+    @Cacheable(cacheNames = "EVCACHE.todos", key = "'findAll'") # <2>
     public List<Todo> findAll() {
         return ...;
     }
 }
 ----
 <1> see on https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/integration.html#cache
-<2> `@Cacheable` `cacheNames` is sames as `evcache.prefixes[].name`
+<2> `cacheNames` is sames as `evcache.clusters[].appName + . + evcache.clusters[].cachePrefix`
 
 3. Write `application.yml` code, See on link:samples/spring-boot-sample/src/main/resources/config/application.yml[Sample]
 
 [source,yml]
 ----
 evcache:
-  name: EVCACHE # <1>
-  prefixes:
-    - name: todos # <2>
+  clusters:
+    - appName: EVCACHE # <1>
+      cachePrefix: todos # <2>
       enable-exception-throwing: false
 
 EVCACHE-NODES: shard1=localhost:11211,localhost:11212;shard2=localhost:11213,localhost:11214
 ----
-<1> EVCache App Name
-<2> EVCache cache name, cache prefix same as `@Cacheable` `cacheNames`
+<1> EVCache Cluster App Name
+<2> EVCache Cache Prefix
 <3> `evcache.name` + `-NODES` means memcache server address, see on : https://github.com/Netflix/EVCache/wiki/Sample-EVCache-Deployment#step-4-create-a-cache-deployment-descriptor
 
 IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
@@ -170,27 +171,27 @@ IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
 | true
 |
 
-| evcache.name
+| evcache.clusters[].appName
 |
-| Name of the EVCache App cluster, Recommend Upper Case
+| Name of the EVCache App clusters, Recommend Upper Case
 
-| evcache.prefix[].name
+| evcache.clusters[].cachePrefix
 |
-| Cache name, Cache Prefix Key, Don't contain colon(:) character
+| Cache Prefix Key, Don't contain colon(:) character
 
-| evcache.prefix[].timeToLive
+| evcache.clusters[].timeToLive
 | 900
 | Default Time To Live(TTL), Seconds
 
-| evcache.prefix[].allowNullValues
+| evcache.clusters[].allowNullValues
 | true
 | Whether to allow for `null` values
 
-| evcache.prefix[].serverGroupRetry
+| evcache.clusters[].serverGroupRetry
 | true
 | Retry across Server Group for cache misses and exceptions
 
-| evcache.prefix[].enableExceptionThrowing
+| evcache.clusters[].enableExceptionThrowing
 | false
 | Exceptions are not propagated and null values are returned
 
@@ -357,15 +358,15 @@ eureka:
       defaultZone: http://localhost:8761/eureka/ # <1>
 
 evcache:
-  name: EVCACHE # <2>
-  prefixes:
-    - name: todos # <3>
+  clusters:
+    - appName: EVCACHE # <2>
+      cachePrefix: todos # <3>
       timeToLive: 5
       server-group-retry: true
 ----
 <1> see on http://cloud.spring.io/spring-cloud-static/spring-cloud-netflix/1.4.0.RELEASE/multi/multi__service_discovery_eureka_clients.html#_registering_with_eureka
 <2> EVCache App Name(`spring.application.name`)
-<3> EVCache cache name, cache prefix same as `@Cacheable` `cacheNames
+<3> EVCache Cache Prefix
 
 IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
 

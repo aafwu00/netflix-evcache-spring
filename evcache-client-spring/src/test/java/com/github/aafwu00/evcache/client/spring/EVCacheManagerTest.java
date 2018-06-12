@@ -17,7 +17,9 @@
 package com.github.aafwu00.evcache.client.spring;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,12 +39,10 @@ import static org.mockito.Mockito.verify;
  */
 class EVCacheManagerTest {
     private ConversionService converterService;
-    private String clusterName;
     private EVCachePostConstructCustomizer customizer;
 
     @BeforeEach
     void setUp() {
-        clusterName = "name";
         converterService = mock(ConversionService.class);
         customizer = spy(new EVCachePostConstructCustomizer() {
             @Override
@@ -54,12 +54,12 @@ class EVCacheManagerTest {
 
     @Test
     void loadCaches() {
-        final EVCacheConfiguration configuration1 = new EVCacheConfiguration("test1", 1000, true, true, true);
-        final EVCacheConfiguration configuration2 = new EVCacheConfiguration("test2", 90, false, false, false);
-        final List<EVCacheConfiguration> configurations = new ArrayList<>();
+        final EVCacheConfiguration configuration1 = new EVCacheConfiguration("TEST", "test1", 1000, true, true, true);
+        final EVCacheConfiguration configuration2 = new EVCacheConfiguration("TEST", "test2", 90, false, false, false);
+        final Set<EVCacheConfiguration> configurations = new HashSet<>();
         configurations.add(configuration1);
         configurations.add(configuration2);
-        final EVCacheManager manager = new EVCacheManager(clusterName, converterService, configurations);
+        final EVCacheManager manager = new EVCacheManager(configurations, converterService);
         manager.setCustomizer(customizer);
         final List<? extends Cache> caches = new ArrayList<>(manager.loadCaches());
         assertAll(
@@ -76,8 +76,8 @@ class EVCacheManagerTest {
 
     private void assertThatCache(final EVCacheImpl cache, final EVCacheConfiguration configuration) {
         assertAll(
-            () -> assertThat(cache.getAppName()).isEqualTo(clusterName.toUpperCase()),
-            () -> assertThat(cache.getCachePrefix()).isEqualTo(configuration.getName()),
+            () -> assertThat(cache.getAppName()).isEqualTo("TEST"),
+            () -> assertThat(cache.getCachePrefix()).isEqualTo(configuration.getCachePrefix()),
             () -> assertThat(cache.getDefaultTTL()).isEqualTo(configuration.getTimeToLive())
         );
     }

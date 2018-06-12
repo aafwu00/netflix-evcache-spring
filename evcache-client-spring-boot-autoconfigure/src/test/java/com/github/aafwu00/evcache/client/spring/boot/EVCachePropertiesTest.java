@@ -16,6 +16,7 @@
 
 package com.github.aafwu00.evcache.client.spring.boot;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -47,29 +48,30 @@ class EVCachePropertiesTest {
     void should_be_loaded_yml() {
         assertAll(
             () -> assertThat(properties.isEnabled()).isFalse(),
-            () -> assertThat(properties.getName()).isEqualTo("test"),
-            () -> assertThat(first(properties.getPrefixes()).getName()).isEqualTo("test1"),
-            () -> assertThat(first(properties.getPrefixes()).getTimeToLive()).isEqualTo(1000),
-            () -> assertThat(first(properties.getPrefixes()).isServerGroupRetry()).isTrue(),
-            () -> assertThat(first(properties.getPrefixes()).isEnableExceptionThrowing()).isTrue(),
-            () -> assertThat(first(properties.getPrefixes()).isAllowNullValues()).isTrue(),
-            () -> assertThat(second(properties.getPrefixes()).getName()).isEqualTo("test2"),
-            () -> assertThat(second(properties.getPrefixes()).isServerGroupRetry()).isFalse(),
-            () -> assertThat(second(properties.getPrefixes()).isEnableExceptionThrowing()).isFalse(),
-            () -> assertThat(second(properties.getPrefixes()).isAllowNullValues()).isFalse()
+            () -> assertThat(first(properties.getClusters()).getAppName()).isEqualTo("test"),
+            () -> assertThat(first(properties.getClusters()).getCachePrefix()).isEqualTo("test1"),
+            () -> assertThat(first(properties.getClusters()).getTimeToLive()).isEqualTo(1000),
+            () -> assertThat(first(properties.getClusters()).isServerGroupRetry()).isTrue(),
+            () -> assertThat(first(properties.getClusters()).isEnableExceptionThrowing()).isTrue(),
+            () -> assertThat(first(properties.getClusters()).isAllowNullValues()).isTrue(),
+            () -> assertThat(second(properties.getClusters()).getAppName()).isEqualTo("test"),
+            () -> assertThat(second(properties.getClusters()).getCachePrefix()).isEqualTo("test2"),
+            () -> assertThat(second(properties.getClusters()).isServerGroupRetry()).isFalse(),
+            () -> assertThat(second(properties.getClusters()).isEnableExceptionThrowing()).isFalse(),
+            () -> assertThat(second(properties.getClusters()).isAllowNullValues()).isFalse()
         );
     }
 
     @Test
     void should_be_converted_to_configurations() {
-        final List<EVCacheConfiguration> configurations = properties.toConfigurations();
+        final List<EVCacheConfiguration> configurations = new ArrayList<>(properties.toConfigurations());
         assertAll(
-            () -> assertThat(first(configurations).getName()).isEqualTo("test1"),
+            () -> assertThat(first(configurations).getCachePrefix()).isEqualTo("test1"),
             () -> assertThat(first(configurations).getTimeToLive()).isEqualTo(1000),
             () -> assertThat(first(configurations).isServerGroupRetry()).isTrue(),
             () -> assertThat(first(configurations).isEnableExceptionThrowing()).isTrue(),
             () -> assertThat(first(configurations).isAllowNullValues()).isTrue(),
-            () -> assertThat(second(configurations).getName()).isEqualTo("test2"),
+            () -> assertThat(second(configurations).getCachePrefix()).isEqualTo("test2"),
             () -> assertThat(second(configurations).isServerGroupRetry()).isFalse(),
             () -> assertThat(second(configurations).isEnableExceptionThrowing()).isFalse(),
             () -> assertThat(second(configurations).isAllowNullValues()).isFalse()

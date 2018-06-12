@@ -70,7 +70,7 @@ public class EVCacheAutoConfiguration {
                                      final ConversionService conversionService,
                                      final EVCacheProperties properties) {
         appendProperty(environment);
-        return customizers.customize(new EVCacheManager(properties.getName(), conversionService, properties.toConfigurations()));
+        return customizers.customize(new EVCacheManager(properties.toConfigurations(), conversionService));
     }
 
     private void appendProperty(final ConfigurableEnvironment environment) {

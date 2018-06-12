@@ -16,6 +16,9 @@
 
 package com.github.aafwu00.evcache.client.spring;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import static org.apache.commons.lang3.Validate.inclusiveBetween;
 import static org.apache.commons.lang3.Validate.matchesPattern;
 import static org.apache.commons.lang3.Validate.notEmpty;
@@ -27,9 +30,13 @@ import static org.apache.commons.lang3.Validate.notEmpty;
  */
 public class EVCacheConfiguration {
     /**
-     * Cache name, Cache Prefix Key, Don't contain colon(:) character
+     * Name of the EVCache App, Cluster Name, Recommend Upper Case
      */
-    private final String name;
+    private final String appName;
+    /**
+     * Cache Prefix Key, Don't contain colon(:) character
+     */
+    private final String cachePrefix;
     /**
      * Default Time To Live(TTL), Seconds
      */
@@ -50,28 +57,58 @@ public class EVCacheConfiguration {
     /**
      * Instantiates a new EVCache configuration.
      *
-     * @param name                    the name
+     * @param appName                 the evcache app name
+     * @param cachePrefix             the cache prefix
      * @param timeToLive              the time to live
      * @param allowNullValues         the allow null values
      * @param serverGroupRetry        the server group retry
      * @param enableExceptionThrowing the enable exception throwing
      */
-    public EVCacheConfiguration(final String name,
+    public EVCacheConfiguration(final String appName,
+                                final String cachePrefix,
                                 final int timeToLive,
                                 final boolean allowNullValues,
                                 final boolean serverGroupRetry,
                                 final boolean enableExceptionThrowing) {
-        this.name = notEmpty(name);
+        this.appName = notEmpty(appName);
+        this.cachePrefix = notEmpty(cachePrefix);
         this.timeToLive = timeToLive;
         this.allowNullValues = allowNullValues;
         this.serverGroupRetry = serverGroupRetry;
         this.enableExceptionThrowing = enableExceptionThrowing;
-        matchesPattern(name, "[^:]*$", "'name' must not contain colon(:) character");
+        matchesPattern(cachePrefix, "[^:]*$", "'cachePrefix' must not contain colon(:) character");
         inclusiveBetween(1, Integer.MAX_VALUE, timeToLive, "'timeToLive' must be positive integer");
     }
 
-    public String getName() {
-        return name;
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final EVCacheConfiguration that = (EVCacheConfiguration) obj;
+        return new EqualsBuilder()
+            .append(appName, that.appName)
+            .append(cachePrefix, that.cachePrefix)
+            .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder()
+            .append(appName)
+            .append(cachePrefix)
+            .toHashCode();
+    }
+
+    public String getAppName() {
+        return appName;
+    }
+
+    public String getCachePrefix() {
+        return cachePrefix;
     }
 
     public int getTimeToLive() {

@@ -17,19 +17,23 @@
 package com.github.aafwu00.evcache.client.spring.boot;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.validation.annotation.Validated;
 
 import com.github.aafwu00.evcache.client.spring.EVCacheConfiguration;
 
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * Configuration properties for the EVCache.
@@ -44,21 +48,17 @@ public class EVCacheProperties {
      */
     private boolean enabled = true;
     /**
-     * Name of the EVCache App cluster, Recommend Upper Case
-     */
-    @NotBlank
-    private String name;
-    /**
-     * The Prefixes.
+     * Clusters
      */
     @NotEmpty
     @Valid
-    private List<Prefix> prefixes;
+    @NestedConfigurationProperty
+    private List<Cluster> clusters;
 
-    protected List<EVCacheConfiguration> toConfigurations() {
-        return prefixes.stream()
-                       .map(Prefix::toConfiguration)
-                       .collect(toList());
+    protected Set<EVCacheConfiguration> toConfigurations() {
+        return clusters.stream()
+                       .map(Cluster::toConfiguration)
+                       .collect(toSet());
     }
 
     public boolean isEnabled() {
@@ -69,32 +69,30 @@ public class EVCacheProperties {
         this.enabled = enabled;
     }
 
-    public String getName() {
-        return name;
+    public List<Cluster> getClusters() {
+        return clusters;
     }
 
-    public void setName(final String name) {
-        this.name = name;
-    }
-
-    public List<Prefix> getPrefixes() {
-        return prefixes;
-    }
-
-    public void setPrefixes(final List<Prefix> prefixes) {
-        this.prefixes = prefixes;
+    public void setClusters(final List<Cluster> clusters) {
+        this.clusters = clusters;
     }
 
     @Validated
-    public static class Prefix {
+    @ConfigurationProperties("evcache.clusters[]")
+    public static class Cluster {
         private static final int DEFAULT_TIME_TO_LIVE = 900;
         /**
-         * Cache name , Cache Prefix Key, Don't contain colon(:) character
+         * Name of the EVCache App cluster, Recommend Upper Case
+         */
+        @NotBlank
+        private String appName;
+        /**
+         * Cache Prefix Key, Don't contain colon(:) character
          * same as {@link org.springframework.cache.annotation.Cacheable} cacheNames
          */
         @NotBlank
         @Pattern(regexp = "[^:]+$")
-        private String name;
+        private String cachePrefix;
         /**
          * Default Time To Live(TTL), Seconds
          */
@@ -114,15 +112,46 @@ public class EVCacheProperties {
         private boolean enableExceptionThrowing;
 
         protected EVCacheConfiguration toConfiguration() {
-            return new EVCacheConfiguration(name, timeToLive, allowNullValues, serverGroupRetry, enableExceptionThrowing);
+            return new EVCacheConfiguration(appName, cachePrefix, timeToLive, allowNullValues, serverGroupRetry, enableExceptionThrowing);
         }
 
-        public String getName() {
-            return name;
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null || getClass() != obj.getClass()) {
+                return false;
+            }
+            final Cluster cluster = (Cluster) obj;
+            return new EqualsBuilder()
+                .append(appName, cluster.appName)
+                .append(cachePrefix, cluster.cachePrefix)
+                .isEquals();
         }
 
-        public void setName(final String name) {
-            this.name = name;
+        @Override
+        public int hashCode() {
+            return new HashCodeBuilder()
+                .append(appName)
+                .append(cachePrefix)
+                .toHashCode();
+        }
+
+        public String getAppName() {
+            return appName;
+        }
+
+        public void setAppName(final String appName) {
+            this.appName = appName;
+        }
+
+        public String getCachePrefix() {
+            return cachePrefix;
+        }
+
+        public void setCachePrefix(final String cachePrefix) {
+            this.cachePrefix = cachePrefix;
         }
 
         public int getTimeToLive() {

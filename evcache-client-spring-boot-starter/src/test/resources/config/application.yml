@@ -3,9 +3,9 @@ spring:
     name: todo
 
 evcache:
-  name: TODO
-  prefixes:
-    - name: todos
+  clusters:
+    - app-name: TODO
+      cache-prefix: todos
       time-to-live: 1000
 
 TODO-NODES: shard1=localhost:11211

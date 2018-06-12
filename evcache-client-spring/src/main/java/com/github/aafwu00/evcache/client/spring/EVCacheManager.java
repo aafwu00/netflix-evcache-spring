@@ -17,7 +17,7 @@
 package com.github.aafwu00.evcache.client.spring;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.cache.Cache;
@@ -35,18 +35,14 @@ import static java.util.Objects.requireNonNull;
  * @author Taeho Kim
  */
 public class EVCacheManager extends AbstractCacheManager {
-    private final String clusterName;
     private final ConversionService conversionService;
-    private final List<EVCacheConfiguration> configurations;
+    private final Set<EVCacheConfiguration> configurations;
     private EVCachePostConstructCustomizer customizer = cache -> cache;
 
-    public EVCacheManager(final String clusterName,
-                          final ConversionService conversionService,
-                          final List<EVCacheConfiguration> configurations) {
+    public EVCacheManager(final Set<EVCacheConfiguration> configurations, final ConversionService conversionService) {
         super();
-        this.clusterName = requireNonNull(clusterName);
-        this.conversionService = requireNonNull(conversionService);
         this.configurations = requireNonNull(configurations);
+        this.conversionService = requireNonNull(conversionService);
     }
 
     @Override
@@ -62,8 +58,8 @@ public class EVCacheManager extends AbstractCacheManager {
     }
 
     private Builder builder(final EVCacheConfiguration configuration) {
-        final Builder builder = new Builder().setAppName(clusterName)
-                                             .setCachePrefix(configuration.getName())
+        final Builder builder = new Builder().setAppName(configuration.getAppName())
+                                             .setCachePrefix(configuration.getCachePrefix())
                                              .setDefaultTTL(configuration.getTimeToLive());
         if (configuration.isServerGroupRetry()) {
             builder.enableRetry();

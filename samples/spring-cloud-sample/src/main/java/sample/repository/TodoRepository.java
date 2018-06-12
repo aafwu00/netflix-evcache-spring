@@ -31,7 +31,7 @@ import org.springframework.stereotype.Repository;
 public class TodoRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(TodoRepository.class);
 
-    @Cacheable(cacheNames = "todos", key = "'findAll'")
+    @Cacheable(cacheNames = "TODO.todos", key = "'findAll'")
     public List<Todo> findAll() {
         LOGGER.info("CALLED");
         return Arrays.asList(new Todo("first"), new Todo("second"));

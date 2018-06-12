@@ -29,39 +29,44 @@ class EVCacheConfigurationTest {
     @Test
     void should_valid_name() {
         assertAll(
-            () -> assertThatThrownBy(() -> new EVCacheConfiguration("",
+            () -> assertThatThrownBy(() -> new EVCacheConfiguration("TEST",
+                                                                    "",
                                                                     10,
                                                                     true,
                                                                     true,
                                                                     true)).isInstanceOf(IllegalArgumentException.class),
-            () -> assertThatThrownBy(() -> new EVCacheConfiguration("test:1",
+            () -> assertThatThrownBy(() -> new EVCacheConfiguration("TEST",
+                                                                    "test:1",
                                                                     10,
                                                                     true,
                                                                     true,
                                                                     true)).isInstanceOf(IllegalArgumentException.class),
-            () -> assertThatThrownBy(() -> new EVCacheConfiguration("test1:",
+            () -> assertThatThrownBy(() -> new EVCacheConfiguration("TEST",
+                                                                    "test1:",
                                                                     10,
                                                                     true,
                                                                     true,
                                                                     true)).isInstanceOf(IllegalArgumentException.class),
-            () -> assertThat(new EVCacheConfiguration("test-1", 10, true, true, true)).isNotNull()
+            () -> assertThat(new EVCacheConfiguration("TEST", "test-1", 10, true, true, true)).isNotNull()
         );
     }
 
     @Test
     void should_valid_time_to_live() {
         assertAll(
-            () -> assertThatThrownBy(() -> new EVCacheConfiguration("test1",
+            () -> assertThatThrownBy(() -> new EVCacheConfiguration("TEST",
+                                                                    "test1",
                                                                     -1,
                                                                     true,
                                                                     true,
                                                                     true)).isInstanceOf(IllegalArgumentException.class),
-            () -> assertThatThrownBy(() -> new EVCacheConfiguration("test1",
+            () -> assertThatThrownBy(() -> new EVCacheConfiguration("TEST",
+                                                                    "test1",
                                                                     0,
                                                                     true,
                                                                     true,
                                                                     true)).isInstanceOf(IllegalArgumentException.class),
-            () -> assertThat(new EVCacheConfiguration("test1", 10, true, true, true)).isNotNull()
+            () -> assertThat(new EVCacheConfiguration("TEST", "test1", 10, true, true, true)).isNotNull()
         );
     }
 }
