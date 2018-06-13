@@ -54,7 +54,8 @@ class MemcachedMetricsTest {
         values.put("pid", "1");
         values.put("free_space", "2");
         values.put("total_items:test", "3.0");
-        values.put("test3", "not number");
+        values.put("test3", "3.0");
+        values.put("free_chunks", "not number");
         final Map<SocketAddress, Map<String, String>> stats = new HashMap<>();
         stats.put(mock(SocketAddress.class), values);
         doReturn(stats).when(client).getStats();

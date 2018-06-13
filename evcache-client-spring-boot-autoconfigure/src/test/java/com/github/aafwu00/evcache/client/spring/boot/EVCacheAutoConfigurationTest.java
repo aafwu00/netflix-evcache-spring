@@ -81,6 +81,21 @@ class EVCacheAutoConfigurationTest {
     }
 
     @Test
+    void should_be_not_override_provider_when_already_exists_property() {
+        loadContext(EnableCachingConfiguration.class,
+                    "evcache.clusters[0].appName=test",
+                    "evcache.clusters[0].cachePrefix=test1",
+                    "evcache.use.simple.node.list.provider=false");
+        assertAll(
+            () -> assertThat(context.getBean(Environment.class)
+                                    .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isFalse(),
+            () -> assertThat(EVCacheConfig.getInstance()
+                                          .getDynamicBooleanProperty("evcache.use.simple.node.list.provider", true)
+                                          .get()).isFalse()
+        );
+    }
+
+    @Test
     void should_be_not_loaded_CacheManager_when_has_no_configuration() {
         loadContext(NoCacheableConfiguration.class);
         assertAll(

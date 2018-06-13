@@ -40,6 +40,10 @@ class EVCacheMetricsTest {
         metrics = new EVCacheMetrics();
         EVCacheMetricsFactory.getAllMetrics().clear();
         stats = EVCacheMetricsFactory.getStats("test", "prefix");
+        call();
+    }
+
+    private void call() {
         stats.operationCompleted(Call.GET, 1);
         stats.operationCompleted(Call.GET_AND_TOUCH, 1);
         stats.operationCompleted(Call.SET, 1);
@@ -51,6 +55,10 @@ class EVCacheMetricsTest {
         stats.operationCompleted(Call.APPEND, 1);
         stats.operationCompleted(Call.INCR, 1);
         stats.operationCompleted(Call.DECR, 1);
+        stats.cacheHit(Call.GET);
+        stats.cacheMiss(Call.GET);
+        stats.cacheHit(Call.BULK);
+        stats.cacheMiss(Call.BULK);
     }
 
     @AfterEach

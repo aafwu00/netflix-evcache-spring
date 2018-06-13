@@ -29,44 +29,46 @@ class EVCacheConfigurationTest {
     @Test
     void should_valid_name() {
         assertAll(
-            () -> assertThatThrownBy(() -> new EVCacheConfiguration("TEST",
-                                                                    "",
-                                                                    10,
-                                                                    true,
-                                                                    true,
-                                                                    true)).isInstanceOf(IllegalArgumentException.class),
-            () -> assertThatThrownBy(() -> new EVCacheConfiguration("TEST",
-                                                                    "test:1",
-                                                                    10,
-                                                                    true,
-                                                                    true,
-                                                                    true)).isInstanceOf(IllegalArgumentException.class),
-            () -> assertThatThrownBy(() -> new EVCacheConfiguration("TEST",
-                                                                    "test1:",
-                                                                    10,
-                                                                    true,
-                                                                    true,
-                                                                    true)).isInstanceOf(IllegalArgumentException.class),
-            () -> assertThat(new EVCacheConfiguration("TEST", "test-1", 10, true, true, true)).isNotNull()
+            () -> assertThatThrownBy(() -> create("TEST", "", 10)).isInstanceOf(IllegalArgumentException.class),
+            () -> assertThatThrownBy(() -> create("TEST", "test:1", 10)).isInstanceOf(IllegalArgumentException.class),
+            () -> assertThatThrownBy(() -> create("TEST", "test1:", 10)).isInstanceOf(IllegalArgumentException.class),
+            () -> assertThat(create("TEST", "test-1", 10)).isNotNull()
         );
+    }
+
+    private EVCacheConfiguration create(String appName, String cachePrefix, int timeToLive) {
+        return new EVCacheConfiguration(appName, cachePrefix, timeToLive, true, true, true);
     }
 
     @Test
     void should_valid_time_to_live() {
         assertAll(
-            () -> assertThatThrownBy(() -> new EVCacheConfiguration("TEST",
-                                                                    "test1",
-                                                                    -1,
-                                                                    true,
-                                                                    true,
-                                                                    true)).isInstanceOf(IllegalArgumentException.class),
-            () -> assertThatThrownBy(() -> new EVCacheConfiguration("TEST",
-                                                                    "test1",
-                                                                    0,
-                                                                    true,
-                                                                    true,
-                                                                    true)).isInstanceOf(IllegalArgumentException.class),
-            () -> assertThat(new EVCacheConfiguration("TEST", "test1", 10, true, true, true)).isNotNull()
+            () -> assertThatThrownBy(() -> create("TEST", "test1", -1)).isInstanceOf(IllegalArgumentException.class),
+            () -> assertThatThrownBy(() -> create("TEST", "test1", 0)).isInstanceOf(IllegalArgumentException.class),
+            () -> assertThat(create("TEST", "test1", 10)).isNotNull()
+        );
+    }
+
+    @Test
+    void should_be_equals_when_appName_and_cachePrefix_are_equals() {
+        final EVCacheConfiguration config = create("TEST", "test1", 1);
+        assertAll(
+            () -> assertThat(config).isEqualTo(config),
+            () -> assertThat(config).isEqualTo(create("TEST", "test1", 1)),
+            () -> assertThat(config).isNotEqualTo(null),
+            () -> assertThat(config).isNotEqualTo(1),
+            () -> assertThat(config).isNotEqualTo(create("TEST1", "test1", 1)),
+            () -> assertThat(config).isNotEqualTo(create("TEST", "test", 1))
+        );
+    }
+
+    @Test
+    void should_be_same_hashCode_when_appName_and_cachePrefix_are_equals() {
+        final EVCacheConfiguration config = create("TEST", "test1", 1);
+        assertAll(
+            () -> assertThat(config).hasSameHashCodeAs(create("TEST", "test1", 1)),
+            () -> assertThat(config.hashCode()).isNotEqualTo(create("TEST1", "test1", 1).hashCode()),
+            () -> assertThat(config.hashCode()).isNotEqualTo(create("TEST", "test", 1).hashCode())
         );
     }
 }

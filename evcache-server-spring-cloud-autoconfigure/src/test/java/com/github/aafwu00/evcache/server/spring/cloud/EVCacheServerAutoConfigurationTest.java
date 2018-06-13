@@ -16,6 +16,9 @@
 
 package com.github.aafwu00.evcache.server.spring.cloud;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,10 +30,14 @@ import org.springframework.cloud.netflix.eureka.EurekaInstanceConfigBean;
 import org.springframework.cloud.netflix.eureka.config.EurekaDiscoveryClientConfigServiceAutoConfiguration;
 import org.springframework.cloud.netflix.eureka.metadata.ManagementMetadataProvider;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.netflix.appinfo.AmazonInfo;
 import com.netflix.appinfo.DataCenterInfo;
+import com.netflix.appinfo.MyDataCenterInfo;
+import com.netflix.discovery.DiscoveryClient;
+import com.netflix.discovery.EurekaClient;
 
 import net.spy.memcached.MemcachedClient;
 
@@ -40,18 +47,26 @@ import static com.netflix.appinfo.AmazonInfo.MetaDataKey.publicIpv4;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 import static org.springframework.boot.test.util.EnvironmentTestUtils.addEnvironment;
 
 /**
  * @author Taeho Kim
  */
 class EVCacheServerAutoConfigurationTest {
+    private static EurekaInstanceConfigBean eurekaInstanceConfigBean = mock(EurekaInstanceConfigBean.class);
     private AnnotationConfigApplicationContext context;
 
     @BeforeEach
     void setUp() {
         System.setProperty("net.spy.log.LoggerImpl", "net.spy.memcached.compat.log.SLF4JLogger");
         context = new AnnotationConfigApplicationContext();
+        reset(eurekaInstanceConfigBean);
     }
 
     @AfterEach
@@ -116,6 +131,28 @@ class EVCacheServerAutoConfigurationTest {
     }
 
     @Test
+    void should_be_loaded_EnableEVCacheServerConfiguration_with_asg_name() {
+        final Map<String, String> metadata = new HashMap<>();
+        final DataCenterInfo dataCenterInfo = new MyDataCenterInfo(DataCenterInfo.Name.Amazon);
+        doReturn(metadata).when(eurekaInstanceConfigBean).getMetadataMap();
+        doReturn("test").when(eurekaInstanceConfigBean).getASGName();
+        doReturn(dataCenterInfo).when(eurekaInstanceConfigBean).getDataCenterInfo();
+        loadContext(EnableEVCacheServerConfigurationWithEurekaConfig.class, "evcache.server.health.enabled=false");
+        verify(eurekaInstanceConfigBean).setDataCenterInfo(any(AmazonInfo.class));
+    }
+
+    @Test
+    void should_be_loaded_EnableEVCacheServerConfiguration_with_AmazonDataCenter() {
+        final Map<String, String> metadata = new HashMap<>();
+        final DataCenterInfo dataCenterInfo = new AmazonInfo();
+        doReturn(metadata).when(eurekaInstanceConfigBean).getMetadataMap();
+        doReturn("test").when(eurekaInstanceConfigBean).getASGName();
+        doReturn(dataCenterInfo).when(eurekaInstanceConfigBean).getDataCenterInfo();
+        loadContext(EnableEVCacheServerConfigurationWithEurekaConfig.class, "evcache.server.health.enabled=false");
+        verify(eurekaInstanceConfigBean, never()).setDataCenterInfo(any());
+    }
+
+    @Test
     void should_be_not_loaded_MemcachedClient_when_EVCacheServer_health_enabled_is_false() {
         loadContext(EnableEVCacheServerConfiguration.class, "evcache.server.health.enabled=false");
         assertThatThrownBy(() -> context.getBean(MemcachedClient.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class);
@@ -149,6 +186,7 @@ class EVCacheServerAutoConfigurationTest {
 
     private void loadContext(final Class<?> configuration, final String... pairs) {
         addEnvironment(context, pairs);
+        addEnvironment(context, "spring.cloud.service-registry.auto-registration.enabled=false");
         context.register(configuration);
         context.register(UtilAutoConfiguration.class);
         context.register(EurekaDiscoveryClientConfiguration.class);
@@ -166,5 +204,19 @@ class EVCacheServerAutoConfigurationTest {
     @Configuration
     @EnableEVCacheServer
     static class EnableEVCacheServerConfiguration {
+    }
+
+    @Configuration
+    @EnableEVCacheServer
+    static class EnableEVCacheServerConfigurationWithEurekaConfig {
+        @Bean
+        public EurekaInstanceConfigBean eurekaInstanceConfigBean() {
+            return eurekaInstanceConfigBean;
+        }
+
+        @Bean
+        public EurekaClient eurekaClient() {
+            return mock(DiscoveryClient.class);
+        }
     }
 }

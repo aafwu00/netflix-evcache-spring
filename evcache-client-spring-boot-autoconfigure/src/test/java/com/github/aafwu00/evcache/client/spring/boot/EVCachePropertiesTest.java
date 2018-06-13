@@ -30,6 +30,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.github.aafwu00.evcache.client.spring.EVCacheConfiguration;
+import com.github.aafwu00.evcache.client.spring.boot.EVCacheProperties.Cluster;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -43,6 +44,36 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 class EVCachePropertiesTest {
     @Autowired
     private EVCacheProperties properties;
+
+    @Test
+    void should_be_equals_when_appName_and_cachePrefix_are_equals() {
+        final Cluster cluster = cluster("TEST", "test1");
+        assertAll(
+            () -> assertThat(cluster).isEqualTo(cluster),
+            () -> assertThat(cluster).isEqualTo(cluster("TEST", "test1")),
+            () -> assertThat(cluster).isNotEqualTo(null),
+            () -> assertThat(cluster).isNotEqualTo(1),
+            () -> assertThat(cluster).isNotEqualTo(cluster("TEST1", "test1")),
+            () -> assertThat(cluster).isNotEqualTo(cluster("TEST", "test"))
+        );
+    }
+
+    @Test
+    void should_be_same_hashCode_when_appName_and_cachePrefix_are_equals() {
+        final Cluster cluster = cluster("TEST", "test1");
+        assertAll(
+            () -> assertThat(cluster).hasSameHashCodeAs(cluster("TEST", "test1")),
+            () -> assertThat(cluster.hashCode()).isNotEqualTo(cluster("TEST1", "test1").hashCode()),
+            () -> assertThat(cluster.hashCode()).isNotEqualTo(cluster("TEST", "test").hashCode())
+        );
+    }
+
+    private Cluster cluster(final String appName, final String cachePrefix) {
+        final Cluster result = new Cluster();
+        result.setAppName(appName);
+        result.setCachePrefix(cachePrefix);
+        return result;
+    }
 
     @Test
     void should_be_loaded_yml() {

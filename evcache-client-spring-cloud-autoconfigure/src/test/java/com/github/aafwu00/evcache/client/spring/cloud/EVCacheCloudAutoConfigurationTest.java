@@ -19,6 +19,8 @@ package com.github.aafwu00.evcache.client.spring.cloud;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.aop.framework.DefaultAopProxyFactory;
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.cache.annotation.EnableCaching;
@@ -80,7 +82,7 @@ class EVCacheCloudAutoConfigurationTest {
 
     @Test
     void should_be_loaded_EVCacheClientPoolManager_when_simpleNodeListProvider_is_false() {
-        loadContext(EnableCachingConfiguration.class,
+        loadContext(EnableCachingConfigurationWithProxyBean.class,
                     "evcache.clusters[0].appName=test",
                     "evcache.clusters[0].cachePrefix=test1",
                     "spring.application.name=test",
@@ -203,6 +205,20 @@ class EVCacheCloudAutoConfigurationTest {
         @Bean
         EurekaClient eurekaClient() {
             return mock(DiscoveryClient.class);
+        }
+    }
+
+    @Configuration
+    @EnableCaching
+    static class EnableCachingConfigurationWithProxyBean extends EnableCachingConfiguration {
+        @Bean
+        ApplicationInfoManager applicationInfoManager() {
+            return super.applicationInfoManager();
+        }
+
+        @Bean
+        EurekaClient eurekaClient() {
+            return (EurekaClient) new DefaultAopProxyFactory().createAopProxy(new ProxyFactory(mock(DiscoveryClient.class))).getProxy();
         }
     }
 
