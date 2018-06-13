@@ -378,10 +378,6 @@ IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
 | true
 |
 
-| evcache.cloud.nodeListMode
-| `DataCenterAware`
-| Support `EVCacheNodeList` mode for `Amazon`, `MyOwn`, `Simple` and `DataCenterAware`
-
 | evcache.trace.enabled
 | true
 | Whether to use sleuth trace, If you want add dependency `spring-cloud-starter-sleuth`
