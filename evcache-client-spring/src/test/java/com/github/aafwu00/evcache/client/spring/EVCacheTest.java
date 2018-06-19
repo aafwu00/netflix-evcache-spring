@@ -59,14 +59,20 @@ class EVCacheTest {
     }
 
     @Test
+    void name() {
+        assertThat(cache.getName()).isEqualTo("name");
+    }
+
+    @Test
     void appName() {
         doReturn("appName").when(source).getAppName();
         assertThat(cache.getAppName()).isEqualTo("appName");
     }
+
     @Test
     void cachePrefix() {
-        doReturn("appName").when(source).getAppName();
-        assertThat(cache.getAppName()).isEqualTo("appName");
+        doReturn("prefix").when(source).getCachePrefix();
+        assertThat(cache.getCachePrefix()).isEqualTo("prefix");
     }
 
     @Test
