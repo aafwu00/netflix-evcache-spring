@@ -23,6 +23,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.validator.constraints.NotBlank;
@@ -82,6 +83,10 @@ public class EVCacheProperties {
     public static class Cluster {
         private static final int DEFAULT_TIME_TO_LIVE = 900;
         /**
+         * Name of the Cache, @Cacheable cacheName, Same as `appName` + `.` + `cachePrefix` when name is blank
+         */
+        private String name;
+        /**
          * Name of the EVCache App cluster, Recommend Upper Case
          */
         @NotBlank
@@ -112,7 +117,13 @@ public class EVCacheProperties {
         private boolean enableExceptionThrowing;
 
         protected EVCacheConfiguration toConfiguration() {
-            return new EVCacheConfiguration(appName, cachePrefix, timeToLive, allowNullValues, serverGroupRetry, enableExceptionThrowing);
+            return new EVCacheConfiguration(determineName(),
+                                            appName,
+                                            cachePrefix,
+                                            timeToLive,
+                                            allowNullValues,
+                                            serverGroupRetry,
+                                            enableExceptionThrowing);
         }
 
         @Override
@@ -125,17 +136,30 @@ public class EVCacheProperties {
             }
             final Cluster cluster = (Cluster) obj;
             return new EqualsBuilder()
-                .append(appName, cluster.appName)
-                .append(cachePrefix, cluster.cachePrefix)
+                .append(determineName(), cluster.determineName())
                 .isEquals();
         }
 
         @Override
         public int hashCode() {
             return new HashCodeBuilder()
-                .append(appName)
-                .append(cachePrefix)
+                .append(determineName())
                 .toHashCode();
+        }
+
+        public String determineName() {
+            if (StringUtils.isBlank(name)) {
+                return appName + "." + cachePrefix;
+            }
+            return name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
         }
 
         public String getAppName() {

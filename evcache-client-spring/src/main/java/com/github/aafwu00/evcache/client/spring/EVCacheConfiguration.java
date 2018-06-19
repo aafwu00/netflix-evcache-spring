@@ -30,6 +30,10 @@ import static org.apache.commons.lang3.Validate.notEmpty;
  */
 public class EVCacheConfiguration {
     /**
+     * Name of the Cache
+     */
+    private final String name;
+    /**
      * Name of the EVCache App, Cluster Name, Recommend Upper Case
      */
     private final String appName;
@@ -57,6 +61,7 @@ public class EVCacheConfiguration {
     /**
      * Instantiates a new EVCache configuration.
      *
+     * @param name                    the cache name
      * @param appName                 the evcache app name
      * @param cachePrefix             the cache prefix
      * @param timeToLive              the time to live
@@ -64,12 +69,14 @@ public class EVCacheConfiguration {
      * @param serverGroupRetry        the server group retry
      * @param enableExceptionThrowing the enable exception throwing
      */
-    public EVCacheConfiguration(final String appName,
+    public EVCacheConfiguration(final String name,
+                                final String appName,
                                 final String cachePrefix,
                                 final int timeToLive,
                                 final boolean allowNullValues,
                                 final boolean serverGroupRetry,
                                 final boolean enableExceptionThrowing) {
+        this.name = notEmpty(name);
         this.appName = notEmpty(appName);
         this.cachePrefix = notEmpty(cachePrefix);
         this.timeToLive = timeToLive;
@@ -90,17 +97,19 @@ public class EVCacheConfiguration {
         }
         final EVCacheConfiguration that = (EVCacheConfiguration) obj;
         return new EqualsBuilder()
-            .append(appName, that.appName)
-            .append(cachePrefix, that.cachePrefix)
+            .append(name, that.name)
             .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-            .append(appName)
-            .append(cachePrefix)
+            .append(name)
             .toHashCode();
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getAppName() {

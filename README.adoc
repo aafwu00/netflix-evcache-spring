@@ -81,8 +81,9 @@ public class TodoApp {
                                                "shard1=localhost:11211,localhost:11212;shard2=localhost:11213,localhost:11214") # <2>
                      .get();
         final EVCacheConfiguration configuration = new EVCacheConfiguration();
+        configuration.setName("todos");
         configuration.setAppName("TODO");
-        configuration.setCachePrefix("todos");
+        configuration.setCachePrefix("todo");
         configuration.setTimeToLive(10);
         configuration.setServerGroupRetry(true);
         return new EVCacheManager(Collections.singletonList(configuration), conversionService); # <1>
@@ -91,7 +92,7 @@ public class TodoApp {
 
 @Repository
 public class TodoRepository {
-    @Cacheable(cacheNames = "TODO.todos", key = "'findAll'") # <3>
+    @Cacheable(cacheNames = "todos", key = "'findAll'") # <3>
     public List<Todo> findAll() {
         return ...;
     }
@@ -99,7 +100,7 @@ public class TodoRepository {
 ----
 <1> `EVCacheManager` app name is `TODO`
 <2> `EVCacheManager` app name + `-NODES` means memcache server address, see on : https://github.com/Netflix/EVCache/wiki/Sample-EVCache-Deployment#step-4-create-a-cache-deployment-descriptor
-<3> `cacheNames` is sames as `appName + . + cachePrefix`
+<3> `cacheNames` is sames as configuration `name`
 
 === evcache-client-spring-boot-starter
 
@@ -142,7 +143,7 @@ public class TodoRepository {
 }
 ----
 <1> see on https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/integration.html#cache
-<2> `cacheNames` is sames as `evcache.clusters[].appName + . + evcache.clusters[].cachePrefix`
+<2> `cacheNames` is sames as `evcache.clusters[].appName + . + evcache.clusters[].cachePrefix`, when `evcache.clusters[].name` is blank
 
 3. Write `application.yml` code, See on link:samples/spring-boot-sample/src/main/resources/config/application.yml[Sample]
 
@@ -170,6 +171,10 @@ IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
 | evcache.enabled
 | true
 |
+
+| evcache.clusters[].name
+|
+| Name of the Cache, @Cacheable cacheName, Same as `appName` + `.` + `cachePrefix` when name is blank
 
 | evcache.clusters[].appName
 |
@@ -344,6 +349,14 @@ public class Application {
         new SpringApplicationBuilder(Application.class).run(args);
     }
 }
+
+@Repository
+public class TodoRepository {
+    @Cacheable(cacheNames = "todos", key = "'findAll'") # <3>
+    public List<Todo> findAll() {
+        return ...;
+    }
+}
 ----
 <1> See on http://cloud.spring.io/spring-cloud-static/spring-cloud-netflix/1.4.0.RELEASE/multi/multi__service_discovery_eureka_clients.html#_registering_with_eureka
 <2> See on https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/integration.html#cache
@@ -359,14 +372,16 @@ eureka:
 
 evcache:
   clusters:
-    - appName: EVCACHE # <2>
-      cachePrefix: todos # <3>
+    - name: todos # <2>
+      appName: EVCACHE # <3>
+      cachePrefix: todo # <4>
       timeToLive: 5
       server-group-retry: true
 ----
 <1> see on http://cloud.spring.io/spring-cloud-static/spring-cloud-netflix/1.4.0.RELEASE/multi/multi__service_discovery_eureka_clients.html#_registering_with_eureka
-<2> EVCache App Name(`spring.application.name`)
-<3> EVCache Cache Prefix
+<2> Cache Name(same as `@Cacheable` `cacheNames`)
+<3> EVCache App Name(`spring.application.name`)
+<4> EVCache Cache Prefix
 
 IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
 

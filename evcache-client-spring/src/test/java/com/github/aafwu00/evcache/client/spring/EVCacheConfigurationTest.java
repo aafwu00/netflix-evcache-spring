@@ -29,46 +29,48 @@ class EVCacheConfigurationTest {
     @Test
     void should_valid_name() {
         assertAll(
-            () -> assertThatThrownBy(() -> create("TEST", "", 10)).isInstanceOf(IllegalArgumentException.class),
-            () -> assertThatThrownBy(() -> create("TEST", "test:1", 10)).isInstanceOf(IllegalArgumentException.class),
-            () -> assertThatThrownBy(() -> create("TEST", "test1:", 10)).isInstanceOf(IllegalArgumentException.class),
-            () -> assertThat(create("TEST", "test-1", 10)).isNotNull()
+            () -> assertThatThrownBy(() -> create("TEST", "TEST", "", 10)).isInstanceOf(IllegalArgumentException.class),
+            () -> assertThatThrownBy(() -> create("TEST", "TEST", "test:1", 10)).isInstanceOf(IllegalArgumentException.class),
+            () -> assertThatThrownBy(() -> create("TEST", "TEST", "test1:", 10)).isInstanceOf(IllegalArgumentException.class),
+            () -> assertThat(create("TEST", "TEST", "test-1", 10)).isNotNull()
         );
     }
 
-    private EVCacheConfiguration create(String appName, String cachePrefix, int timeToLive) {
-        return new EVCacheConfiguration(appName, cachePrefix, timeToLive, true, true, true);
+    private EVCacheConfiguration create(final String name, final String appName, final String cachePrefix, final int timeToLive) {
+        return new EVCacheConfiguration(name, appName, cachePrefix, timeToLive, true, true, true);
     }
 
     @Test
     void should_valid_time_to_live() {
         assertAll(
-            () -> assertThatThrownBy(() -> create("TEST", "test1", -1)).isInstanceOf(IllegalArgumentException.class),
-            () -> assertThatThrownBy(() -> create("TEST", "test1", 0)).isInstanceOf(IllegalArgumentException.class),
-            () -> assertThat(create("TEST", "test1", 10)).isNotNull()
+            () -> assertThatThrownBy(() -> create("TEST", "TEST", "test1", -1)).isInstanceOf(IllegalArgumentException.class),
+            () -> assertThatThrownBy(() -> create("TEST", "TEST", "test1", 0)).isInstanceOf(IllegalArgumentException.class),
+            () -> assertThat(create("TEST", "TEST", "test1", 10)).isNotNull()
         );
     }
 
     @Test
     void should_be_equals_when_appName_and_cachePrefix_are_equals() {
-        final EVCacheConfiguration config = create("TEST", "test1", 1);
+        final EVCacheConfiguration config = create("TEST", "TEST", "test1", 1);
         assertAll(
             () -> assertThat(config).isEqualTo(config),
-            () -> assertThat(config).isEqualTo(create("TEST", "test1", 1)),
+            () -> assertThat(config).isEqualTo(create("TEST", "TEST1", "test1", 1)),
+            () -> assertThat(config).isEqualTo(create("TEST", "TEST", "test", 1)),
             () -> assertThat(config).isNotEqualTo(null),
             () -> assertThat(config).isNotEqualTo(1),
-            () -> assertThat(config).isNotEqualTo(create("TEST1", "test1", 1)),
-            () -> assertThat(config).isNotEqualTo(create("TEST", "test", 1))
+            () -> assertThat(config).isNotEqualTo(create("TEST1", "TEST1", "test1", 1)),
+            () -> assertThat(config).isNotEqualTo(create("TEST1", "TEST", "test", 1))
         );
     }
 
     @Test
     void should_be_same_hashCode_when_appName_and_cachePrefix_are_equals() {
-        final EVCacheConfiguration config = create("TEST", "test1", 1);
+        final EVCacheConfiguration config = create("TEST", "TEST", "test1", 1);
         assertAll(
-            () -> assertThat(config).hasSameHashCodeAs(create("TEST", "test1", 1)),
-            () -> assertThat(config.hashCode()).isNotEqualTo(create("TEST1", "test1", 1).hashCode()),
-            () -> assertThat(config.hashCode()).isNotEqualTo(create("TEST", "test", 1).hashCode())
+            () -> assertThat(config).hasSameHashCodeAs(create("TEST", "TEST1", "test1", 1)),
+            () -> assertThat(config).hasSameHashCodeAs(create("TEST", "TEST", "test", 1)),
+            () -> assertThat(config.hashCode()).isNotEqualTo(create("TEST1", "TEST1", "test1", 1).hashCode()),
+            () -> assertThat(config.hashCode()).isNotEqualTo(create("TEST1", "TEST", "test", 1).hashCode())
         );
     }
 }

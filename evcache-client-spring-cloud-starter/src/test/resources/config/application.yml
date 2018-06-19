@@ -4,7 +4,8 @@ spring:
 
 evcache:
   clusters:
-    - app-name: TODO
+    - name: todos
+      app-name: TODO
       cache-prefix: todos
       time-to-live: 1000
 

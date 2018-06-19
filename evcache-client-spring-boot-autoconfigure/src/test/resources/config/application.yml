@@ -1,7 +1,8 @@
 evcache:
   enabled: false
   clusters:
-    - appName: test
+    - name: test
+      appName: test
       cachePrefix: test1
       time-to-live: 1000
       allowNullValues: true

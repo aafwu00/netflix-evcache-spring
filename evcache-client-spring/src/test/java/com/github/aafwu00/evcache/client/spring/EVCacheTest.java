@@ -48,21 +48,25 @@ class EVCacheTest {
     void setUp() {
         source = mock(com.netflix.evcache.EVCache.class);
         converterService = mock(ConversionService.class);
-        cache = new EVCache(source, converterService, true);
+        cache = new EVCache("name", source, converterService, true);
         doReturn(false).when(converterService)
                        .canConvert(TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class));
     }
 
     @Test
-    void name() {
-        doReturn("Test").when(source).getAppName();
-        doReturn("name").when(source).getCachePrefix();
-        assertThat(cache.getName()).isEqualTo("Test.name");
+    void nativeCache() {
+        assertThat(cache.getNativeCache()).isEqualTo(source);
     }
 
     @Test
-    void nativeCache() {
-        assertThat(cache.getNativeCache()).isEqualTo(source);
+    void appName() {
+        doReturn("appName").when(source).getAppName();
+        assertThat(cache.getAppName()).isEqualTo("appName");
+    }
+    @Test
+    void cachePrefix() {
+        doReturn("appName").when(source).getAppName();
+        assertThat(cache.getAppName()).isEqualTo("appName");
     }
 
     @Test
@@ -85,7 +89,7 @@ class EVCacheTest {
                 doReturn(false).when(converterService)
                                .canConvert(TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class));
                 doReturn(1).when(source).get(DigestUtils.sha256Hex("1"));
-                assertThat(new EVCache(source, converterService, true).lookup(1)).isEqualTo(1);
+                assertThat(new EVCache("name", source, converterService, true).lookup(1)).isEqualTo(1);
             }
         );
     }

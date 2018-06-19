@@ -54,8 +54,8 @@ class EVCacheManagerTest {
 
     @Test
     void loadCaches() {
-        final EVCacheConfiguration configuration1 = new EVCacheConfiguration("TEST", "test1", 1000, true, true, true);
-        final EVCacheConfiguration configuration2 = new EVCacheConfiguration("TEST", "test2", 90, false, false, false);
+        final EVCacheConfiguration configuration1 = new EVCacheConfiguration("1", "TEST", "test1", 1000, true, true, true);
+        final EVCacheConfiguration configuration2 = new EVCacheConfiguration("2", "TEST", "test2", 90, false, false, false);
         final Set<EVCacheConfiguration> configurations = new HashSet<>();
         configurations.add(configuration1);
         configurations.add(configuration2);

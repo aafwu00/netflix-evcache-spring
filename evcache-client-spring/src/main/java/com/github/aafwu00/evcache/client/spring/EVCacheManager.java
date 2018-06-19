@@ -54,7 +54,10 @@ public class EVCacheManager extends AbstractCacheManager {
     }
 
     private EVCache create(final EVCacheConfiguration configuration) {
-        return new EVCache(builder(configuration).build(), conversionService, configuration.isAllowNullValues());
+        return new EVCache(configuration.getName(),
+                           builder(configuration).build(),
+                           conversionService,
+                           configuration.isAllowNullValues());
     }
 
     private Builder builder(final EVCacheConfiguration configuration) {

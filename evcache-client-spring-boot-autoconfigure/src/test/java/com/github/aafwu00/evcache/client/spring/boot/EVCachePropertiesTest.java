@@ -46,6 +46,14 @@ class EVCachePropertiesTest {
     private EVCacheProperties properties;
 
     @Test
+    void should_be_determineName_when() {
+        assertAll(
+            () -> assertThat(cluster("TEST").determineName()).isEqualTo("TEST"),
+            () -> assertThat(cluster("TEST", "prefix").determineName()).isEqualTo("TEST.prefix")
+        );
+    }
+
+    @Test
     void should_be_equals_when_appName_and_cachePrefix_are_equals() {
         final Cluster cluster = cluster("TEST", "test1");
         assertAll(
@@ -54,7 +62,9 @@ class EVCachePropertiesTest {
             () -> assertThat(cluster).isNotEqualTo(null),
             () -> assertThat(cluster).isNotEqualTo(1),
             () -> assertThat(cluster).isNotEqualTo(cluster("TEST1", "test1")),
-            () -> assertThat(cluster).isNotEqualTo(cluster("TEST", "test"))
+            () -> assertThat(cluster).isNotEqualTo(cluster("TEST", "test")),
+            () -> assertThat(cluster("TEST")).isEqualTo(cluster("TEST")),
+            () -> assertThat(cluster("TEST")).isNotEqualTo(cluster("TEST1"))
         );
     }
 
@@ -64,7 +74,9 @@ class EVCachePropertiesTest {
         assertAll(
             () -> assertThat(cluster).hasSameHashCodeAs(cluster("TEST", "test1")),
             () -> assertThat(cluster.hashCode()).isNotEqualTo(cluster("TEST1", "test1").hashCode()),
-            () -> assertThat(cluster.hashCode()).isNotEqualTo(cluster("TEST", "test").hashCode())
+            () -> assertThat(cluster.hashCode()).isNotEqualTo(cluster("TEST", "test").hashCode()),
+            () -> assertThat(cluster("TEST")).hasSameHashCodeAs(cluster("TEST")),
+            () -> assertThat(cluster("TEST").hashCode()).isNotEqualTo(cluster("TEST1").hashCode())
         );
     }
 
@@ -75,16 +87,26 @@ class EVCachePropertiesTest {
         return result;
     }
 
+    private Cluster cluster(final String name) {
+        final Cluster result = new Cluster();
+        result.setName(name);
+        return result;
+    }
+
     @Test
     void should_be_loaded_yml() {
         assertAll(
             () -> assertThat(properties.isEnabled()).isFalse(),
+            () -> assertThat(first(properties.getClusters()).determineName()).isEqualTo("test"),
+            () -> assertThat(first(properties.getClusters()).getName()).isEqualTo("test"),
             () -> assertThat(first(properties.getClusters()).getAppName()).isEqualTo("test"),
             () -> assertThat(first(properties.getClusters()).getCachePrefix()).isEqualTo("test1"),
             () -> assertThat(first(properties.getClusters()).getTimeToLive()).isEqualTo(1000),
             () -> assertThat(first(properties.getClusters()).isServerGroupRetry()).isTrue(),
             () -> assertThat(first(properties.getClusters()).isEnableExceptionThrowing()).isTrue(),
             () -> assertThat(first(properties.getClusters()).isAllowNullValues()).isTrue(),
+            () -> assertThat(second(properties.getClusters()).determineName()).isEqualTo("test.test2"),
+            () -> assertThat(second(properties.getClusters()).getName()).isNull(),
             () -> assertThat(second(properties.getClusters()).getAppName()).isEqualTo("test"),
             () -> assertThat(second(properties.getClusters()).getCachePrefix()).isEqualTo("test2"),
             () -> assertThat(second(properties.getClusters()).isServerGroupRetry()).isFalse(),

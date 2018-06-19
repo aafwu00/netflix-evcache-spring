@@ -33,20 +33,31 @@ import static java.util.Objects.requireNonNull;
  * @author Taeho Kim
  */
 public class EVCache extends AbstractValueAdaptingCache {
+    private final String name;
     private final com.netflix.evcache.EVCache cache;
     private final ConversionService conversionService;
 
-    public EVCache(final com.netflix.evcache.EVCache cache,
+    public EVCache(final String name,
+                   final com.netflix.evcache.EVCache cache,
                    final ConversionService conversionService,
                    final boolean allowNullValues) {
         super(allowNullValues);
+        this.name = name;
         this.cache = requireNonNull(cache);
         this.conversionService = requireNonNull(conversionService);
     }
 
     @Override
     public String getName() {
-        return cache.getAppName() + "." + cache.getCachePrefix();
+        return name;
+    }
+
+    public String getCachePrefix() {
+        return cache.getCachePrefix();
+    }
+
+    public String getAppName() {
+        return cache.getAppName();
     }
 
     @Override
