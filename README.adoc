@@ -159,7 +159,7 @@ EVCACHE-NODES: shard1=localhost:11211,localhost:11212;shard2=localhost:11213,loc
 ----
 <1> EVCache Cluster App Name
 <2> EVCache Cache Prefix
-<3> `evcache.name` + `-NODES` means memcache server address, see on : https://github.com/Netflix/EVCache/wiki/Sample-EVCache-Deployment#step-4-create-a-cache-deployment-descriptor
+<3> `evcache.clusters[0].appName` + `-NODES` means memcached server address, see on : https://github.com/Netflix/EVCache/wiki/Sample-EVCache-Deployment#step-4-create-a-cache-deployment-descriptor
 
 IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
 
