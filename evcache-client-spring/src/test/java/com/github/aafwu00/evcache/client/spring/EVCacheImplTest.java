@@ -37,14 +37,14 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Taeho Kim
  */
-class EVCacheTest {
+class EVCacheImplTest {
     private com.netflix.evcache.EVCache source;
-    private EVCache cache;
+    private EVCacheImpl cache;
 
     @BeforeEach
     void setUp() {
         source = mock(com.netflix.evcache.EVCache.class);
-        cache = new EVCache("name", source, true);
+        cache = new EVCacheImpl("name", source, true);
     }
 
     @Test
@@ -82,7 +82,7 @@ class EVCacheTest {
             },
             () -> {
                 doReturn(1).when(source).get(DigestUtils.sha256Hex("1"));
-                assertThat(new EVCache("name", source, true).lookup(1)).isEqualTo(1);
+                assertThat(new EVCacheImpl("name", source, true).lookup(1)).isEqualTo(1);
             }
         );
     }

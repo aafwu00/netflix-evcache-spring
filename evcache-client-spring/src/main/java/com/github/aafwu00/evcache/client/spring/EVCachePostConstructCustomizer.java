@@ -16,11 +16,9 @@
 
 package com.github.aafwu00.evcache.client.spring;
 
-import org.springframework.cache.Cache;
-
 /**
  * @author Taeho Kim
  */
 public interface EVCachePostConstructCustomizer {
-    Cache customize(EVCache cache);
+    EVCache customize(EVCache cache);
 }

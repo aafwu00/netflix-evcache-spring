@@ -29,6 +29,7 @@ import org.springframework.cloud.sleuth.Span;
 import org.springframework.cloud.sleuth.Tracer;
 
 import com.github.aafwu00.evcache.client.spring.EVCache;
+import com.github.aafwu00.evcache.client.spring.EVCacheImpl;
 import com.github.aafwu00.evcache.client.spring.EVCacheManager;
 import com.github.aafwu00.evcache.client.spring.EVCachePostConstructCustomizer;
 
@@ -61,7 +62,7 @@ class EVCacheManagerTraceCustomizerTest {
         tracer = mock(Tracer.class);
         errorParser = mock(ErrorParser.class);
         customizer = new EVCacheManagerTraceCustomizer(tracer, errorParser);
-        evcache = mock(EVCache.class);
+        evcache = mock(EVCacheImpl.class);
         nativeCache = mock(com.netflix.evcache.EVCache.class);
         doReturn(nativeCache).when(evcache).getNativeCache();
         traceableCache = new EVCacheManagerTraceCustomizer.SleuthTraceableCache(evcache, tracer, errorParser);

@@ -42,7 +42,7 @@ class EVCacheManagerTest {
     void setUp() {
         customizer = spy(new EVCachePostConstructCustomizer() {
             @Override
-            public Cache customize(final EVCache cache) {
+            public EVCache customize(final EVCache cache) {
                 return cache;
             }
         });

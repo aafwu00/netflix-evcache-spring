@@ -20,7 +20,6 @@ import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizer;
-import org.springframework.cache.Cache;
 import org.springframework.cloud.sleuth.ErrorParser;
 import org.springframework.cloud.sleuth.Span;
 import org.springframework.cloud.sleuth.Tracer;
@@ -52,7 +51,7 @@ public class EVCacheManagerTraceCustomizer implements CacheManagerCustomizer<EVC
         cacheManager.setCustomizer(cache -> new SleuthTraceableCache(cache, tracer, errorParser));
     }
 
-    static class SleuthTraceableCache implements Cache {
+    static class SleuthTraceableCache implements EVCache {
         private static final String GET = "get";
         private static final String PUT = "put";
         private static final String PUT_IF_ABSENT = "putIfAbsent";

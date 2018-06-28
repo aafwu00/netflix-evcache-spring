@@ -29,7 +29,7 @@ import com.netflix.evcache.EVCache.Builder;
 import static java.util.Objects.requireNonNull;
 
 /**
- * {@link CacheManager} backed by an {@link EVCache}.
+ * {@link CacheManager} backed by an {@link EVCacheImpl}.
  *
  * @author Taeho Kim
  */
@@ -51,9 +51,9 @@ public class EVCacheManager extends AbstractCacheManager {
     }
 
     private EVCache create(final EVCacheConfiguration configuration) {
-        return new EVCache(configuration.getName(),
-                           builder(configuration).build(),
-                           configuration.isAllowNullValues());
+        return new EVCacheImpl(configuration.getName(),
+                               builder(configuration).build(),
+                               configuration.isAllowNullValues());
     }
 
     private Builder builder(final EVCacheConfiguration configuration) {
