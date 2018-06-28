@@ -32,8 +32,6 @@ import org.springframework.cloud.netflix.archaius.ArchaiusAutoConfiguration;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.env.Environment;
 
 import com.github.aafwu00.evcache.client.spring.EVCacheManager;
@@ -222,20 +220,11 @@ class EVCacheAutoConfigurationTest {
 
     @Configuration
     static class NoCacheableConfiguration {
-        @Bean
-        ConversionService conversionService() {
-            return new DefaultConversionService();
-        }
     }
 
     @Configuration
     @EnableCaching
     static class EnableCachingConfiguration {
-        @Bean
-        ConversionService conversionService() {
-            return new DefaultConversionService();
-        }
-
         @Bean
         CacheManagerCustomizer<EVCacheManager> cacheManagerCustomizer() {
             return cacheManagerCustomizer;
@@ -245,11 +234,6 @@ class EVCacheAutoConfigurationTest {
     @Configuration
     @EnableCaching
     static class ExistsCacheManagerConfiguration {
-        @Bean
-        ConversionService conversionService() {
-            return new DefaultConversionService();
-        }
-
         @Bean
         CacheManager cacheManager() {
             return new SimpleCacheManager();

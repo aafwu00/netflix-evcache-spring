@@ -37,7 +37,6 @@ import org.springframework.cloud.client.actuator.HasFeatures;
 import org.springframework.cloud.netflix.archaius.ArchaiusAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 
@@ -67,10 +66,9 @@ public class EVCacheAutoConfiguration {
     @ConditionalOnMissingBean
     public CacheManager cacheManager(final ConfigurableEnvironment environment,
                                      final CacheManagerCustomizers customizers,
-                                     final ConversionService conversionService,
                                      final EVCacheProperties properties) {
         appendProperty(environment);
-        return customizers.customize(new EVCacheManager(properties.toConfigurations(), conversionService));
+        return customizers.customize(new EVCacheManager(properties.toConfigurations()));
     }
 
     private void appendProperty(final ConfigurableEnvironment environment) {

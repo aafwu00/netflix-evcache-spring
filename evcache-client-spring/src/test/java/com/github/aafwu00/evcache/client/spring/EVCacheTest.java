@@ -23,8 +23,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.cache.Cache;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -41,16 +39,12 @@ import static org.mockito.Mockito.verify;
  */
 class EVCacheTest {
     private com.netflix.evcache.EVCache source;
-    private ConversionService converterService;
     private EVCache cache;
 
     @BeforeEach
     void setUp() {
         source = mock(com.netflix.evcache.EVCache.class);
-        converterService = mock(ConversionService.class);
-        cache = new EVCache("name", source, converterService, true);
-        doReturn(false).when(converterService)
-                       .canConvert(TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class));
+        cache = new EVCache("name", source, true);
     }
 
     @Test
@@ -79,23 +73,16 @@ class EVCacheTest {
     void createKey() {
         assertAll(
             () -> {
-                doReturn(true).when(converterService)
-                              .canConvert(TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class));
-                doReturn("1").when(converterService).convert(1, String.class);
                 doReturn(1).when(source).get("1");
                 assertThat(cache.lookup(1)).isEqualTo(1);
             },
             () -> {
-                doReturn(false).when(converterService)
-                               .canConvert(TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class));
                 doReturn(1).when(source).get("1");
                 assertThat(cache.lookup(1)).isEqualTo(1);
             },
             () -> {
-                doReturn(false).when(converterService)
-                               .canConvert(TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class));
                 doReturn(1).when(source).get(DigestUtils.sha256Hex("1"));
-                assertThat(new EVCache("name", source, converterService, true).lookup(1)).isEqualTo(1);
+                assertThat(new EVCache("name", source, true).lookup(1)).isEqualTo(1);
             }
         );
     }

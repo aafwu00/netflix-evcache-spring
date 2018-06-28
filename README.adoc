@@ -75,7 +75,7 @@ dependencies {
 @EnableCaching
 public class TodoApp {
     @Bean
-    public CacheManager cacheManager(final ConversionService conversionService) {
+    public CacheManager cacheManager() {
         EVCacheConfig.getInstance()
                      .getDynamicStringProperty("TODO-NODES",
                                                "shard1=localhost:11211,localhost:11212;shard2=localhost:11213,localhost:11214") # <2>
@@ -86,7 +86,7 @@ public class TodoApp {
         configuration.setCachePrefix("todo");
         configuration.setTimeToLive(10);
         configuration.setServerGroupRetry(true);
-        return new EVCacheManager(Collections.singletonList(configuration), conversionService); # <1>
+        return new EVCacheManager(Collections.singletonList(configuration)); # <1>
     }
 }
 

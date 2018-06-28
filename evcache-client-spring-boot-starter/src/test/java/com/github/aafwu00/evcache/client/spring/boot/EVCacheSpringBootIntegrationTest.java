@@ -32,9 +32,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.annotation.Bean;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.stereotype.Repository;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -86,11 +83,6 @@ class EVCacheSpringBootIntegrationTest {
     @SpringBootApplication
     @EnableCaching
     static class TodoApp {
-        @Bean
-        public ConversionService conversionService() {
-            return DefaultConversionService.getSharedInstance();
-        }
-
         @Repository
         static class TodoRepository {
             @Cacheable(cacheNames = "TODO.todos", key = "'findAll'")

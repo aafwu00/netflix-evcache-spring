@@ -24,13 +24,11 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.cache.Cache;
-import org.springframework.core.convert.ConversionService;
 
 import com.netflix.evcache.EVCacheImpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -38,12 +36,10 @@ import static org.mockito.Mockito.verify;
  * @author Taeho Kim
  */
 class EVCacheManagerTest {
-    private ConversionService converterService;
     private EVCachePostConstructCustomizer customizer;
 
     @BeforeEach
     void setUp() {
-        converterService = mock(ConversionService.class);
         customizer = spy(new EVCachePostConstructCustomizer() {
             @Override
             public Cache customize(final EVCache cache) {
@@ -59,7 +55,7 @@ class EVCacheManagerTest {
         final Set<EVCacheConfiguration> configurations = new HashSet<>();
         configurations.add(configuration1);
         configurations.add(configuration2);
-        final EVCacheManager manager = new EVCacheManager(configurations, converterService);
+        final EVCacheManager manager = new EVCacheManager(configurations);
         manager.setCustomizer(customizer);
         final List<? extends Cache> caches = new ArrayList<>(manager.loadCaches());
         assertAll(

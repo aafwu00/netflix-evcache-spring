@@ -27,7 +27,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.convert.ConversionService;
 
 import com.github.aafwu00.evcache.client.spring.EVCacheConfiguration;
 import com.github.aafwu00.evcache.client.spring.EVCacheManager;
@@ -52,12 +51,12 @@ public class TodoApp {
     }
 
     @Bean
-    public CacheManager cacheManager(final ConversionService conversionService) {
+    public CacheManager cacheManager() {
         EVCacheConfig.getInstance()
                      .getDynamicStringProperty("TODO-NODES",
                                                "shard1=localhost:11211,localhost:11212;shard2=localhost:11213,localhost:11214")
                      .get();
-        final EVCacheConfiguration configuration = new EVCacheConfiguration("todos","TODO", "todos", 10, true, true, true);
-        return new EVCacheManager(Collections.singleton(configuration), conversionService);
+        final EVCacheConfiguration configuration = new EVCacheConfiguration("todos", "TODO", "todos", 10, true, true, true);
+        return new EVCacheManager(Collections.singleton(configuration));
     }
 }

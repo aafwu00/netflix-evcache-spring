@@ -27,8 +27,6 @@ import org.springframework.cloud.sleuth.log.SpanLogger;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.support.DefaultConversionService;
 
 import com.github.aafwu00.evcache.client.spring.boot.EVCacheAutoConfiguration;
 
@@ -93,11 +91,6 @@ class EVCacheTraceAutoConfigurationTest {
         }
 
         @Bean
-        ConversionService conversionService() {
-            return new DefaultConversionService();
-        }
-
-        @Bean
         SpanLogger spanLogger() {
             return new NoOpSpanLogger();
         }
@@ -106,11 +99,6 @@ class EVCacheTraceAutoConfigurationTest {
     @Configuration
     @EnableCaching
     static class EnableCachingConfiguration {
-        @Bean
-        ConversionService conversionService() {
-            return new DefaultConversionService();
-        }
-
         @Bean
         SpanLogger spanLogger() {
             return new NoOpSpanLogger();

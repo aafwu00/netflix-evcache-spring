@@ -20,8 +20,6 @@ import java.util.concurrent.Callable;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.support.AbstractValueAdaptingCache;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.util.Assert;
 
 import static java.util.Objects.nonNull;
@@ -35,16 +33,13 @@ import static java.util.Objects.requireNonNull;
 public class EVCache extends AbstractValueAdaptingCache {
     private final String name;
     private final com.netflix.evcache.EVCache cache;
-    private final ConversionService conversionService;
 
     public EVCache(final String name,
                    final com.netflix.evcache.EVCache cache,
-                   final ConversionService conversionService,
                    final boolean allowNullValues) {
         super(allowNullValues);
         this.name = name;
         this.cache = requireNonNull(cache);
-        this.conversionService = requireNonNull(conversionService);
     }
 
     @Override
@@ -122,10 +117,6 @@ public class EVCache extends AbstractValueAdaptingCache {
 
     private String convertKey(final Object key) {
         Assert.notNull(key, "Key cannot be null");
-        final TypeDescriptor source = TypeDescriptor.forObject(key);
-        if (conversionService.canConvert(source, TypeDescriptor.valueOf(String.class))) {
-            return conversionService.convert(key, String.class);
-        }
         return key.toString();
     }
 

@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.support.AbstractCacheManager;
-import org.springframework.core.convert.ConversionService;
 
 import com.netflix.evcache.EVCache.Builder;
 
@@ -35,14 +34,12 @@ import static java.util.Objects.requireNonNull;
  * @author Taeho Kim
  */
 public class EVCacheManager extends AbstractCacheManager {
-    private final ConversionService conversionService;
     private final Set<EVCacheConfiguration> configurations;
     private EVCachePostConstructCustomizer customizer = cache -> cache;
 
-    public EVCacheManager(final Set<EVCacheConfiguration> configurations, final ConversionService conversionService) {
+    public EVCacheManager(final Set<EVCacheConfiguration> configurations) {
         super();
         this.configurations = requireNonNull(configurations);
-        this.conversionService = requireNonNull(conversionService);
     }
 
     @Override
@@ -56,7 +53,6 @@ public class EVCacheManager extends AbstractCacheManager {
     private EVCache create(final EVCacheConfiguration configuration) {
         return new EVCache(configuration.getName(),
                            builder(configuration).build(),
-                           conversionService,
                            configuration.isAllowNullValues());
     }
 
