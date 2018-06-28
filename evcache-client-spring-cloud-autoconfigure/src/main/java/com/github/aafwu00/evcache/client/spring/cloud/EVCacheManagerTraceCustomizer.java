@@ -48,7 +48,7 @@ public class EVCacheManagerTraceCustomizer implements CacheManagerCustomizer<EVC
 
     @Override
     public void customize(final EVCacheManager cacheManager) {
-        cacheManager.setCustomizer(cache -> new SleuthTraceableCache(cache, tracer, errorParser));
+        cacheManager.addCustomizer(cache -> new SleuthTraceableCache(cache, tracer, errorParser));
     }
 
     static class SleuthTraceableCache implements EVCache {

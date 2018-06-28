@@ -18,6 +18,7 @@ package com.github.aafwu00.evcache.client.spring;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.springframework.cache.Cache;
@@ -35,7 +36,7 @@ import static java.util.Objects.requireNonNull;
  */
 public class EVCacheManager extends AbstractCacheManager {
     private final Set<EVCacheConfiguration> configurations;
-    private EVCachePostConstructCustomizer customizer = cache -> cache;
+    private final Set<EVCachePostConstructCustomizer> customizers = new TreeSet<>();
 
     public EVCacheManager(final Set<EVCacheConfiguration> configurations) {
         super();
@@ -46,8 +47,16 @@ public class EVCacheManager extends AbstractCacheManager {
     protected Collection<? extends Cache> loadCaches() {
         return configurations.stream()
                              .map(this::create)
-                             .map(customizer::customize)
+                             .map(this::customize)
                              .collect(Collectors.toList());
+    }
+
+    private EVCache customize(final EVCache cache) {
+        EVCache result = cache;
+        for (final EVCachePostConstructCustomizer customizer : customizers) {
+            result = customizer.customize(result);
+        }
+        return result;
     }
 
     private EVCache create(final EVCacheConfiguration configuration) {
@@ -71,7 +80,7 @@ public class EVCacheManager extends AbstractCacheManager {
         return builder;
     }
 
-    public void setCustomizer(final EVCachePostConstructCustomizer customizer) {
-        this.customizer = requireNonNull(customizer);
+    public void addCustomizer(final EVCachePostConstructCustomizer customizer) {
+        this.customizers.add(requireNonNull(customizer));
     }
 }

@@ -253,6 +253,6 @@ class EVCacheManagerTraceCustomizerTest {
     void customize() {
         final EVCacheManager cacheManager = mock(EVCacheManager.class);
         customizer.customize(cacheManager);
-        verify(cacheManager).setCustomizer(any(EVCachePostConstructCustomizer.class));
+        verify(cacheManager).addCustomizer(any(EVCachePostConstructCustomizer.class));
     }
 }

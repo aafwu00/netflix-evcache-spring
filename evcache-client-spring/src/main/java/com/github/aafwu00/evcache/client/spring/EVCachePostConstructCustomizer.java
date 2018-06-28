@@ -16,9 +16,21 @@
 
 package com.github.aafwu00.evcache.client.spring;
 
+import org.springframework.core.Ordered;
+
 /**
  * @author Taeho Kim
  */
-public interface EVCachePostConstructCustomizer {
+public interface EVCachePostConstructCustomizer extends Ordered, Comparable<EVCachePostConstructCustomizer> {
     EVCache customize(EVCache cache);
+
+    @Override
+    default int getOrder() {
+        return Ordered.LOWEST_PRECEDENCE;
+    }
+
+    @Override
+    default int compareTo(final EVCachePostConstructCustomizer that) {
+        return Integer.compare(getOrder(), that.getOrder());
+    }
 }

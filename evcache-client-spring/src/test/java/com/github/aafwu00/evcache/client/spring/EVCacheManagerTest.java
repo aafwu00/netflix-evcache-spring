@@ -56,7 +56,7 @@ class EVCacheManagerTest {
         configurations.add(configuration1);
         configurations.add(configuration2);
         final EVCacheManager manager = new EVCacheManager(configurations);
-        manager.setCustomizer(customizer);
+        manager.addCustomizer(customizer);
         final List<? extends Cache> caches = new ArrayList<>(manager.loadCaches());
         assertAll(
             () -> assertThatCache(getNativeCache(caches, 0), configuration1),
