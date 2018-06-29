@@ -16,9 +16,10 @@
 
 package com.github.aafwu00.evcache.client.spring;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.springframework.cache.Cache;
@@ -36,11 +37,12 @@ import static java.util.Objects.requireNonNull;
  */
 public class EVCacheManager extends AbstractCacheManager {
     private final Set<EVCacheConfiguration> configurations;
-    private final Set<EVCachePostConstructCustomizer> customizers = new TreeSet<>();
+    private final List<EVCachePostConstructCustomizer> customizers;
 
     public EVCacheManager(final Set<EVCacheConfiguration> configurations) {
         super();
         this.configurations = requireNonNull(configurations);
+        this.customizers = new ArrayList<>();
     }
 
     @Override

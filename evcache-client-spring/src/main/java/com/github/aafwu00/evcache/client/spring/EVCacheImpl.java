@@ -38,7 +38,7 @@ public class EVCacheImpl extends AbstractValueAdaptingCache implements EVCache {
                        final com.netflix.evcache.EVCache cache,
                        final boolean allowNullValues) {
         super(allowNullValues);
-        this.name = name;
+        this.name = requireNonNull(name);
         this.cache = requireNonNull(cache);
     }
 
