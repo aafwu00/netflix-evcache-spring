@@ -1,7 +1,7 @@
 buildscript {
     ext {
         springBootVersion = '1.5.14.RELEASE'
-        springCloudVersion = 'Edgware.SR3'
+        springCloudVersion = 'Edgware.SR4'
         evcacheVersion = '4.127.0'
     }
     repositories {
@@ -174,7 +174,7 @@ subprojects {
         testCompile 'com.couchbase.mock:CouchbaseMock:1.5.19'
 
         if (project.name.contains('autoconfigure')) {
-            compile 'org.springframework.boot:spring-boot-configuration-processor', optional
+            annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
         }
     }
 }
