@@ -20,35 +20,33 @@ import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizer;
-import org.springframework.cloud.sleuth.ErrorParser;
-import org.springframework.cloud.sleuth.Span;
-import org.springframework.cloud.sleuth.Tracer;
 
 import com.github.aafwu00.evcache.client.spring.EVCache;
 import com.github.aafwu00.evcache.client.spring.EVCacheManager;
 
+import brave.Span;
+import brave.Tracer;
+import brave.Tracing;
+import zipkin2.Endpoint;
+
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
-import static org.springframework.cloud.sleuth.Span.CLIENT_RECV;
-import static org.springframework.cloud.sleuth.Span.CLIENT_SEND;
-import static org.springframework.cloud.sleuth.Span.SPAN_PEER_SERVICE_TAG_NAME;
+import static org.springframework.cloud.sleuth.util.SpanNameUtil.toLowerHyphen;
 
 /**
  * @author Taeho Kim
  */
 public class EVCacheManagerTraceCustomizer implements CacheManagerCustomizer<EVCacheManager> {
-    private final Tracer tracer;
-    private final ErrorParser errorParser;
+    private final Tracing tracing;
 
-    public EVCacheManagerTraceCustomizer(final Tracer tracer, final ErrorParser errorParser) {
-        this.tracer = requireNonNull(tracer);
-        this.errorParser = requireNonNull(errorParser);
+    public EVCacheManagerTraceCustomizer(final Tracing tracing) {
+        this.tracing = requireNonNull(tracing);
     }
 
     @Override
     public void customize(final EVCacheManager cacheManager) {
-        cacheManager.addCustomizer(cache -> new SleuthTraceableCache(cache, tracer, errorParser));
+        cacheManager.addCustomizer(cache -> new SleuthTraceableCache(cache, tracing));
     }
 
     static class SleuthTraceableCache implements EVCache {
@@ -59,63 +57,48 @@ public class EVCacheManagerTraceCustomizer implements CacheManagerCustomizer<EVC
         private static final String CLEAR = "clear";
         private static final String KEY_ALL = "*";
         private final EVCache cache;
-        private final Tracer tracer;
-        private final ErrorParser errorParser;
+        private final Tracing tracing;
 
-        SleuthTraceableCache(final EVCache cache, final Tracer tracer, final ErrorParser errorParser) {
+        SleuthTraceableCache(final EVCache cache, final Tracing tracing) {
             this.cache = requireNonNull(cache);
-            this.tracer = requireNonNull(tracer);
-            this.errorParser = requireNonNull(errorParser);
+            this.tracing = requireNonNull(tracing);
         }
 
         private <T> T execute(final String operation, final Object key, final Supplier<T> callback) {
             if (isNotTraceable()) {
                 return callback.get();
             }
-            final Span span = createSpan(operation);
-            try {
-                send(span, key);
+            final Span span = createSpan(operation, key);
+            try (Tracer.SpanInScope scope = tracing.tracer().withSpanInScope(span.start())) {
                 return callback.get();
                 // CHECKSTYLE:OFF
-            } catch (final Exception ex) {
+            } catch (Exception ex) {
                 // CHECKSTYLE:ON
-                parseErrorTags(span, ex);
+                span.error(ex);
                 throw ex;
             } finally {
-                receive(span);
-                close(span);
+                span.finish();
             }
         }
 
         private boolean isNotTraceable() {
-            return isNull(currentSpan()) || !currentSpan().isExportable();
+            return isNull(currentSpan()) || currentSpan().isNoop();
         }
 
         private Span currentSpan() {
-            return tracer.getCurrentSpan();
+            return tracing.tracer().currentSpan();
         }
 
-        private Span createSpan(final String name) {
-            return tracer.createSpan(name);
-        }
-
-        private void send(final Span span, final Object key) {
-            span.tag("cache.prefix", getNativeCache().getCachePrefix());
-            span.tag("cache.key", String.valueOf(key));
-            span.logEvent(CLIENT_SEND);
-        }
-
-        private void parseErrorTags(final Span span, final Throwable throwable) {
-            errorParser.parseErrorTags(span, throwable);
-        }
-
-        private void receive(final Span span) {
-            span.logEvent(CLIENT_RECV);
-            span.tag(SPAN_PEER_SERVICE_TAG_NAME, getNativeCache().getAppName());
-        }
-
-        private void close(final Span span) {
-            tracer.close(span);
+        private Span createSpan(final String name, final Object key) {
+            return tracing.tracer()
+                          .newTrace()
+                          .kind(Span.Kind.CLIENT)
+                          .remoteEndpoint(Endpoint.newBuilder()
+                                                  .serviceName(getNativeCache().getAppName())
+                                                  .build())
+                          .name(toLowerHyphen(name))
+                          .tag("cache.prefix", getNativeCache().getCachePrefix())
+                          .tag("cache.key", String.valueOf(key));
         }
 
         @Override

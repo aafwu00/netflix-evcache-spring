@@ -1,7 +1,7 @@
 buildscript {
     ext {
-        springBootVersion = '1.5.14.RELEASE'
-        springCloudVersion = 'Edgware.SR4'
+        springBootVersion = '2.0.3.RELEASE'
+        springCloudVersion = 'Finchley.RELEASE'
         evcacheVersion = '4.127.0'
     }
     repositories {
@@ -19,7 +19,6 @@ buildscript {
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.20.0'
 
         classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-        classpath 'io.spring.gradle:dependency-management-plugin:1.0.5.RELEASE'
         classpath 'io.spring.gradle:propdeps-plugin:0.0.9.RELEASE'
     }
 }
@@ -44,7 +43,6 @@ allprojects {
 subprojects {
     apply plugin: 'java'
 
-    apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
 
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -69,9 +67,6 @@ subprojects {
 
         apply plugin: 'nebula.maven-publish'
         apply plugin: 'nebula.source-jar'
-
-        bootRun.enabled = false
-        bootRepackage.enabled = false
 
         dependencyUpdates.resolutionStrategy = {
             componentSelection { rules ->
@@ -127,12 +122,7 @@ subprojects {
     }
 
     if (project.name.endsWith('sample')) {
-        apply plugin: 'application'
-    }
-
-    if (project.name.contains('samples')) {
-        bootRun.enabled = false
-        bootRepackage.enabled = false
+        apply plugin: 'org.springframework.boot'
     }
 
     if (project.name.contains('autoconfigure')) {
@@ -158,6 +148,7 @@ subprojects {
 
     dependencyManagement {
         imports {
+            mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
             mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
         }
     }
@@ -166,10 +157,7 @@ subprojects {
         testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.2.0'
         testCompile 'org.junit.jupiter:junit-jupiter-api:5.2.0'
 
-        testCompile 'com.github.sbrannen:spring-test-junit5:1.2.0'
         testCompile 'org.springframework.boot:spring-boot-starter-test'
-
-        testCompile 'org.assertj:assertj-core:3.10.0'
 
         testCompile 'com.couchbase.mock:CouchbaseMock:1.5.19'
 

@@ -16,206 +16,194 @@
 
 package com.github.aafwu00.evcache.client.spring.boot;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizer;
+import org.springframework.boot.context.properties.ConfigurationPropertiesBindException;
+import org.springframework.boot.test.context.assertj.AssertableApplicationContext;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.support.NoOpCacheManager;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.cloud.netflix.archaius.ArchaiusAutoConfiguration;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 
 import com.github.aafwu00.evcache.client.spring.EVCacheManager;
-import com.netflix.evcache.util.EVCacheConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.springframework.boot.test.util.EnvironmentTestUtils.addEnvironment;
 
 /**
  * @author Taeho Kim
  */
 class EVCacheAutoConfigurationTest {
-    private static CacheManagerCustomizer<EVCacheManager> cacheManagerCustomizer;
-    private AnnotationConfigApplicationContext context;
+    private static CacheManagerCustomizer<EVCacheManager> cacheManagerCustomizer = mock(CacheManagerCustomizer.class);
+    private ApplicationContextRunner contextRunner;
 
     @BeforeEach
     void setUp() {
-        context = new AnnotationConfigApplicationContext();
-        cacheManagerCustomizer = mock(CacheManagerCustomizer.class);
-    }
-
-    @AfterEach
-    void tearDown() {
-        context.close();
+        contextRunner = new ApplicationContextRunner()
+            .withConfiguration(AutoConfigurations.of(EVCacheAutoConfiguration.class,
+                                                     CacheAutoConfiguration.class,
+                                                     ArchaiusAutoConfiguration.class));
     }
 
     @Test
     void should_be_loaded_EVCacheManager() {
-        loadContext(EnableCachingConfiguration.class, "evcache.clusters[0].appName=test", "evcache.clusters[0].cachePrefix=test1");
-        assertAll(
-            () -> assertThat(context.getBean(EVCacheManager.class)).isNotNull(),
-            () -> assertThat(context.getBean(EVCacheMetrics.class)).isNotNull(),
-            () -> assertThat(context.getBean(Environment.class)
-                                    .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isTrue(),
-            () -> assertThat(EVCacheConfig.getInstance()
-                                          .getDynamicBooleanProperty("evcache.use.simple.node.list.provider", false)
-                                          .get()).isTrue(),
-            () -> verify(cacheManagerCustomizer).customize(any(EVCacheManager.class))
-        );
+        contextRunner.withPropertyValues("evcache.clusters[0].appName=test", "evcache.clusters[0].cachePrefix=test1")
+                     .withUserConfiguration(EnableCachingConfiguration.class)
+                     .run(context -> assertAll(
+                         () -> assertThat(context).hasSingleBean(EVCacheManager.class),
+                         () -> assertThat(context).hasSingleBean(EVCacheMeterBinderProvider.class),
+                         () -> assertThat(context.getEnvironment().getProperty("evcache.use.simple.node.list.provider")).isEqualTo("true"),
+                         () -> verify(cacheManagerCustomizer).customize(any(EVCacheManager.class))
+                     ));
     }
 
     @Test
-    void should_be_not_override_provider_when_already_exists_property() {
-        loadContext(EnableCachingConfiguration.class,
-                    "evcache.clusters[0].appName=test",
-                    "evcache.clusters[0].cachePrefix=test1",
-                    "evcache.use.simple.node.list.provider=false");
-        assertAll(
-            () -> assertThat(context.getBean(Environment.class)
-                                    .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isFalse(),
-            () -> assertThat(EVCacheConfig.getInstance()
-                                          .getDynamicBooleanProperty("evcache.use.simple.node.list.provider", true)
-                                          .get()).isFalse()
-        );
-    }
-
-    @Test
-    void should_be_not_loaded_CacheManager_when_has_no_configuration() {
-        loadContext(NoCacheableConfiguration.class);
-        assertAll(
-            () -> assertThatThrownBy(() -> context.getBean(CacheManager.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class),
-            () -> assertThat(context.getBean(Environment.class)
-                                    .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isNull()
-        );
+    void should_be_not_loaded_CacheManager_when_no_configuration() {
+        contextRunner.withUserConfiguration(NoCacheableConfiguration.class)
+                     .run(context -> assertThat(context).doesNotHaveBean(CacheManager.class));
     }
 
     @Test
     void should_be_not_loaded_EVCacheManager_when_cacheManager_already_exists() {
-        loadContext(ExistsCacheManagerConfiguration.class, "evcache.clusters[0].appName=test", "evcache.clusters[0].cachePrefix=test1");
-        assertAll(
-            () -> assertThatThrownBy(() -> context.getBean(EVCacheManager.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class),
-            () -> assertThatThrownBy(() -> context.getBean(EVCacheMetrics.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class),
-            () -> assertThat(context.getBean(Environment.class)
-                                    .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isNull()
-        );
+        contextRunner.withPropertyValues("evcache.clusters[0].appName=test", "evcache.clusters[0].cachePrefix=test1")
+                     .withUserConfiguration(ExistsCacheManagerConfiguration.class)
+                     .run(context -> assertAll(
+                         () -> assertThat(context).doesNotHaveBean(EVCacheManager.class),
+                         () -> assertThat(context).doesNotHaveBean(EVCacheMeterBinderProvider.class)
+                     ));
     }
 
     @Test
-    void should_be_not_loaded_EVCacheManager_when_disable_evcache() {
-        loadContext(EnableCachingConfiguration.class, "evcache.enabled=false");
-        assertAll(
-            () -> assertThat(context.getBean(CacheManager.class)).isNotNull(),
-            () -> assertThatThrownBy(() -> context.getBean(EVCacheManager.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class),
-            () -> assertThat(context.getBean(Environment.class)
-                                    .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isNull()
-        );
+    void should_be_not_loaded_EVCacheManager_when_evcache_enable_is_false() {
+        contextRunner.withPropertyValues("evcache.enabled=false")
+                     .withUserConfiguration(EnableCachingConfiguration.class)
+                     .run(context -> assertAll(
+                         () -> assertThat(context).hasSingleBean(CacheManager.class),
+                         () -> assertThat(context).doesNotHaveBean(EVCacheManager.class)
+                     ));
     }
 
     @Test
     void should_be_not_loaded_EVCacheManager_when_cache_type_is_none() {
-        loadContext(EnableCachingConfiguration.class, "spring.cache.type=none", "evcache.enabled=true");
-        assertAll(
-            () -> assertThat(context.getBean(CacheManager.class)).isInstanceOf(NoOpCacheManager.class),
-            () -> assertThatThrownBy(() -> context.getBean(EVCacheManager.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class),
-            () -> assertThat(context.getBean(Environment.class)
-                                    .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isNull()
-        );
-    }
-
-    private void assertThatThrownExceptionWhenContextLoadWithInvalidEnvironment(final String... paris) {
-        assertThatThrownBy(() -> loadContext(EnableCachingConfiguration.class,
-                                             paris)).isExactlyInstanceOf(UnsatisfiedDependencyException.class)
-                                                    .hasCauseExactlyInstanceOf(BeanCreationException.class);
+        contextRunner.withPropertyValues("spring.cache.type=none", "evcache.enabled=true")
+                     .withUserConfiguration(EnableCachingConfiguration.class)
+                     .run(context -> assertAll(
+                         () -> assertThat(context).hasSingleBean(NoOpCacheManager.class),
+                         () -> assertThat(context).doesNotHaveBean(EVCacheManager.class)
+                     ));
     }
 
     @Test
-    void should_be_thrown_exception_when_evcache_cachePrefix_is_empty() {
-        assertThatThrownExceptionWhenContextLoadWithInvalidEnvironment("evcache.clusters[0].appName=test");
+    void should_be_thrown_exception_when_evcache_name_is_blank() {
+        contextRunner.withPropertyValues("evcache.clusters[0].appName=")
+                     .withUserConfiguration(EnableCachingConfiguration.class)
+                     .run(context -> assertThat(context).hasFailed()
+                                                        .getFailure()
+                                                        .isExactlyInstanceOf(UnsatisfiedDependencyException.class)
+                                                        .hasCauseExactlyInstanceOf(ConfigurationPropertiesBindException.class));
     }
 
     @Test
-    void should_be_thrown_exception_when_evcache_cachePrefix_is_blank() {
-        assertThatThrownExceptionWhenContextLoadWithInvalidEnvironment("evcache.clusters[0].appName=test",
-                                                                       "evcache.clusters[0].cachePrefix=");
+    void should_be_thrown_exception_when_evcache_prefixes_is_empty() {
+        contextRunner.withPropertyValues("evcache.clusters[0].appName=test")
+                     .withUserConfiguration(EnableCachingConfiguration.class)
+                     .run(context -> assertThat(context).hasFailed()
+                                                        .getFailure()
+                                                        .isExactlyInstanceOf(UnsatisfiedDependencyException.class)
+                                                        .hasCauseExactlyInstanceOf(ConfigurationPropertiesBindException.class));
     }
 
     @Test
-    void should_be_thrown_exception_when_evcache_cachePrefix_contains_colon() {
-        assertThatThrownExceptionWhenContextLoadWithInvalidEnvironment("evcache.clusters[0].appName=test",
-                                                                       "evcache.clusters[0].cachePrefix=test:123");
+    void should_be_thrown_exception_when_evcache_prefixes_name_is_blank() {
+        contextRunner.withPropertyValues("evcache.clusters[0].appName=test",
+                                         "evcache.clusters[0].cachePrefix=")
+                     .withUserConfiguration(EnableCachingConfiguration.class)
+                     .run(context -> assertThat(context).hasFailed()
+                                                        .getFailure()
+                                                        .isExactlyInstanceOf(UnsatisfiedDependencyException.class)
+                                                        .hasCauseExactlyInstanceOf(ConfigurationPropertiesBindException.class));
     }
 
     @Test
-    void should_be_thrown_exception_when_evcache_cluster_ttl_is_less_then_zero() {
-        assertThatThrownExceptionWhenContextLoadWithInvalidEnvironment("evcache.clusters[0].appName=test",
-                                                                       "evcache.clusters[0].cachePrefix=test1",
-                                                                       "evcache.clusters[0].timeToLive=-1");
+    void should_be_thrown_exception_when_evcache_prefixes_name_contains_colon() {
+        contextRunner.withPropertyValues("evcache.clusters[0].appName=test",
+                                         "evcache.clusters[0].cachePrefix=test:123")
+                     .withUserConfiguration(EnableCachingConfiguration.class)
+                     .run(context -> assertThat(context).hasFailed()
+                                                        .getFailure()
+                                                        .isExactlyInstanceOf(UnsatisfiedDependencyException.class)
+                                                        .hasCauseExactlyInstanceOf(ConfigurationPropertiesBindException.class));
     }
 
     @Test
-    void should_be_not_loaded_EVCacheMetrics_when_disable_evcache_metrics() {
-        loadContext(EnableCachingConfiguration.class,
-                    "evcache.clusters[0].appName=test",
-                    "evcache.clusters[0].cachePrefix=test1",
-                    "evcache.metrics.enabled=false");
-        assertThatThrownBy(() -> context.getBean(EVCacheMetrics.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class);
+    void should_be_thrown_exception_when_evcache_prefixes_ttl_is_less_then_zero() {
+        contextRunner.withPropertyValues("evcache.clusters[0].appName=test",
+                                         "evcache.clusters[0].cachePrefix=test1",
+                                         "evcache.clusters[0].timeToLive=-1")
+                     .withUserConfiguration(EnableCachingConfiguration.class)
+                     .run(context -> assertThat(context).hasFailed()
+                                                        .getFailure()
+                                                        .isExactlyInstanceOf(UnsatisfiedDependencyException.class)
+                                                        .hasCauseExactlyInstanceOf(ConfigurationPropertiesBindException.class));
+    }
+
+    @Test
+    void should_be_not_loaded_EVCacheMeterBinder_when_evcache_metrics_enabled_is_false() {
+        contextRunner.withPropertyValues("evcache.clusters[0].appName=test",
+                                         "evcache.clusters[0].cachePrefix=test1",
+                                         "evcache.metrics.enabled=false")
+                     .withUserConfiguration(EnableCachingConfiguration.class)
+                     .run(context -> assertThat(context).doesNotHaveBean(EVCacheMeterBinder.class));
     }
 
     @Test
     void should_be_loaded_EVCacheProperties() {
-        loadContext(EnableCachingConfiguration.class,
-                    "evcache.clusters[0].appName=test",
-                    "evcache.clusters[0].cachePrefix=test1",
-                    "evcache.clusters[0].time-to-live=1000",
-                    "evcache.clusters[0].server-group-retry=true",
-                    "evcache.clusters[0].enable-exception-throwing=true",
-                    "evcache.clusters[0].allow-null-values=false",
-                    "evcache.clusters[1].appName=test",
-                    "evcache.clusters[1].cachePrefix=test2",
-                    "evcache.clusters[1].server-group-retry=false");
-        final EVCacheProperties properties = context.getBean(EVCacheProperties.class);
-        assertAll(
-            () -> assertThat(first(properties).getAppName()).isEqualTo("test"),
-            () -> assertThat(first(properties).getCachePrefix()).isEqualTo("test1"),
-            () -> assertThat(first(properties).getTimeToLive()).isEqualTo(1000),
-            () -> assertThat(first(properties).isServerGroupRetry()).isTrue(),
-            () -> assertThat(first(properties).isAllowNullValues()).isFalse(),
-            () -> assertThat(second(properties).getAppName()).isEqualTo("test"),
-            () -> assertThat(second(properties).getCachePrefix()).isEqualTo("test2"),
-            () -> assertThat(second(properties).isAllowNullValues()).isTrue(),
-            () -> assertThat(second(properties).isServerGroupRetry()).isFalse()
-        );
+        contextRunner.withPropertyValues("evcache.clusters[0].app-name=test",
+                                         "evcache.clusters[0].cache-prefix=test1",
+                                         "evcache.clusters[0].time-to-live=1000",
+                                         "evcache.clusters[0].server-group-retry=true",
+                                         "evcache.clusters[0].enable-exception-throwing=true",
+                                         "evcache.clusters[0].allow-null-values=false",
+                                         "evcache.clusters[1].appName=test",
+                                         "evcache.clusters[1].cachePrefix=test2",
+                                         "evcache.clusters[1].server-group-retry=false",
+                                         "evcache.use.simple.node.list.provider=true")
+                     .withUserConfiguration(EnableCachingConfiguration.class)
+                     .run(context -> assertAll(
+                         () -> assertThat(context).hasSingleBean(EVCacheProperties.class),
+                         () -> assertThat(firstCluster(context).getAppName()).isEqualTo("test"),
+                         () -> assertThat(firstCluster(context).getCachePrefix()).isEqualTo("test1"),
+                         () -> assertThat(firstCluster(context).getTimeToLive()).isEqualTo(1000),
+                         () -> assertThat(firstCluster(context).isServerGroupRetry()).isTrue(),
+                         () -> assertThat(firstCluster(context).isAllowNullValues()).isFalse(),
+                         () -> assertThat(secondCluster(context).getAppName()).isEqualTo("test"),
+                         () -> assertThat(secondCluster(context).getCachePrefix()).isEqualTo("test2"),
+                         () -> assertThat(secondCluster(context).isAllowNullValues()).isTrue(),
+                         () -> assertThat(secondCluster(context).isServerGroupRetry()).isFalse()
+                     ));
     }
 
-    private EVCacheProperties.Cluster first(final EVCacheProperties properties) {
-        return properties.getClusters().get(0);
+    private EVCacheProperties.Cluster firstCluster(final AssertableApplicationContext context) {
+        return property(context).getClusters().get(0);
     }
 
-    private EVCacheProperties.Cluster second(final EVCacheProperties properties) {
-        return properties.getClusters().get(1);
+    private EVCacheProperties property(final AssertableApplicationContext context) {
+        return context.getBean(EVCacheProperties.class);
     }
 
-    private void loadContext(final Class<?> configuration, final String... pairs) {
-        addEnvironment(context, pairs);
-        context.register(configuration);
-        context.register(EVCacheAutoConfiguration.class);
-        context.register(CacheAutoConfiguration.class);
-        context.register(ArchaiusAutoConfiguration.class);
-        context.refresh();
+    private EVCacheProperties.Cluster secondCluster(final AssertableApplicationContext context) {
+        return property(context).getClusters().get(1);
     }
 
     @Configuration

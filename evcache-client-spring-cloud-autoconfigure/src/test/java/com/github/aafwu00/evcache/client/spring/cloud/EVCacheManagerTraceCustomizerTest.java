@@ -24,32 +24,33 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.springframework.cache.Cache;
 import org.springframework.cache.support.SimpleValueWrapper;
-import org.springframework.cloud.sleuth.ErrorParser;
-import org.springframework.cloud.sleuth.Span;
-import org.springframework.cloud.sleuth.Tracer;
 
 import com.github.aafwu00.evcache.client.spring.EVCache;
-import com.github.aafwu00.evcache.client.spring.EVCacheImpl;
 import com.github.aafwu00.evcache.client.spring.EVCacheManager;
 import com.github.aafwu00.evcache.client.spring.EVCachePostConstructCustomizer;
 
+import brave.Span;
+import brave.Tracer;
+import brave.Tracing;
+import zipkin2.Endpoint;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.springframework.cloud.sleuth.Span.CLIENT_RECV;
-import static org.springframework.cloud.sleuth.Span.CLIENT_SEND;
-import static org.springframework.cloud.sleuth.Span.SPAN_PEER_SERVICE_TAG_NAME;
+import static org.springframework.cloud.sleuth.util.SpanNameUtil.toLowerHyphen;
 
 class EVCacheManagerTraceCustomizerTest {
+    private Tracing tracing;
     private Tracer tracer;
-    private ErrorParser errorParser;
     private EVCacheManagerTraceCustomizer customizer;
     private Cache traceableCache;
     private EVCache evcache;
@@ -59,13 +60,14 @@ class EVCacheManagerTraceCustomizerTest {
 
     @BeforeEach
     void setUp() {
+        tracing = mock(Tracing.class);
         tracer = mock(Tracer.class);
-        errorParser = mock(ErrorParser.class);
-        customizer = new EVCacheManagerTraceCustomizer(tracer, errorParser);
-        evcache = mock(EVCacheImpl.class);
+        doReturn(tracer).when(tracing).tracer();
+        customizer = new EVCacheManagerTraceCustomizer(tracing);
+        evcache = mock(EVCache.class);
         nativeCache = mock(com.netflix.evcache.EVCache.class);
         doReturn(nativeCache).when(evcache).getNativeCache();
-        traceableCache = new EVCacheManagerTraceCustomizer.SleuthTraceableCache(evcache, tracer, errorParser);
+        traceableCache = new EVCacheManagerTraceCustomizer.SleuthTraceableCache(evcache, tracing);
         currentSpan = mock(Span.class);
         span = mock(Span.class);
     }
@@ -193,8 +195,8 @@ class EVCacheManagerTraceCustomizerTest {
 
     @Test
     void should_not_be_traced_when_clear() {
-        doReturn(currentSpan).when(tracer).getCurrentSpan();
-        doReturn(false).when(currentSpan).isExportable();
+        doReturn(currentSpan).when(tracer).currentSpan();
+        doReturn(true).when(currentSpan).isNoop();
         traceableCache.clear();
         verify(evcache).clear();
         verifyNotTraceable();
@@ -202,51 +204,80 @@ class EVCacheManagerTraceCustomizerTest {
 
     private void verifyNotTraceable() {
         verify(currentSpan, never()).tag(anyString(), anyString());
-        verify(currentSpan, never()).logEvent(anyString());
         verify(span, never()).tag(anyString(), anyString());
-        verify(span, never()).logEvent(anyString());
-        verify(tracer, never()).close(any(Span.class));
+        verify(span, never()).annotate(anyString());
+        verify(span, never()).finish();
+        verify(span, never()).finish(anyLong());
     }
 
     private void assertThatTraceable(final String operation,
                                      final String key,
                                      final Consumer<Cache> execution) {
-        doReturn(currentSpan).when(tracer).getCurrentSpan();
-        doReturn(true).when(currentSpan).isExportable();
-        doReturn(span).when(tracer).createSpan(operation);
+        doReturn(currentSpan).when(tracer).currentSpan();
+        doReturn(false).when(currentSpan).isNoop();
+        doReturn(span).when(tracer).newTrace();
+        doReturn(span).when(span).kind(Span.Kind.CLIENT);
+        doReturn(span).when(span).remoteEndpoint(Endpoint.newBuilder()
+                                                         .serviceName("AppName")
+                                                         .build());
+        doReturn(span).when(span).name(toLowerHyphen(operation));
+        doReturn(span).when(span).tag("cache.prefix", "prefix");
+        doReturn(span).when(span).tag("cache.key", key);
+        doReturn(span).when(span).start();
         doReturn("AppName").when(nativeCache).getAppName();
         doReturn("prefix").when(nativeCache).getCachePrefix();
         execution.accept(traceableCache);
-        final InOrder inOrder = inOrder(span, evcache, tracer);
+        final InOrder inOrder = inOrder(tracer, currentSpan, span, evcache);
+        inOrder.verify(tracer, times(2)).currentSpan();
+        inOrder.verify(currentSpan).isNoop();
+        inOrder.verify(tracer).newTrace();
+        inOrder.verify(span).kind(Span.Kind.CLIENT);
+        inOrder.verify(span).remoteEndpoint(Endpoint.newBuilder()
+                                                    .serviceName("AppName")
+                                                    .build());
+        inOrder.verify(span).name(toLowerHyphen(operation));
         inOrder.verify(span).tag("cache.prefix", "prefix");
         inOrder.verify(span).tag("cache.key", key);
-        inOrder.verify(span).logEvent(CLIENT_SEND);
+        inOrder.verify(span).start();
         execution.accept(inOrder.verify(evcache));
-        inOrder.verify(span).logEvent(CLIENT_RECV);
-        inOrder.verify(span).tag(SPAN_PEER_SERVICE_TAG_NAME, "AppName");
-        inOrder.verify(tracer).close(span);
+        inOrder.verify(span, never()).error(any());
+        inOrder.verify(span).finish();
     }
 
     private void assertThatTraceable(final String operation,
                                      final String key,
                                      final Consumer<Cache> execution,
                                      final Throwable throwable) {
-        doReturn(currentSpan).when(tracer).getCurrentSpan();
-        doReturn(true).when(currentSpan).isExportable();
-        doReturn(span).when(tracer).createSpan(operation);
+        doReturn(currentSpan).when(tracer).currentSpan();
+        doReturn(false).when(currentSpan).isNoop();
+        doReturn(span).when(tracer).newTrace();
+        doReturn(span).when(span).kind(Span.Kind.CLIENT);
+        doReturn(span).when(span).remoteEndpoint(Endpoint.newBuilder()
+                                                         .serviceName("AppName")
+                                                         .build());
+        doReturn(span).when(span).name(toLowerHyphen(operation));
+        doReturn(span).when(span).tag("cache.prefix", "prefix");
+        doReturn(span).when(span).tag("cache.key", key);
+        doReturn(span).when(span).start();
         doReturn("AppName").when(nativeCache).getAppName();
         doReturn("prefix").when(nativeCache).getCachePrefix();
         execution.accept(doThrow(throwable).when(evcache));
         assertThatThrownBy(() -> execution.accept(traceableCache)).isEqualTo(throwable);
-        final InOrder inOrder = inOrder(span, evcache, errorParser, tracer);
+        final InOrder inOrder = inOrder(tracer, currentSpan, span, evcache);
+        inOrder.verify(tracer, times(2)).currentSpan();
+        inOrder.verify(currentSpan).isNoop();
+        inOrder.verify(tracer).newTrace();
+        inOrder.verify(span).kind(Span.Kind.CLIENT);
+        inOrder.verify(span).remoteEndpoint(Endpoint.newBuilder()
+                                                    .serviceName("AppName")
+                                                    .build());
+        inOrder.verify(span).name(toLowerHyphen(operation));
         inOrder.verify(span).tag("cache.prefix", "prefix");
         inOrder.verify(span).tag("cache.key", key);
-        inOrder.verify(span).logEvent(CLIENT_SEND);
+        inOrder.verify(span).start();
         execution.accept(inOrder.verify(evcache));
-        inOrder.verify(errorParser).parseErrorTags(span, throwable);
-        inOrder.verify(span).logEvent(CLIENT_RECV);
-        inOrder.verify(span).tag(SPAN_PEER_SERVICE_TAG_NAME, "AppName");
-        inOrder.verify(tracer).close(span);
+        inOrder.verify(span).error(throwable);
+        inOrder.verify(span).finish();
     }
 
     @Test

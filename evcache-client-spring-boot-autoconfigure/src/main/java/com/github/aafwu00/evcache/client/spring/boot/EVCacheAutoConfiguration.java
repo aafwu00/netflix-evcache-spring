@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Properties;
 
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.actuate.endpoint.PublicMetrics;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -41,6 +40,8 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 
 import com.github.aafwu00.evcache.client.spring.EVCacheManager;
+
+import io.micrometer.core.instrument.binder.MeterBinder;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for the EVCache. Creates a
@@ -86,11 +87,13 @@ public class EVCacheAutoConfiguration {
         return new CacheManagerCustomizers(customizers.getIfAvailable());
     }
 
-    @Bean
-    @ConditionalOnClass(PublicMetrics.class)
+    @Configuration
     @ConditionalOnProperty(value = "evcache.metrics.enabled", matchIfMissing = true)
-    @ConditionalOnMissingBean
-    public PublicMetrics evcacheMetrics() {
-        return new EVCacheMetrics();
+    @ConditionalOnClass(MeterBinder.class)
+    static class EVCacheMeterBinderProviderConfiguration {
+        @Bean
+        public EVCacheMeterBinderProvider evcacheMeterBinderProvider() {
+            return new EVCacheMeterBinderProvider();
+        }
     }
 }

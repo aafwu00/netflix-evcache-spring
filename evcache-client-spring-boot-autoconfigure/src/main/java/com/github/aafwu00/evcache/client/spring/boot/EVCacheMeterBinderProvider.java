@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package sample;
+package com.github.aafwu00.evcache.client.spring.boot;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
+import org.springframework.boot.actuate.metrics.cache.CacheMeterBinderProvider;
 
-/**
- * see application.yml
- *
- * @author Taeho Kim
- */
-@SpringBootApplication
-@EnableEurekaServer
-public class EurekaServer {
-    public static void main(final String[] args) {
-        new SpringApplicationBuilder(EurekaServer.class).run(args);
+import com.github.aafwu00.evcache.client.spring.EVCache;
+
+import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.binder.MeterBinder;
+
+public class EVCacheMeterBinderProvider implements CacheMeterBinderProvider<EVCache> {
+    @Override
+    public MeterBinder getMeterBinder(final EVCache cache, final Iterable<Tag> tags) {
+        return new EVCacheMeterBinder(cache, cache.getName(), tags);
     }
 }

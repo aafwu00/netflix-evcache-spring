@@ -21,13 +21,13 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.cloud.sleuth.ErrorParser;
-import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.cloud.sleuth.autoconfig.TraceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.github.aafwu00.evcache.client.spring.boot.EVCacheAutoConfiguration;
+
+import brave.Tracing;
 
 /**
  * Spring configuration for configuring EVCache Trace defaults to be Sleuth based
@@ -37,14 +37,14 @@ import com.github.aafwu00.evcache.client.spring.boot.EVCacheAutoConfiguration;
  * @see EVCacheAutoConfiguration
  */
 @Configuration
-@ConditionalOnBean({Tracer.class, ErrorParser.class})
+@ConditionalOnBean(Tracing.class)
 @ConditionalOnProperty(value = "evcache.trace.enabled", matchIfMissing = true)
 @AutoConfigureAfter(TraceAutoConfiguration.class)
 @AutoConfigureBefore(EVCacheAutoConfiguration.class)
 public class EVCacheTraceAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
-    public EVCacheManagerTraceCustomizer evcacheManagerSleuthCustomizer(final Tracer tracer, final ErrorParser errorParser) {
-        return new EVCacheManagerTraceCustomizer(tracer, errorParser);
+    public EVCacheManagerTraceCustomizer evcacheManagerSleuthCustomizer(final Tracing tracing) {
+        return new EVCacheManagerTraceCustomizer(tracing);
     }
 }

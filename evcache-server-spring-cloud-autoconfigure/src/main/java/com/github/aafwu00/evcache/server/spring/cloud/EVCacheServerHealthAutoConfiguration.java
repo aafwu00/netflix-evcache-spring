@@ -89,10 +89,4 @@ public class EVCacheServerHealthAutoConfiguration {
         return new MemcachedHealthIndicator(client);
     }
 
-    @Bean
-    @ConditionalOnProperty(value = "evcache.server.metrics.enabled", matchIfMissing = true)
-    @ConditionalOnMissingBean
-    public MemcachedMetrics memcachedMetrics(final MemcachedClient client) {
-        return new MemcachedMetrics(client);
-    }
 }

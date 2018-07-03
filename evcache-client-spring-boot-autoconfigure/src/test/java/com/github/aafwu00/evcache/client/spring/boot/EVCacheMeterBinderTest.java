@@ -16,30 +16,41 @@
 
 package com.github.aafwu00.evcache.client.spring.boot;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.github.aafwu00.evcache.client.spring.EVCache;
 import com.netflix.evcache.EVCache.Call;
 import com.netflix.evcache.metrics.EVCacheMetricsFactory;
 import com.netflix.evcache.metrics.Stats;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 /**
  * @author Taeho Kim
  */
-class EVCacheMetricsTest {
-    private EVCacheMetrics metrics;
+class EVCacheMeterBinderTest {
+    private EVCache cache;
+    private EVCacheMeterBinder binder;
     private Stats stats;
 
     @BeforeEach
     void setUp() {
-        metrics = new EVCacheMetrics();
+        cache = mock(EVCache.class);
+        doReturn("app").when(cache).getAppName();
+        doReturn("prefix").when(cache).getCachePrefix();
+        binder = spy(new EVCacheMeterBinder(cache, "test", emptyList()));
         EVCacheMetricsFactory.getAllMetrics().clear();
-        stats = EVCacheMetricsFactory.getStats("test", "prefix");
+        stats = EVCacheMetricsFactory.getStats("app", "prefix");
         call();
     }
 
@@ -67,23 +78,41 @@ class EVCacheMetricsTest {
     }
 
     @Test
-    void metrics() {
-        assertAll(
-            () -> assertThat(hasMetric("evcache.test:prefix.cache.hits")).isTrue(),
-            () -> assertThat(hasMetric("evcache.test:prefix.cache.miss")).isTrue(),
-            () -> assertThat(hasMetric("evcache.test:prefix.get.call")).isTrue(),
-            () -> assertThat(hasMetric("evcache.test:prefix.get.duration")).isTrue(),
-            () -> assertThat(hasMetric("evcache.test:prefix.set.call")).isTrue(),
-            () -> assertThat(hasMetric("evcache.test:prefix.bulk.hits")).isTrue(),
-            () -> assertThat(hasMetric("evcache.test:prefix.bulk.miss")).isTrue(),
-            () -> assertThat(hasMetric("evcache.test:prefix.bulk.call")).isTrue(),
-            () -> assertThat(hasMetric("evcache.test:prefix.bulk.duration")).isTrue()
-        );
+    void evictionCount() {
+        assertThat(binder.evictionCount()).isNotNull();
     }
 
-    private boolean hasMetric(final String key) {
-        return metrics.metrics()
-                      .stream()
-                      .anyMatch(metric -> StringUtils.equals(key, metric.getName()));
+    @Test
+    void hitCount() {
+        assertThat(binder.hitCount()).isNotNull();
+    }
+
+    @Test
+    void missCount() {
+        assertThat(binder.missCount()).isNotNull();
+    }
+
+    @Test
+    void putCount() {
+        assertThat(binder.putCount()).isNotNull();
+    }
+
+    @Test
+    void size_not_supported() {
+        assertThat(binder.size()).isNull();
+    }
+
+    @Test
+    void bindImplementationSpecificMetrics() {
+        final MeterRegistry registry = spy(new SimpleMeterRegistry());
+        binder.bindImplementationSpecificMetrics(registry);
+        assertAll(
+            () -> assertThat(registry.get("cache.get.calls")).isNotNull(),
+            () -> assertThat(registry.get("cache.get.duration")).isNotNull(),
+            () -> assertThat(registry.get("cache.bulk.calls")).isNotNull(),
+            () -> assertThat(registry.get("cache.bulk.duration")).isNotNull(),
+            () -> assertThat(registry.get("cache.bulk.hit")).isNotNull(),
+            () -> assertThat(registry.get("cache.bulk.miss")).isNotNull()
+        );
     }
 }

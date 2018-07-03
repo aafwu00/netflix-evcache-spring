@@ -28,7 +28,9 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.gson.GsonAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
@@ -82,6 +84,7 @@ class EVCacheSpringBootIntegrationTest {
 
     @SpringBootApplication
     @EnableCaching
+    @EnableAutoConfiguration(exclude = GsonAutoConfiguration.class)
     static class TodoApp {
         @Repository
         static class TodoRepository {

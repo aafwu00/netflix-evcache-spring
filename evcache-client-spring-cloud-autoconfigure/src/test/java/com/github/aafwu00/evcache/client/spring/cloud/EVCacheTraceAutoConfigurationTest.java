@@ -16,70 +16,57 @@
 
 package com.github.aafwu00.evcache.client.spring.cloud;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.sleuth.autoconfig.TraceAutoConfiguration;
-import org.springframework.cloud.sleuth.log.NoOpSpanLogger;
-import org.springframework.cloud.sleuth.log.SpanLogger;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.github.aafwu00.evcache.client.spring.boot.EVCacheAutoConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.springframework.boot.test.util.EnvironmentTestUtils.addEnvironment;
 
 /**
  * @author Taeho Kim
  */
 class EVCacheTraceAutoConfigurationTest {
-    private AnnotationConfigApplicationContext context;
+    private ApplicationContextRunner contextRunner;
 
     @BeforeEach
     void setUp() {
-        context = new AnnotationConfigApplicationContext();
-    }
-
-    @AfterEach
-    void tearDown() {
-        context.close();
+        contextRunner = new ApplicationContextRunner()
+            .withConfiguration(AutoConfigurations.of(TraceAutoConfiguration.class,
+                                                     EVCacheTraceAutoConfiguration.class,
+                                                     EVCacheAutoConfiguration.class));
     }
 
     @Test
     void should_be_loaded_EVCacheManagerTraceCustomizer() {
-        loadContext(EnableCachingConfiguration.class, "evcache.clusters[0].appName=test", "evcache.clusters[0].cachePrefix=test1");
-        assertThat(context.getBean(EVCacheManagerTraceCustomizer.class)).isNotNull();
+        contextRunner.withPropertyValues("evcache.clusters[0].appName=test", "evcache.clusters[0].cachePrefix=test1")
+                     .withUserConfiguration(EnableCachingConfiguration.class)
+                     .run(context -> assertThat(context).hasSingleBean(EVCacheManagerTraceCustomizer.class));
     }
 
     @Test
     void should_be_customized_EVCacheManager() {
-        loadContext(MockConfiguration.class, "evcache.clusters[0].appName=test", "evcache.clusters[0].cachePrefix=test1");
-        verify(context.getBean(EVCacheManagerTraceCustomizer.class)).customize(any());
+        contextRunner.withPropertyValues("evcache.clusters[0].appName=test", "evcache.clusters[0].cachePrefix=test1")
+                     .withUserConfiguration(MockConfiguration.class)
+                     .run(context -> verify(context.getBean(EVCacheManagerTraceCustomizer.class)).customize(any()));
     }
 
     @Test
     void should_be_not_loaded_EVCacheManagerTraceCustomizer_when_not_disabled() {
-        loadContext(EnableCachingConfiguration.class,
-                    "evcache.clusters[0].appName=test", "evcache.clusters[0].cachePrefix=test1", "evcache.trace.enabled=false");
-        assertThatThrownBy(() -> context.getBean(EVCacheManagerTraceCustomizer.class))
-            .isExactlyInstanceOf(NoSuchBeanDefinitionException.class);
-    }
-
-    private void loadContext(final Class<?> configuration, final String... pairs) {
-        addEnvironment(context, pairs);
-        context.register(configuration);
-        context.register(TraceAutoConfiguration.class);
-        context.register(EVCacheTraceAutoConfiguration.class);
-        context.register(EVCacheAutoConfiguration.class);
-        context.refresh();
+        contextRunner.withPropertyValues("evcache.clusters[0].appName=test",
+                                         "evcache.clusters[0].cachePrefix=test1",
+                                         "evcache.trace.enabled=false")
+                     .withUserConfiguration(EnableCachingConfiguration.class)
+                     .run(context -> assertThat(context).doesNotHaveBean(EVCacheManagerTraceCustomizer.class));
     }
 
     @Configuration
@@ -89,19 +76,10 @@ class EVCacheTraceAutoConfigurationTest {
         EVCacheManagerTraceCustomizer evcacheManagerTraceCustomizer() {
             return mock(EVCacheManagerTraceCustomizer.class);
         }
-
-        @Bean
-        SpanLogger spanLogger() {
-            return new NoOpSpanLogger();
-        }
     }
 
     @Configuration
     @EnableCaching
     static class EnableCachingConfiguration {
-        @Bean
-        SpanLogger spanLogger() {
-            return new NoOpSpanLogger();
-        }
     }
 }

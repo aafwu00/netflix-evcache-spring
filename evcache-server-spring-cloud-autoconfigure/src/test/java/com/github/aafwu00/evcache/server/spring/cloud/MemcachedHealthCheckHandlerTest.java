@@ -25,7 +25,7 @@ import static com.netflix.appinfo.InstanceInfo.InstanceStatus.OUT_OF_SERVICE;
 import static com.netflix.appinfo.InstanceInfo.InstanceStatus.UNKNOWN;
 import static com.netflix.appinfo.InstanceInfo.InstanceStatus.UP;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
@@ -45,7 +45,8 @@ class MemcachedHealthCheckHandlerTest {
     @Test
     void up() throws Exception {
         doAnswer(invocation -> {
-            invocation.getArgumentAt(0, Health.Builder.class).up();
+            final Health.Builder builder = invocation.getArgument(0);
+            builder.up();
             return null;
         }).when(indicator).doHealthCheck(any());
         assertThat(handler.getStatus(null)).isEqualTo(UP);
@@ -54,7 +55,8 @@ class MemcachedHealthCheckHandlerTest {
     @Test
     void down() throws Exception {
         doAnswer(invocation -> {
-            invocation.getArgumentAt(0, Health.Builder.class).down();
+            final Health.Builder builder = invocation.getArgument(0);
+            builder.down();
             return null;
         }).when(indicator).doHealthCheck(any());
         assertThat(handler.getStatus(null)).isEqualTo(DOWN);
@@ -63,7 +65,8 @@ class MemcachedHealthCheckHandlerTest {
     @Test
     void outOfService() throws Exception {
         doAnswer(invocation -> {
-            invocation.getArgumentAt(0, Health.Builder.class).outOfService();
+            final Health.Builder builder = invocation.getArgument(0);
+            builder.outOfService();
             return null;
         }).when(indicator).doHealthCheck(any());
         assertThat(handler.getStatus(null)).isEqualTo(OUT_OF_SERVICE);
@@ -72,7 +75,8 @@ class MemcachedHealthCheckHandlerTest {
     @Test
     void unknown() throws Exception {
         doAnswer(invocation -> {
-            invocation.getArgumentAt(0, Health.Builder.class).unknown();
+            final Health.Builder builder = invocation.getArgument(0);
+            builder.unknown();
             return null;
         }).when(indicator).doHealthCheck(any());
         assertThat(handler.getStatus(null)).isEqualTo(UNKNOWN);

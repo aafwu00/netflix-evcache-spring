@@ -19,17 +19,17 @@ package com.github.aafwu00.evcache.server.spring.cloud;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.test.context.assertj.AssertableApplicationContext;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.commons.util.UtilAutoConfiguration;
 import org.springframework.cloud.netflix.eureka.EurekaClientAutoConfiguration;
 import org.springframework.cloud.netflix.eureka.EurekaDiscoveryClientConfiguration;
 import org.springframework.cloud.netflix.eureka.EurekaInstanceConfigBean;
 import org.springframework.cloud.netflix.eureka.config.EurekaDiscoveryClientConfigServiceAutoConfiguration;
 import org.springframework.cloud.netflix.eureka.metadata.ManagementMetadataProvider;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -45,51 +45,60 @@ import static com.netflix.appinfo.AmazonInfo.MetaDataKey.availabilityZone;
 import static com.netflix.appinfo.AmazonInfo.MetaDataKey.publicHostname;
 import static com.netflix.appinfo.AmazonInfo.MetaDataKey.publicIpv4;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
-import static org.springframework.boot.test.util.EnvironmentTestUtils.addEnvironment;
 
 /**
  * @author Taeho Kim
  */
 class EVCacheServerAutoConfigurationTest {
     private static EurekaInstanceConfigBean eurekaInstanceConfigBean = mock(EurekaInstanceConfigBean.class);
-    private AnnotationConfigApplicationContext context;
+    private ApplicationContextRunner contextRunner;
 
     @BeforeEach
     void setUp() {
         System.setProperty("net.spy.log.LoggerImpl", "net.spy.memcached.compat.log.SLF4JLogger");
-        context = new AnnotationConfigApplicationContext();
+        contextRunner = new ApplicationContextRunner()
+            .withConfiguration(AutoConfigurations.of(UtilAutoConfiguration.class,
+                                                     EurekaDiscoveryClientConfiguration.class,
+                                                     EurekaClientAutoConfiguration.class,
+                                                     EurekaDiscoveryClientConfigServiceAutoConfiguration.class,
+                                                     EVCacheServerAutoConfiguration.class,
+                                                     EVCacheServerHealthAutoConfiguration.class
+            )).withPropertyValues("spring.cloud.service-registry.auto-registration.enabled=false");
         reset(eurekaInstanceConfigBean);
-    }
-
-    @AfterEach
-    void tearDown() {
-        context.close();
     }
 
     @Test
     void should_be_loaded_EnableEVCacheServerConfiguration() {
-        loadContext(EnableEVCacheServerConfiguration.class);
-        final EurekaInstanceConfigBean config = context.getBean(EurekaInstanceConfigBean.class);
-        final AmazonInfo amazonInfo = getAmazonInfo(config);
-        assertAll(
-            () -> assertThat(context.getBean(ManagementMetadataProvider.class)).isNotNull(),
-            () -> assertThat(context.getBean(MemcachedClient.class)).isNotNull(),
-            () -> assertThat(context.getBean(MemcachedHealthCheckHandler.class)).isNotNull(),
-            () -> assertThat(context.getBean(MemcachedMetrics.class)).isNotNull(),
-            () -> assertThat(context.getBean(MemcachedHealthIndicator.class)).isNotNull(),
-            () -> assertThat(config.getASGName()).isEqualTo("DEFAULT"),
-            () -> assertThat(amazonInfo.get(availabilityZone)).isEqualTo("defaultZone"),
-            () -> assertThat(amazonInfo.get(publicHostname)).isNotBlank(),
-            () -> assertThat(amazonInfo.get(publicIpv4)).isNotBlank()
-        );
+        contextRunner.withUserConfiguration(EnableEVCacheServerConfiguration.class)
+                     .run(context -> assertAll(
+                         () -> assertThat(context.getBean(ManagementMetadataProvider.class)).isNotNull(),
+                         () -> assertThat(context.getBean(MemcachedClient.class)).isNotNull(),
+                         () -> assertThat(context.getBean(MemcachedHealthCheckHandler.class)).isNotNull(),
+                         () -> assertThat(context.getBean(MemcachedHealthIndicator.class)).isNotNull(),
+                         () -> assertThat(getConfig(context).getASGName()).isEqualTo("DEFAULT"),
+                         () -> assertThat(getAmazonInfo(context).get(availabilityZone)).isEqualTo("defaultZone"),
+                         () -> assertThat(getAmazonInfo(context).get(publicHostname)).isNotBlank(),
+                         () -> assertThat(getAmazonInfo(context).get(publicIpv4)).isNotBlank()
+                     ));
+    }
+
+    private EurekaInstanceConfigBean getConfig(AssertableApplicationContext context) {
+        return context.getBean(EurekaInstanceConfigBean.class);
+    }
+
+    private Map<String, String> getMetadataMap(AssertableApplicationContext context) {
+        return getConfig(context).getMetadataMap();
+    }
+
+    private AmazonInfo getAmazonInfo(AssertableApplicationContext context) {
+        return getAmazonInfo(getConfig(context));
     }
 
     private AmazonInfo getAmazonInfo(final EurekaInstanceConfigBean config) {
@@ -102,32 +111,30 @@ class EVCacheServerAutoConfigurationTest {
 
     @Test
     void should_be_overloaded_properties_when_EurekaInstanceConfigBean_is_loaded() {
-        loadContext(EnableEVCacheServerConfiguration.class,
-                    "evcache.port=1",
-                    "evcache.secure.port=2",
-                    "rend.port=3",
-                    "rend.batch.port=4",
-                    "udsproxy.memcached.port=5",
-                    "udsproxy.memento.port=6",
-                    "evcache.asg-name=test1",
-                    "evcache.availability-zone=test2",
-                    "evcache.public-hostname=test3",
-                    "evcache.public-ipv4=test4",
-                    "evcache.server.health.enabled=false");
-        final EurekaInstanceConfigBean config = context.getBean(EurekaInstanceConfigBean.class);
-        final AmazonInfo amazonInfo = getAmazonInfo(config);
-        assertAll(
-            () -> assertThat(config.getMetadataMap()).containsEntry("evcache.port", "1"),
-            () -> assertThat(config.getMetadataMap()).containsEntry("evcache.secure.port", "2"),
-            () -> assertThat(config.getMetadataMap()).containsEntry("rend.port", "3"),
-            () -> assertThat(config.getMetadataMap()).containsEntry("rend.batch.port", "4"),
-            () -> assertThat(config.getMetadataMap()).containsEntry("udsproxy.memcached.port", "5"),
-            () -> assertThat(config.getMetadataMap()).containsEntry("udsproxy.memento.port", "6"),
-            () -> assertThat(config.getASGName()).isEqualTo("test1"),
-            () -> assertThat(amazonInfo.get(availabilityZone)).isEqualTo("test2"),
-            () -> assertThat(amazonInfo.get(publicHostname)).isEqualTo("test3"),
-            () -> assertThat(amazonInfo.get(publicIpv4)).isEqualTo("test4")
-        );
+        contextRunner.withPropertyValues("evcache.port=1",
+                                         "evcache.secure.port=2",
+                                         "rend.port=3",
+                                         "rend.batch.port=4",
+                                         "udsproxy.memcached.port=5",
+                                         "udsproxy.memento.port=6",
+                                         "evcache.asg-name=test1",
+                                         "evcache.availability-zone=test2",
+                                         "evcache.public-hostname=test3",
+                                         "evcache.public-ipv4=test4",
+                                         "evcache.server.health.enabled=false")
+                     .withUserConfiguration(EnableEVCacheServerConfiguration.class)
+                     .run(context -> assertAll(
+                         () -> assertThat(getMetadataMap(context)).containsEntry("evcache.port", "1"),
+                         () -> assertThat(getMetadataMap(context)).containsEntry("evcache.secure.port", "2"),
+                         () -> assertThat(getMetadataMap(context)).containsEntry("rend.port", "3"),
+                         () -> assertThat(getMetadataMap(context)).containsEntry("rend.batch.port", "4"),
+                         () -> assertThat(getMetadataMap(context)).containsEntry("udsproxy.memcached.port", "5"),
+                         () -> assertThat(getMetadataMap(context)).containsEntry("udsproxy.memento.port", "6"),
+                         () -> assertThat(getConfig(context).getASGName()).isEqualTo("test1"),
+                         () -> assertThat(getAmazonInfo(context).get(availabilityZone)).isEqualTo("test2"),
+                         () -> assertThat(getAmazonInfo(context).get(publicHostname)).isEqualTo("test3"),
+                         () -> assertThat(getAmazonInfo(context).get(publicIpv4)).isEqualTo("test4")
+                     ));
     }
 
     @Test
@@ -137,8 +144,9 @@ class EVCacheServerAutoConfigurationTest {
         doReturn(metadata).when(eurekaInstanceConfigBean).getMetadataMap();
         doReturn("test").when(eurekaInstanceConfigBean).getASGName();
         doReturn(dataCenterInfo).when(eurekaInstanceConfigBean).getDataCenterInfo();
-        loadContext(EnableEVCacheServerConfigurationWithEurekaConfig.class, "evcache.server.health.enabled=false");
-        verify(eurekaInstanceConfigBean).setDataCenterInfo(any(AmazonInfo.class));
+        contextRunner.withPropertyValues("evcache.server.health.enabled=false")
+                     .withUserConfiguration(EnableEVCacheServerConfigurationWithEurekaConfig.class)
+                     .run(context -> verify(eurekaInstanceConfigBean).setDataCenterInfo(any(AmazonInfo.class)));
     }
 
     @Test
@@ -148,53 +156,36 @@ class EVCacheServerAutoConfigurationTest {
         doReturn(metadata).when(eurekaInstanceConfigBean).getMetadataMap();
         doReturn("test").when(eurekaInstanceConfigBean).getASGName();
         doReturn(dataCenterInfo).when(eurekaInstanceConfigBean).getDataCenterInfo();
-        loadContext(EnableEVCacheServerConfigurationWithEurekaConfig.class, "evcache.server.health.enabled=false");
-        verify(eurekaInstanceConfigBean, never()).setDataCenterInfo(any());
+        contextRunner.withPropertyValues("evcache.server.health.enabled=false")
+                     .withUserConfiguration(EnableEVCacheServerConfigurationWithEurekaConfig.class)
+                     .run(context -> verify(eurekaInstanceConfigBean, never()).setDataCenterInfo(any()));
     }
 
     @Test
     void should_be_not_loaded_MemcachedClient_when_EVCacheServer_health_enabled_is_false() {
-        loadContext(EnableEVCacheServerConfiguration.class, "evcache.server.health.enabled=false");
-        assertThatThrownBy(() -> context.getBean(MemcachedClient.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class);
+        contextRunner.withPropertyValues("evcache.server.health.enabled=false")
+                     .withUserConfiguration(EnableEVCacheServerConfiguration.class)
+                     .run(context -> assertThat(context).doesNotHaveBean(MemcachedClient.class));
     }
 
     @Test
     void should_be_not_loaded_MemcachedHealthCheckHandler_when_evcache_health_eureka_enabled_is_false() {
-        loadContext(EnableEVCacheServerConfiguration.class, "evcache.server.health.eureka.enabled=false");
-        assertThatThrownBy(() -> context.getBean(MemcachedHealthCheckHandler.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException
-                                                                                                             .class);
-    }
-
-    @Test
-    void should_be_not_loaded_MemcachedMetrics_when_evcache_metrics_enabled_is_false() {
-        loadContext(EnableEVCacheServerConfiguration.class, "evcache.server.metrics.enabled=false");
-        assertThatThrownBy(() -> context.getBean(MemcachedMetrics.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class);
+        contextRunner.withPropertyValues("evcache.server.health.eureka.enabled=false")
+                     .withUserConfiguration(EnableEVCacheServerConfiguration.class)
+                     .run(context -> assertThat(context).doesNotHaveBean(MemcachedHealthCheckHandler.class));
     }
 
     @Test
     void should_be_not_loaded_MemcachedHealthIndicator_when_evcache_health_memcached_enabled_is_false() {
-        loadContext(EnableEVCacheServerConfiguration.class, "evcache.server.health.memcached.enabled=false");
-        assertThatThrownBy(() -> context.getBean(MemcachedHealthIndicator.class)).isExactlyInstanceOf(
-            NoSuchBeanDefinitionException.class);
+        contextRunner.withPropertyValues("evcache.server.health.memcached.enabled=false")
+                     .withUserConfiguration(EnableEVCacheServerConfiguration.class)
+                     .run(context -> assertThat(context).doesNotHaveBean(MemcachedHealthIndicator.class));
     }
 
     @Test
     void should_be_not_loaded_MemcachedClient_when_not_exists_EnableEVCacheServer() {
-        loadContext(NoEVCacheServerConfiguration.class);
-        assertThatThrownBy(() -> context.getBean(MemcachedClient.class)).isExactlyInstanceOf(NoSuchBeanDefinitionException.class);
-    }
-
-    private void loadContext(final Class<?> configuration, final String... pairs) {
-        addEnvironment(context, pairs);
-        addEnvironment(context, "spring.cloud.service-registry.auto-registration.enabled=false");
-        context.register(configuration);
-        context.register(UtilAutoConfiguration.class);
-        context.register(EurekaDiscoveryClientConfiguration.class);
-        context.register(EurekaClientAutoConfiguration.class);
-        context.register(EurekaDiscoveryClientConfigServiceAutoConfiguration.class);
-        context.register(EVCacheServerAutoConfiguration.class);
-        context.register(EVCacheServerHealthAutoConfiguration.class);
-        context.refresh();
+        contextRunner.withUserConfiguration(NoEVCacheServerConfiguration.class)
+                     .run(context -> assertThat(context).doesNotHaveBean(MemcachedClient.class));
     }
 
     @Configuration
