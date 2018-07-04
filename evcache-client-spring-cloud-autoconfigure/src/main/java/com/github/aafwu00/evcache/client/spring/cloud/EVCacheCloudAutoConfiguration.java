@@ -20,6 +20,8 @@ import java.util.Properties;
 
 import javax.inject.Provider;
 
+import org.springframework.aop.TargetSource;
+import org.springframework.aop.framework.Advised;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -41,7 +43,6 @@ import com.netflix.evcache.connection.ConnectionFactoryProvider;
 import com.netflix.evcache.connection.IConnectionFactoryProvider;
 import com.netflix.evcache.pool.EVCacheClientPoolManager;
 
-import static org.springframework.aop.framework.AopProxyUtils.getSingletonTarget;
 import static org.springframework.aop.support.AopUtils.isAopProxy;
 
 /**
@@ -90,7 +91,14 @@ public class EVCacheCloudAutoConfiguration {
 
     private DiscoveryClient discoveryClient(final EurekaClient eurekaClient) {
         if (isAopProxy(eurekaClient)) {
-            return DiscoveryClient.class.cast(getSingletonTarget(eurekaClient));
+            final TargetSource targetSource = Advised.class.cast(eurekaClient).getTargetSource();
+            try {
+                return DiscoveryClient.class.cast(targetSource.getTarget());
+                // CHECKSTYLE:OFF
+            } catch (final Exception e) {
+                // CHECKSTYLE:ON
+                throw new IllegalStateException(e);
+            }
         }
         return DiscoveryClient.class.cast(eurekaClient);
     }
