@@ -21,12 +21,13 @@ logging:
 
 evcache:
   clusters:
-    - app-name: evcache
+    - name: TODO
+      app-name: EVCACHE
       cache-prefix: todos
       time-to-live: 5
       server-group-retry: true
       enable-exception-throwing: false
 
-EVCACHE.use.inmemory.cache: true
+EVCACHE.use.inmemory.cache: false
 EVCACHE.inmemory.cache.duration.ms: 1000
 EVCACHE.log.operation.calls: SET,DELETE,GMISS,TMISS,BMISS_ALL,TOUCH,REPLACE
