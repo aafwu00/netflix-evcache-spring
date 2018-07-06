@@ -1,0 +1,105 @@
+=== evcache-server-spring-cloud-starter
+
+WARNING: This project is not an original `EVCar`(`EVCache` + `Sidecar`).
+EVCache Server composed `memcached` and `Prana(Sidecar)`.
+`EVCar` is not released at this time, so I combined the functions of `Eureka` + `Sidecar`.
+You can find some hints about the function of `EVCar` below.
+
+Hint on: https://github.com/Netflix/EVCache/issues/49 and https://github.com/Netflix/EVCache/tree/nflx-specific/evcar
+
+Example EVCache Server, See on link:samples/evcache-server-sample[evcache-server-sample]
+
+1. Start Eureka Server
+See on link:samples/eureka-server-sample[eureka-server-sample]
+
+2. Start memcached
+
+3. Dependency Management
+
+[source,gradle]
+----
+repositories {
+    maven { url 'https://jitpack.io' } <1>
+}
+
+dependencies {
+    compile 'com.github.aafwu00:evcache-server-spring-cloud-starter:x.y.z' <2>
+}
+----
+<1> add `jitpack` repository
+<2> add dependency
+
+4. Write java source code
+
+[source,java]
+----
+@SpringBootApplication
+@EnableEVCacheServer # <1>
+public class Application {
+    public static void main(final String[] args) {
+        new SpringApplicationBuilder(Application.class).run(args);
+    }
+}
+----
+<1> Using `@EnableEVCacheServer` annotation, that's all
+
+5. Write `application.yml` code, See on link:samples/evcar-sample/src/main/resources/config/application.yml[Sample]
+
+[source,yml]
+----
+spring:
+  application:
+    name: EVCACHE # <1>
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/ # <2>
+
+evcache:
+  port: 11211 # <3>
+----
+<1> EVCache App Name
+<2> see on http://cloud.spring.io/spring-cloud-static/spring-cloud-netflix/1.4.0.RELEASE/multi/multi__service_discovery_eureka_clients.html#_registering_with_eureka
+<3> memcached server port
+<4> evcache server group, shard name of replica set
+
+.Table EVCache Sidcar Properties
+|===
+| Name | Default | Description
+
+| evcache.public-hostname
+|
+| Hostname of Memcached Or Rend, If blank using localhost
+
+| evcache.public-ipv4
+|
+| Ip Address of Memcached Or Rend, If blank using localhost ip
+
+| evcache.availability-zone
+|
+| Ip Address of Memcached Or Rend, If blank using localhost ip
+
+| evcache.asg-name
+| DEFAULT
+| Use AWS autoscaling group name(EVCache Group Name), when Eureka ASG name if blank
+
+
+| evcache.port
+| 11211
+| Default Port of Memcached Or Rend
+
+
+| evcache.server.health.eureka.enabled
+| true
+| Eureka Health Check for Memcached
+
+| evcache.server.metrics.enabled
+| true
+| Spring Boot Metrics for Memcached
+
+| evcache.server.health.memcached.enabled
+| true
+| Spring Boot Health Check for Memcached
+
+|===

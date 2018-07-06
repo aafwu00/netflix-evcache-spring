@@ -1,0 +1,86 @@
+=== evcache-client-spring-cloud-starter
+
+This project provides Netflix EVCache And Eureka integrations for Spring Cloud.
+see link:samples/spring-boot-sample[spring-boot-sample]
+
+1. Run evcache server.
+See on <<evcar-spring-cloud-starter>>
+
+2. Dependency Management
+
+[source,gradle]
+----
+repositories {
+    maven { url 'https://jitpack.io' } <1>
+}
+
+dependencies {
+    compile 'com.github.aafwu00:evcache-client-spring-cloud-starter:x.y.z' <2>
+}
+----
+<1> add `jitpack` repository
+<2> add dependency
+
+3. Write java code
+
+[source,java]
+----
+@SpringBootApplication
+@EnableDiscoveryClient # <1>
+@EnableCaching # <2>
+public class Application {
+    public static void main(final String[] args) {
+        new SpringApplicationBuilder(Application.class).run(args);
+    }
+}
+
+@Repository
+public class TodoRepository {
+    @Cacheable(cacheNames = "todos", key = "'findAll'") # <3>
+    public List<Todo> findAll() {
+        return ...;
+    }
+}
+----
+<1> See on http://cloud.spring.io/spring-cloud-static/spring-cloud-netflix/1.4.0.RELEASE/multi/multi__service_discovery_eureka_clients.html#_registering_with_eureka
+<2> See on https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/integration.html#cache
+
+4. Write `application.yml` code, See on link:samples/spring-cloud-sample/src/main/resources/config/application.yml[Sample]
+
+[source,yml]
+----
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/ # <1>
+
+evcache:
+  clusters:
+    - name: todos # <2>
+      appName: EVCACHE # <3>
+      cachePrefix: todo # <4>
+      timeToLive: 5
+      server-group-retry: true
+----
+<1> see on http://cloud.spring.io/spring-cloud-static/spring-cloud-netflix/1.4.0.RELEASE/multi/multi__service_discovery_eureka_clients.html#_registering_with_eureka
+<2> Cache Name(same as `@Cacheable` `cacheNames`)
+<3> EVCache App Name(`spring.application.name`)
+<4> EVCache Cache Prefix
+
+IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
+
+.Table EVCache Cloud Properties
+|===
+| Name | Default | Description
+
+| evcache.cloud.enabled
+| true
+|
+
+| evcache.trace.enabled
+| true
+| Whether to use sleuth trace, If you want add dependency `spring-cloud-starter-sleuth`
+
+|===
+
+See also: https://github.com/Netflix/EVCache/wiki/Configuring-EVCache-Client , https://github.com/Netflix/EVCache/blob/split/docs/config.md , https://github.com/spring-cloud/spring-cloud-sleuth

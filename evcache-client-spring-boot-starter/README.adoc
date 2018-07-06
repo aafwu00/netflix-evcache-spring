@@ -1,0 +1,105 @@
+=== evcache-client-spring-boot-starter
+
+This project provides Netflix EVCache integrations for Spring Boot.
+See on link:samples/spring-boot-sample[spring-boot-sample]
+
+1. Dependency Management
+
+[source,gradle]
+----
+repositories {
+    maven { url 'https://jitpack.io' } <1>
+}
+
+dependencies {
+    compile 'com.github.aafwu00:evcache-client-spring-boot-starter:x.y.z' <2>
+}
+----
+<1> add `jitpack` repository
+<2> add dependency
+
+2. Write java code
+
+[source,java]
+----
+@SpringBootApplication
+@EnableCaching # <1>
+public class Application {
+    public static void main(final String[] args) {
+        new SpringApplicationBuilder(Application.class).run(args);
+    }
+}
+
+@Repository
+public class TodoRepository {
+    @Cacheable(cacheNames = "EVCACHE.todos", key = "'findAll'") # <2>
+    public List<Todo> findAll() {
+        return ...;
+    }
+}
+----
+<1> see on https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/integration.html#cache
+<2> `cacheNames` is sames as `evcache.clusters[].appName + . + evcache.clusters[].cachePrefix`, when `evcache.clusters[].name` is blank
+
+3. Write `application.yml` code, See on link:samples/spring-boot-sample/src/main/resources/config/application.yml[Sample]
+
+[source,yml]
+----
+evcache:
+  clusters:
+    - appName: EVCACHE # <1>
+      cachePrefix: todos # <2>
+      enable-exception-throwing: false
+
+EVCACHE-NODES: shard1=localhost:11211,localhost:11212;shard2=localhost:11213,localhost:11214
+----
+<1> EVCache Cluster App Name
+<2> EVCache Cache Prefix
+<3> `evcache.clusters[0].appName` + `-NODES` means memcached server address, see on : https://github.com/Netflix/EVCache/wiki/Sample-EVCache-Deployment#step-4-create-a-cache-deployment-descriptor
+
+IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
+
+
+.Table EVCache Properties
+|===
+| Name | Default | Description
+
+| evcache.enabled
+| true
+|
+
+| evcache.clusters[].name
+|
+| Name of the Cache, @Cacheable cacheName, Same as `appName` + `.` + `cachePrefix` when name is blank
+
+| evcache.clusters[].appName
+|
+| Name of the EVCache App clusters, Recommend Upper Case
+
+| evcache.clusters[].cachePrefix
+|
+| Cache Prefix Key, Don't contain colon(:) character
+
+| evcache.clusters[].timeToLive
+| 900
+| Default Time To Live(TTL), Seconds
+
+| evcache.clusters[].allowNullValues
+| true
+| Whether to allow for `null` values
+
+| evcache.clusters[].serverGroupRetry
+| true
+| Retry across Server Group for cache misses and exceptions
+
+| evcache.clusters[].enableExceptionThrowing
+| false
+| Exceptions are not propagated and null values are returned
+
+| evcache.metrics.enabled
+| true
+| Spring Boot Metrics for EVCache
+
+|===
+
+See also: https://github.com/Netflix/EVCache/wiki/Configuring-EVCache-Client , https://github.com/Netflix/EVCache/blob/split/docs/config.md

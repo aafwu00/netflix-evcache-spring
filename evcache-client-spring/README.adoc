@@ -1,0 +1,55 @@
+=== evcache-client-spring
+
+This project provides Netflix EVCache integrations for Spring Cache Abstraction.
+See on link:samples/spring-sample[spring-sample]
+
+1. Dependency Management
+
+[source,gradle]
+----
+repositories {
+    maven { url 'https://jitpack.io' } <1>
+}
+
+dependencies {
+    compile 'com.github.aafwu00:evcache-client-spring:x.y.z' <2>
+}
+----
+<1> add `jitpack` repository
+<2> add dependency
+
+2. Write java source code
+
+[source,java]
+----
+@Configuration
+@ComponentScan
+@EnableCaching
+public class TodoApp {
+    @Bean
+    public CacheManager cacheManager() {
+        EVCacheConfig.getInstance()
+                     .getDynamicStringProperty("TODO-NODES",
+                                               "shard1=localhost:11211,localhost:11212;shard2=localhost:11213,localhost:11214") # <2>
+                     .get();
+        final EVCacheConfiguration configuration = new EVCacheConfiguration();
+        configuration.setName("todos");
+        configuration.setAppName("TODO");
+        configuration.setCachePrefix("todo");
+        configuration.setTimeToLive(10);
+        configuration.setServerGroupRetry(true);
+        return new EVCacheManager(Collections.singletonList(configuration)); # <1>
+    }
+}
+
+@Repository
+public class TodoRepository {
+    @Cacheable(cacheNames = "todos", key = "'findAll'") # <3>
+    public List<Todo> findAll() {
+        return ...;
+    }
+}
+----
+<1> `EVCacheManager` app name is `TODO`
+<2> `EVCacheManager` app name + `-NODES` means memcached server address, see on : https://github.com/Netflix/EVCache/wiki/Sample-EVCache-Deployment#step-4-create-a-cache-deployment-descriptor
+<3> `cacheNames` is sames as configuration `name`
