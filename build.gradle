@@ -1,8 +1,8 @@
 buildscript {
     ext {
-        springBootVersion = '2.0.3.RELEASE'
-        springCloudVersion = 'Finchley.RELEASE'
-        evcacheVersion = '4.127.0'
+        springBootVersion = '2.0.4.RELEASE'
+        springCloudVersion = 'Finchley.SR1'
+        evcacheVersion = '4.130.0'
     }
     repositories {
         maven { url 'https://plugins.gradle.org/m2/' }
@@ -82,7 +82,7 @@ subprojects {
         }
 
         checkstyle {
-            toolVersion = '8.10'
+            toolVersion = '8.11'
             ignoreFailures = false
             maxErrors = 0
             maxWarnings = 0
@@ -101,7 +101,7 @@ subprojects {
         }
 
         pmd {
-            toolVersion = '6.4.0'
+            toolVersion = '6.6.0'
             ruleSetFiles = rootProject.files('config/pmd/rulesets.xml')
             sourceSets = [project.sourceSets.main as SourceSet]
             ignoreFailures = false

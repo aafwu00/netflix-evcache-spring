@@ -9,5 +9,5 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-actuator', optional
     compile 'io.micrometer:micrometer-core', optional
 
-    testCompile 'io.micrometer:micrometer-test:1.0.5'
+    testCompile 'io.micrometer:micrometer-test:1.0.6'
 }
