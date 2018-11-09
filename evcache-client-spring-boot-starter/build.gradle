@@ -2,7 +2,9 @@ dependencies {
     compile project(':evcache-client-spring-boot-autoconfigure')
 
     compile 'org.springframework.boot:spring-boot-starter-cache'
-    
+
     compile 'org.springframework.cloud:spring-cloud-netflix-core'
     compile 'org.springframework.cloud:spring-cloud-commons'
+
+    testCompile "com.couchbase.mock:CouchbaseMock:${couchbaseVersion}"
 }

@@ -32,7 +32,6 @@ import com.github.aafwu00.evcache.client.spring.EVCachePostConstructCustomizer;
 import brave.Span;
 import brave.Tracer;
 import brave.Tracing;
-import zipkin2.Endpoint;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -217,9 +216,7 @@ class EVCacheManagerTraceCustomizerTest {
         doReturn(false).when(currentSpan).isNoop();
         doReturn(span).when(tracer).newTrace();
         doReturn(span).when(span).kind(Span.Kind.CLIENT);
-        doReturn(span).when(span).remoteEndpoint(Endpoint.newBuilder()
-                                                         .serviceName("AppName")
-                                                         .build());
+        doReturn(span).when(span).remoteServiceName("AppName");
         doReturn(span).when(span).name(toLowerHyphen(operation));
         doReturn(span).when(span).tag("cache.prefix", "prefix");
         doReturn(span).when(span).tag("cache.key", key);
@@ -232,9 +229,7 @@ class EVCacheManagerTraceCustomizerTest {
         inOrder.verify(currentSpan).isNoop();
         inOrder.verify(tracer).newTrace();
         inOrder.verify(span).kind(Span.Kind.CLIENT);
-        inOrder.verify(span).remoteEndpoint(Endpoint.newBuilder()
-                                                    .serviceName("AppName")
-                                                    .build());
+        inOrder.verify(span).remoteServiceName("AppName");
         inOrder.verify(span).name(toLowerHyphen(operation));
         inOrder.verify(span).tag("cache.prefix", "prefix");
         inOrder.verify(span).tag("cache.key", key);
@@ -252,9 +247,7 @@ class EVCacheManagerTraceCustomizerTest {
         doReturn(false).when(currentSpan).isNoop();
         doReturn(span).when(tracer).newTrace();
         doReturn(span).when(span).kind(Span.Kind.CLIENT);
-        doReturn(span).when(span).remoteEndpoint(Endpoint.newBuilder()
-                                                         .serviceName("AppName")
-                                                         .build());
+        doReturn(span).when(span).remoteServiceName("AppName");
         doReturn(span).when(span).name(toLowerHyphen(operation));
         doReturn(span).when(span).tag("cache.prefix", "prefix");
         doReturn(span).when(span).tag("cache.key", key);
@@ -268,9 +261,7 @@ class EVCacheManagerTraceCustomizerTest {
         inOrder.verify(currentSpan).isNoop();
         inOrder.verify(tracer).newTrace();
         inOrder.verify(span).kind(Span.Kind.CLIENT);
-        inOrder.verify(span).remoteEndpoint(Endpoint.newBuilder()
-                                                    .serviceName("AppName")
-                                                    .build());
+        inOrder.verify(span).remoteServiceName("AppName");
         inOrder.verify(span).name(toLowerHyphen(operation));
         inOrder.verify(span).tag("cache.prefix", "prefix");
         inOrder.verify(span).tag("cache.key", key);

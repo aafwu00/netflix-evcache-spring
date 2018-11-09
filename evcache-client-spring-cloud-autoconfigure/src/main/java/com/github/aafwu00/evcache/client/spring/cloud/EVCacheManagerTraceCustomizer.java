@@ -27,7 +27,6 @@ import com.github.aafwu00.evcache.client.spring.EVCacheManager;
 import brave.Span;
 import brave.Tracer;
 import brave.Tracing;
-import zipkin2.Endpoint;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
@@ -93,9 +92,7 @@ public class EVCacheManagerTraceCustomizer implements CacheManagerCustomizer<EVC
             return tracing.tracer()
                           .newTrace()
                           .kind(Span.Kind.CLIENT)
-                          .remoteEndpoint(Endpoint.newBuilder()
-                                                  .serviceName(getNativeCache().getAppName())
-                                                  .build())
+                          .remoteServiceName(getNativeCache().getAppName())
                           .name(toLowerHyphen(name))
                           .tag("cache.prefix", getNativeCache().getCachePrefix())
                           .tag("cache.key", String.valueOf(key));
