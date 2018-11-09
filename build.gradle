@@ -1,8 +1,8 @@
 buildscript {
     ext {
-        springBootVersion = '2.0.4.RELEASE'
-        springCloudVersion = 'Finchley.SR1'
-        evcacheVersion = '4.130.0'
+        springBootVersion = '2.0.6.RELEASE'
+        springCloudVersion = 'Finchley.SR2'
+        evcacheVersion = '4.136.0'
     }
     repositories {
         maven { url 'https://plugins.gradle.org/m2/' }
