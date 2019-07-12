@@ -1,7 +1,8 @@
 dependencies {
-    compile project(':evcache-client-spring-cloud-starter')
+    api project(':evcache-client-spring-cloud-starter')
 
-    compile 'org.springframework.boot:spring-boot-starter-validation'
-    compile 'org.springframework.boot:spring-boot-starter-actuator'
-    compile 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
 }

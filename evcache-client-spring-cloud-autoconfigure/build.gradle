@@ -1,13 +1,18 @@
 dependencies {
-    compile project(':evcache-client-spring-boot-autoconfigure')
+    implementation 'javax.inject:javax.inject:1'
+    implementation 'com.netflix.eureka:eureka-client', optional
 
-    compile 'org.springframework.cloud:spring-cloud-netflix-eureka-client', optional
-    compile 'org.springframework.cloud:spring-cloud-sleuth-core', optional
+    api project(':evcache-client-spring-boot-autoconfigure')
 
-    compile 'org.springframework.boot:spring-boot-starter-validation', optional
-    compile 'org.springframework.boot:spring-boot-actuator', optional
+    implementation 'org.springframework.cloud:spring-cloud-netflix-archaius'
+    implementation 'org.springframework.cloud:spring-cloud-netflix-eureka-client', optional
+    implementation 'org.springframework.cloud:spring-cloud-sleuth-core', optional
 
-    compile 'io.micrometer:micrometer-core', optional
+    implementation 'org.springframework.boot:spring-boot-starter-validation', optional
+    implementation 'org.springframework.boot:spring-boot-actuator', optional
 
-    testCompile "io.micrometer:micrometer-test:${dependencyManagement.importedProperties['micrometer.version']}"
+    implementation 'io.micrometer:micrometer-core', optional
+
+    testImplementation "io.micrometer:micrometer-test:${dependencyManagement.importedProperties['micrometer.version']}"
+    testImplementation 'com.netflix.archaius:archaius-core:0.7.6'
 }

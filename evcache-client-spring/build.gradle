@@ -1,5 +1,11 @@
 dependencies {
-    compile "com.netflix.evcache:evcache-client:${evcacheVersion}"
-    compile 'org.springframework:spring-context'
-    compile 'org.springframework:spring-context-support'
+    api 'org.apache.commons:commons-lang3'
+    implementation 'net.spy:spymemcached:2.11.4'
+    implementation 'io.reactivex:rxjava:1.3.8'
+
+    api "com.netflix.evcache:evcache-client:${evcacheVersion}"
+    api 'org.springframework:spring-context'
+    api 'org.springframework:spring-context-support'
+
+    testImplementation 'commons-codec:commons-codec'
 }

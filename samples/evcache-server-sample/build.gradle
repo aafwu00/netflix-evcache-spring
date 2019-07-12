@@ -1,3 +1,4 @@
 dependencies {
-    compile project(':evcache-server-spring-cloud-starter')
+    implementation project(':evcache-server-spring-cloud-starter')
+    implementation 'org.springframework.boot:spring-boot-starter-web'
 }

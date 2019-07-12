@@ -1,10 +1,10 @@
 dependencies {
-    compile project(':evcache-client-spring-cloud-autoconfigure')
-    compile project(':evcache-client-spring-boot-starter')
+    api project(':evcache-client-spring-cloud-autoconfigure')
+    api project(':evcache-client-spring-boot-starter')
 
-    compile 'org.springframework.cloud:spring-cloud-starter-netflix-archaius'
-    compile 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
-    compile 'org.springframework.cloud:spring-cloud-starter-sleuth', optional
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-archaius'
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    implementation 'org.springframework.cloud:spring-cloud-starter-sleuth', optional
 
-    testCompile "com.couchbase.mock:CouchbaseMock:${couchbaseVersion}"
+    testImplementation "com.couchbase.mock:CouchbaseMock:${couchbaseVersion}"
 }

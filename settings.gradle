@@ -14,9 +14,8 @@ pluginManagement {
         }
     }
 }
-enableFeaturePreview('STABLE_PUBLISHING')
 
-rootProject.name = 'netflix-evcache-spring'
+rootProject.name = 'netflix-evcache-spring-parent'
 
 include 'evcache-client-spring'
 include 'evcache-client-spring-boot-autoconfigure'
