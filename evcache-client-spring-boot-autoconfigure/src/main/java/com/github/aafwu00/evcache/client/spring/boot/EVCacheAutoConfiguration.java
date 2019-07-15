@@ -17,7 +17,6 @@
 package com.github.aafwu00.evcache.client.spring.boot;
 
 import java.util.List;
-import java.util.Properties;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -26,22 +25,20 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizer;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizers;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cloud.client.actuator.HasFeatures;
-import org.springframework.cloud.netflix.archaius.ArchaiusAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.PropertiesPropertySource;
+import org.springframework.context.annotation.DependsOn;
 
 import com.github.aafwu00.evcache.client.spring.EVCacheManager;
-
-import io.micrometer.core.instrument.binder.MeterBinder;
+import com.netflix.evcache.connection.ConnectionFactoryBuilder;
+import com.netflix.evcache.connection.IConnectionBuilder;
+import com.netflix.evcache.pool.EVCacheClientPoolManager;
+import com.netflix.evcache.pool.EVCacheNodeList;
+import com.netflix.evcache.pool.SimpleNodeListProvider;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for the EVCache. Creates a
@@ -54,46 +51,40 @@ import io.micrometer.core.instrument.binder.MeterBinder;
  */
 @Configuration
 @ConditionalOnEVCache
-@AutoConfigureAfter(ArchaiusAutoConfiguration.class)
+@AutoConfigureAfter(name = "org.springframework.cloud.netflix.archaius.ArchaiusAutoConfiguration")
 @AutoConfigureBefore(CacheAutoConfiguration.class)
 @EnableConfigurationProperties(EVCacheProperties.class)
 public class EVCacheAutoConfiguration {
-    @Bean
-    public HasFeatures evcacheClientFeature() {
-        return HasFeatures.namedFeature("Netflix EVCache Client", EVCacheManager.class);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public CacheManager cacheManager(final ConfigurableEnvironment environment,
-                                     final CacheManagerCustomizers customizers,
-                                     final EVCacheProperties properties) {
-        appendProperty(environment);
-        return customizers.customize(new EVCacheManager(properties.toConfigurations()));
-    }
-
-    private void appendProperty(final ConfigurableEnvironment environment) {
-        if (environment.containsProperty("evcache.use.simple.node.list.provider")) {
-            return;
-        }
-        final Properties source = new Properties();
-        source.setProperty("evcache.use.simple.node.list.provider", "true");
-        environment.getPropertySources().addLast(new PropertiesPropertySource("evcacheSpringBoot", source));
-    }
-
     @Bean
     @ConditionalOnMissingBean
     public CacheManagerCustomizers cacheManagerCustomizers(final ObjectProvider<List<CacheManagerCustomizer<?>>> customizers) {
         return new CacheManagerCustomizers(customizers.getIfAvailable());
     }
 
-    @Configuration
-    @ConditionalOnProperty(value = "evcache.metrics.enabled", matchIfMissing = true)
-    @ConditionalOnClass(MeterBinder.class)
-    static class EVCacheMeterBinderProviderConfiguration {
-        @Bean
-        public EVCacheMeterBinderProvider evcacheMeterBinderProvider() {
-            return new EVCacheMeterBinderProvider();
-        }
+    @Bean
+    @DependsOn("evcacheClientPoolManager")
+    @ConditionalOnMissingBean
+    public CacheManager cacheManager(final CacheManagerCustomizers customizers,
+                                     final EVCacheProperties properties) {
+        return customizers.customize(new EVCacheManager(properties.toConfigurations()));
+    }
+
+    @Bean(destroyMethod = "shutdown")
+    @ConditionalOnMissingBean
+    public EVCacheClientPoolManager evcacheClientPoolManager(final IConnectionBuilder connectionBuilder,
+                                                             final EVCacheNodeList evcacheNodeList) {
+        return new EVCacheClientPoolManager(connectionBuilder, evcacheNodeList);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public IConnectionBuilder connectionBuilder() {
+        return new ConnectionFactoryBuilder();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public EVCacheNodeList evcacheNodeList() {
+        return new SimpleNodeListProvider();
     }
 }

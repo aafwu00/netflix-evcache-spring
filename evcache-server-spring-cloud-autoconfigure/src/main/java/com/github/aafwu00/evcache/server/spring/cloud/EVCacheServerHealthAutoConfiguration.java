@@ -35,7 +35,7 @@ import net.spy.memcached.spring.MemcachedClientFactoryBean;
 
 import static com.netflix.appinfo.AmazonInfo.MetaDataKey.publicHostname;
 import static com.netflix.appinfo.AmazonInfo.MetaDataKey.publicIpv4;
-import static com.netflix.evcache.pool.DiscoveryNodeListProvider.DEFAULT_PORT;
+import static com.netflix.evcache.pool.EVCacheClientPool.DEFAULT_PORT;
 import static java.util.Objects.requireNonNull;
 
 /**

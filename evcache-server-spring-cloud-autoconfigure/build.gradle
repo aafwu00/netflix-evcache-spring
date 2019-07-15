@@ -1,7 +1,5 @@
 dependencies {
-    implementation 'org.apache.commons:commons-lang3'
-    implementation 'net.spy:spymemcached:2.11.4'
-    implementation "com.netflix.evcache:evcache-client:${evcacheVersion}"
+    api "com.netflix.evcache:evcache-client:${evcacheVersion}"
 
     implementation 'com.netflix.eureka:eureka-client'
 

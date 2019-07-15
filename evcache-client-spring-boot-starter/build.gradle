@@ -3,8 +3,5 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-cache'
 
-    implementation 'org.springframework.cloud:spring-cloud-netflix-core'
-    implementation 'org.springframework.cloud:spring-cloud-commons'
-
     testImplementation "com.couchbase.mock:CouchbaseMock:${couchbaseVersion}"
 }

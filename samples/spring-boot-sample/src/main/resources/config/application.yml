@@ -2,13 +2,10 @@ spring:
   application:
     name: todo
 
-management:
-  security:
-    enabled: false
-
 logging:
   level:
     root: info
+    com.netflix: debug
 
 evcache:
   clusters:
@@ -19,3 +16,5 @@ evcache:
 
 TODO-NODES: shard1=localhost:11211
 TODO.use.inmemory.cache: true
+TODO.inmemory.cache.duration.ms: 1000
+TODO.log.operation.calls: SET,DELETE,GMISS,TMISS,BMISS_ALL,TOUCH,REPLACE

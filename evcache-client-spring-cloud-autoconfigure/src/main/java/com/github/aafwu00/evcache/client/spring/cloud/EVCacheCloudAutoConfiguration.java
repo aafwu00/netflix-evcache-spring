@@ -16,12 +16,6 @@
 
 package com.github.aafwu00.evcache.client.spring.cloud;
 
-import java.util.Properties;
-
-import javax.inject.Provider;
-
-import org.springframework.aop.TargetSource;
-import org.springframework.aop.framework.Advised;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -30,20 +24,16 @@ import org.springframework.cloud.netflix.archaius.ArchaiusAutoConfiguration;
 import org.springframework.cloud.netflix.eureka.EurekaClientAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.PropertiesPropertySource;
 
 import com.github.aafwu00.evcache.client.spring.boot.ConditionalOnEVCache;
 import com.github.aafwu00.evcache.client.spring.boot.EVCacheAutoConfiguration;
 import com.netflix.appinfo.ApplicationInfoManager;
-import com.netflix.discovery.DiscoveryClient;
 import com.netflix.discovery.EurekaClient;
 import com.netflix.evcache.EVCache;
-import com.netflix.evcache.connection.ConnectionFactoryProvider;
-import com.netflix.evcache.connection.IConnectionFactoryProvider;
-import com.netflix.evcache.pool.EVCacheClientPoolManager;
-
-import static org.springframework.aop.support.AopUtils.isAopProxy;
+import com.netflix.evcache.connection.DIConnectionFactoryBuilderProvider;
+import com.netflix.evcache.connection.IConnectionBuilder;
+import com.netflix.evcache.pool.EVCacheNodeList;
+import com.netflix.evcache.pool.eureka.EurekaNodeListProvider;
 
 /**
  * Spring configuration for configuring EVCache defaults to be Eureka based
@@ -66,40 +56,13 @@ public class EVCacheCloudAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public IConnectionFactoryProvider connectionFactoryProvider() {
-        return new ConnectionFactoryProvider();
+    public IConnectionBuilder connectionBuilder(final EurekaClient eurekaClient) {
+        return new DIConnectionFactoryBuilderProvider(eurekaClient);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public EVCacheClientPoolManager evcacheClientPoolManager(final ConfigurableEnvironment environment,
-                                                             final ApplicationInfoManager applicationInfoManager,
-                                                             final EurekaClient eurekaClient,
-                                                             final Provider<IConnectionFactoryProvider> connectionFactoryProvider) {
-        appendProperty(environment);
-        return new EVCacheClientPoolManager(applicationInfoManager, discoveryClient(eurekaClient), connectionFactoryProvider);
-    }
-
-    private void appendProperty(final ConfigurableEnvironment environment) {
-        if (environment.containsProperty("evcache.use.simple.node.list.provider")) {
-            return;
-        }
-        final Properties source = new Properties();
-        source.setProperty("evcache.use.simple.node.list.provider", "false");
-        environment.getPropertySources().addLast(new PropertiesPropertySource("evcacheSpringCloud", source));
-    }
-
-    private DiscoveryClient discoveryClient(final EurekaClient eurekaClient) {
-        if (isAopProxy(eurekaClient)) {
-            final TargetSource targetSource = Advised.class.cast(eurekaClient).getTargetSource();
-            try {
-                return DiscoveryClient.class.cast(targetSource.getTarget());
-                // CHECKSTYLE:OFF
-            } catch (final Exception e) {
-                // CHECKSTYLE:ON
-                throw new IllegalStateException(e);
-            }
-        }
-        return DiscoveryClient.class.cast(eurekaClient);
+    public EVCacheNodeList evcacheNodeList(final ApplicationInfoManager applicationInfoManager, final EurekaClient eurekaClient) {
+        return new EurekaNodeListProvider(applicationInfoManager, eurekaClient);
     }
 }

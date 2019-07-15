@@ -34,6 +34,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.github.aafwu00.evcache.client.spring.EVCacheManager;
+import com.netflix.evcache.pool.EVCacheClientPoolManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -62,8 +63,7 @@ class EVCacheAutoConfigurationTest {
                      .withUserConfiguration(EnableCachingConfiguration.class)
                      .run(context -> assertAll(
                          () -> assertThat(context).hasSingleBean(EVCacheManager.class),
-                         () -> assertThat(context).hasSingleBean(EVCacheMeterBinderProvider.class),
-                         () -> assertThat(context.getEnvironment().getProperty("evcache.use.simple.node.list.provider")).isEqualTo("true"),
+                         () -> assertThat(context).hasSingleBean(EVCacheClientPoolManager.class),
                          () -> verify(cacheManagerCustomizer).customize(any(EVCacheManager.class))
                      ));
     }
@@ -80,7 +80,7 @@ class EVCacheAutoConfigurationTest {
                      .withUserConfiguration(ExistsCacheManagerConfiguration.class)
                      .run(context -> assertAll(
                          () -> assertThat(context).doesNotHaveBean(EVCacheManager.class),
-                         () -> assertThat(context).doesNotHaveBean(EVCacheMeterBinderProvider.class)
+                         () -> assertThat(context).doesNotHaveBean(EVCacheClientPoolManager.class)
                      ));
     }
 
@@ -90,7 +90,8 @@ class EVCacheAutoConfigurationTest {
                      .withUserConfiguration(EnableCachingConfiguration.class)
                      .run(context -> assertAll(
                          () -> assertThat(context).hasSingleBean(CacheManager.class),
-                         () -> assertThat(context).doesNotHaveBean(EVCacheManager.class)
+                         () -> assertThat(context).doesNotHaveBean(EVCacheManager.class),
+                         () -> assertThat(context).doesNotHaveBean(EVCacheClientPoolManager.class)
                      ));
     }
 
@@ -100,7 +101,8 @@ class EVCacheAutoConfigurationTest {
                      .withUserConfiguration(EnableCachingConfiguration.class)
                      .run(context -> assertAll(
                          () -> assertThat(context).hasSingleBean(NoOpCacheManager.class),
-                         () -> assertThat(context).doesNotHaveBean(EVCacheManager.class)
+                         () -> assertThat(context).doesNotHaveBean(EVCacheManager.class),
+                         () -> assertThat(context).doesNotHaveBean(EVCacheClientPoolManager.class)
                      ));
     }
 
@@ -156,15 +158,6 @@ class EVCacheAutoConfigurationTest {
                                                         .getFailure()
                                                         .isExactlyInstanceOf(UnsatisfiedDependencyException.class)
                                                         .hasCauseExactlyInstanceOf(ConfigurationPropertiesBindException.class));
-    }
-
-    @Test
-    void should_be_not_loaded_EVCacheMeterBinder_when_evcache_metrics_enabled_is_false() {
-        contextRunner.withPropertyValues("evcache.clusters[0].appName=test",
-                                         "evcache.clusters[0].cachePrefix=test1",
-                                         "evcache.metrics.enabled=false")
-                     .withUserConfiguration(EnableCachingConfiguration.class)
-                     .run(context -> assertThat(context).doesNotHaveBean(EVCacheMeterBinder.class));
     }
 
     @Test

@@ -18,8 +18,6 @@ package com.github.aafwu00.evcache.client.spring.cloud;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.aop.framework.DefaultAopProxyFactory;
-import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
@@ -30,14 +28,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
+import com.github.aafwu00.evcache.client.spring.boot.EVCacheAutoConfiguration;
 import com.netflix.appinfo.ApplicationInfoManager;
 import com.netflix.appinfo.DataCenterInfo;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.appinfo.MyDataCenterInfo;
-import com.netflix.discovery.DiscoveryClient;
 import com.netflix.discovery.EurekaClient;
-import com.netflix.evcache.connection.IConnectionFactoryProvider;
+import com.netflix.evcache.connection.DIConnectionFactoryBuilderProvider;
 import com.netflix.evcache.pool.EVCacheClientPoolManager;
+import com.netflix.evcache.pool.eureka.EurekaNodeListProvider;
 import com.netflix.evcache.util.EVCacheConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,6 +55,7 @@ class EVCacheCloudAutoConfigurationTest {
     void setUp() {
         contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(EVCacheCloudAutoConfiguration.class,
+                                                     EVCacheAutoConfiguration.class,
                                                      CacheAutoConfiguration.class,
                                                      ArchaiusAutoConfiguration.class));
     }
@@ -68,11 +68,8 @@ class EVCacheCloudAutoConfigurationTest {
                      .withUserConfiguration(EnableCachingConfiguration.class)
                      .run(context -> assertAll(
                          () -> assertThat(context).hasSingleBean(EVCacheClientPoolManager.class),
-                         () -> assertThat(context).hasSingleBean(IConnectionFactoryProvider.class),
-                         () -> assertThat(context.getEnvironment().getProperty("evcache.use.simple.node.list.provider")).isEqualTo("false"),
-                         () -> assertThat(EVCacheConfig.getInstance()
-                                                       .getDynamicBooleanProperty("evcache.use.simple.node.list.provider", true)
-                                                       .get()).isFalse()
+                         () -> assertThat(context).hasSingleBean(DIConnectionFactoryBuilderProvider.class),
+                         () -> assertThat(context).hasSingleBean(EurekaNodeListProvider.class)
                      ));
     }
 
@@ -85,7 +82,8 @@ class EVCacheCloudAutoConfigurationTest {
                      .withUserConfiguration(EnableCachingConfiguration.class)
                      .run(context -> assertAll(
                          () -> assertThat(context).hasSingleBean(EVCacheClientPoolManager.class),
-                         () -> assertThat(context.getBean(IConnectionFactoryProvider.class)).isNotNull(),
+                         () -> assertThat(context).hasSingleBean(DIConnectionFactoryBuilderProvider.class),
+                         () -> assertThat(context).hasSingleBean(EurekaNodeListProvider.class),
                          () -> assertThat(context.getBean(Environment.class)
                                                  .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isFalse(),
                          () -> assertThat(EVCacheConfig.getInstance()
@@ -101,10 +99,8 @@ class EVCacheCloudAutoConfigurationTest {
                                          "spring.application.name=test")
                      .withUserConfiguration(ExistsEVCacheClientPoolManagerConfiguration.class)
                      .run(context -> assertAll(
-                         () -> assertThat(context.getBean(EVCacheClientPoolManager.class)).isNotNull(),
-                         () -> assertThat(context.getBean(IConnectionFactoryProvider.class)).isNotNull(),
-                         () -> assertThat(context.getBean(Environment.class)
-                                                 .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isNull()
+                         () -> assertThat(context.getBean(DIConnectionFactoryBuilderProvider.class)).isNotNull(),
+                         () -> assertThat(context.getBean(EurekaNodeListProvider.class)).isNotNull()
                      ));
     }
 
@@ -116,10 +112,10 @@ class EVCacheCloudAutoConfigurationTest {
                                          "spring.application.name=test")
                      .withUserConfiguration(EnableCachingConfiguration.class)
                      .run(context -> assertAll(
-                         () -> assertThatThrownBy(() -> context.getBean(EVCacheClientPoolManager.class)).isExactlyInstanceOf(
+                         () -> assertThatThrownBy(() -> context.getBean(EurekaNodeListProvider.class)).isExactlyInstanceOf(
                              NoSuchBeanDefinitionException.class),
-                         () -> assertThat(context.getBean(Environment.class)
-                                                 .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isNull()
+                         () -> assertThatThrownBy(() -> context.getBean(DIConnectionFactoryBuilderProvider.class)).isExactlyInstanceOf(
+                             NoSuchBeanDefinitionException.class)
                      ));
     }
 
@@ -131,7 +127,7 @@ class EVCacheCloudAutoConfigurationTest {
                                          "evcache.use.simple.node.list.provider=true")
                      .withUserConfiguration(EnableCachingConfiguration.class)
                      .run(context -> assertAll(
-                         () -> assertThatThrownBy(() -> context.getBean(EVCacheClientPoolManager.class)).isExactlyInstanceOf(
+                         () -> assertThatThrownBy(() -> context.getBean(EurekaNodeListProvider.class)).isExactlyInstanceOf(
                              NoSuchBeanDefinitionException.class)
                      ));
     }
@@ -143,8 +139,7 @@ class EVCacheCloudAutoConfigurationTest {
                                          "spring.application.name=test")
                      .withUserConfiguration(NoEurekaClientConfiguration.class)
                      .run(context -> assertAll(
-                         () -> assertThat(context).doesNotHaveBean(EVCacheClientPoolManager.class),
-                         () -> assertThat(context.getEnvironment().containsProperty("evcache.use.simple.node.list.provider")).isFalse()
+                         () -> assertThat(context).doesNotHaveBean(EurekaNodeListProvider.class)
                      ));
     }
 
@@ -181,21 +176,7 @@ class EVCacheCloudAutoConfigurationTest {
 
         @Bean
         EurekaClient eurekaClient() {
-            return mock(DiscoveryClient.class);
-        }
-    }
-
-    @Configuration
-    @EnableCaching
-    static class EnableCachingConfigurationWithProxyBean extends EnableCachingConfiguration {
-        @Bean
-        ApplicationInfoManager applicationInfoManager() {
-            return super.applicationInfoManager();
-        }
-
-        @Bean
-        EurekaClient eurekaClient() {
-            return (EurekaClient) new DefaultAopProxyFactory().createAopProxy(new ProxyFactory(mock(DiscoveryClient.class))).getProxy();
+            return mock(EurekaClient.class);
         }
     }
 
@@ -203,7 +184,7 @@ class EVCacheCloudAutoConfigurationTest {
     @EnableCaching
     static class ExistsEVCacheClientPoolManagerConfiguration extends EnableCachingConfiguration {
         @Bean
-        EVCacheClientPoolManager evCacheClientPoolManager() {
+        EVCacheClientPoolManager evcacheClientPoolManager() {
             return mock(EVCacheClientPoolManager.class);
         }
     }

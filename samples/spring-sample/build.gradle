@@ -1,5 +1,4 @@
 dependencies {
     api project(':evcache-client-spring')
-    implementation 'com.netflix.archaius:archaius-core:0.7.6'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 }

@@ -47,7 +47,7 @@ import static org.springframework.cloud.netflix.eureka.EurekaClientConfigBean.DE
  *
  * @author Taeho Kim
  * @see EurekaClientAutoConfiguration
- * @see com.netflix.evcache.pool.DiscoveryNodeListProvider
+ * @see com.netflix.evcache.pool.eureka.EurekaNodeListProvider
  */
 @Configuration
 @ConditionalOnBean(EVCacheServerMarkerConfiguration.Marker.class)
@@ -112,6 +112,7 @@ public class EVCacheServerAutoConfiguration {
         addMetadata(builder, MetaDataKey.instanceId, eurekaInstanceConfigBean.getInstanceId());
         addMetadata(builder, MetaDataKey.publicHostname, hostInfo.getHostname());
         addMetadata(builder, MetaDataKey.publicIpv4, hostInfo.getIpAddress());
+        addMetadata(builder, MetaDataKey.localIpv4, hostInfo.getIpAddress());
         return builder.build();
     }
 

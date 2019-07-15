@@ -1,11 +1,8 @@
 dependencies {
-    implementation 'javax.inject:javax.inject:1'
-    implementation 'com.netflix.eureka:eureka-client', optional
-
     api project(':evcache-client-spring-boot-autoconfigure')
 
     implementation 'org.springframework.cloud:spring-cloud-netflix-archaius'
-    implementation 'org.springframework.cloud:spring-cloud-netflix-eureka-client', optional
+    implementation 'org.springframework.cloud:spring-cloud-netflix-eureka-client'
     implementation 'org.springframework.cloud:spring-cloud-sleuth-core', optional
 
     implementation 'org.springframework.boot:spring-boot-starter-validation', optional
