@@ -38,6 +38,10 @@ import static java.util.Objects.requireNonNull;
 public class EVCacheManager extends AbstractCacheManager {
     private final Set<EVCacheConfiguration> configurations;
     private final List<EVCachePostConstructCustomizer> customizers;
+    /**
+     * Whether to allow for {@code null} values
+     */
+    private boolean allowNullValues = true;
 
     public EVCacheManager(final Set<EVCacheConfiguration> configurations) {
         super();
@@ -62,27 +66,20 @@ public class EVCacheManager extends AbstractCacheManager {
     }
 
     private EVCache create(final EVCacheConfiguration configuration) {
-        return new EVCacheImpl(configuration.getName(),
-                               builder(configuration).build(),
-                               configuration.isAllowNullValues());
+        return new EVCacheImpl(configuration.getName(), build(configuration), allowNullValues);
     }
 
-    private Builder builder(final EVCacheConfiguration configuration) {
-        final Builder builder = new Builder().setAppName(configuration.getAppName())
-                                             .setCachePrefix(configuration.getCachePrefix())
-                                             .setDefaultTTL(configuration.getTimeToLive());
-        if (configuration.isServerGroupRetry()) {
-            builder.enableRetry();
-        } else {
-            builder.disableRetry();
-        }
-        if (configuration.isEnableExceptionThrowing()) {
-            builder.enableExceptionPropagation();
-        }
-        return builder;
+    private com.netflix.evcache.EVCache build(final EVCacheConfiguration configuration) {
+        return Builder.forApp(configuration.getAppName())
+                      .withConfigurationProperties(configuration.getProperties())
+                      .build();
     }
 
     public void addCustomizer(final EVCachePostConstructCustomizer customizer) {
         this.customizers.add(requireNonNull(customizer));
+    }
+
+    public void setAllowNullValues(final boolean allowNullValues) {
+        this.allowNullValues = allowNullValues;
     }
 }

@@ -3,13 +3,10 @@ evcache:
   clusters:
     - name: test
       appName: test
-      cachePrefix: test1
-      time-to-live: 1000
-      allowNullValues: true
-      serverGroupRetry: true
-      enableExceptionThrowing: true
+      time-to-live: 1000s
+      retryEnabled: true
+      exceptionThrowingEnabled: true
     - app-name: test
-      cache-prefix: test2
-      allow-null-values: false
-      server-group-retry: false
-      enable-exception-throwing: false
+      key-prefix: test2
+      retry-enabled: false
+      exception-throwing-enabled: false

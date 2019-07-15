@@ -39,7 +39,7 @@ public class TodoRepository {
 }
 ----
 <1> see on https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/integration.html#cache
-<2> `cacheNames` is sames as `evcache.clusters[].appName + . + evcache.clusters[].cachePrefix`, when `evcache.clusters[].name` is blank
+<2> `cacheNames` is sames as `evcache.clusters[].appName + . + evcache.clusters[].keyPrefix`, when `evcache.clusters[].name` is blank
 
 3. Write `application.yml` code, See on link:samples/spring-boot-sample/src/main/resources/config/application.yml[Sample]
 
@@ -48,8 +48,8 @@ public class TodoRepository {
 evcache:
   clusters:
     - appName: EVCACHE # <1>
-      cachePrefix: todos # <2>
-      enable-exception-throwing: false
+      keyPrefix: todos # <2>
+      exception-throwing-enabled: false
 
 EVCACHE-NODES: shard1=localhost:11211,localhost:11212;shard2=localhost:11213,localhost:11214
 ----
@@ -70,29 +70,25 @@ IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
 
 | evcache.clusters[].name
 |
-| Name of the Cache, @Cacheable cacheName, Same as `appName` + `.` + `cachePrefix` when name is blank
+| Name of the Cache, @Cacheable cacheName, Same as `appName` + `.` + `keyPrefix` when name is blank
 
 | evcache.clusters[].appName
 |
 | Name of the EVCache App clusters, Recommend Upper Case
 
-| evcache.clusters[].cachePrefix
+| evcache.clusters[].keyPrefix
 |
 | Cache Prefix Key, Don't contain colon(:) character
 
 | evcache.clusters[].timeToLive
-| 900
+| 900s
 | Default Time To Live(TTL), Seconds
 
-| evcache.clusters[].allowNullValues
-| true
-| Whether to allow for `null` values
-
-| evcache.clusters[].serverGroupRetry
+| evcache.clusters[].retryEnabled
 | true
 | Retry across Server Group for cache misses and exceptions
 
-| evcache.clusters[].enableExceptionThrowing
+| evcache.clusters[].exceptionThrowingEnabled
 | false
 | Exceptions are not propagated and null values are returned
 

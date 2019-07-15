@@ -10,9 +10,9 @@ logging:
 evcache:
   clusters:
     - app-name: TODO
-      cache-prefix: todos
-      time-to-live: 10
-      server-group-retry: true
+      key-prefix: todos
+      time-to-live: 10s
+      retry-enabled: true
 
 TODO-NODES: shard1=localhost:11211
 TODO.use.inmemory.cache: true

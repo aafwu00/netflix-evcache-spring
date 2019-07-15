@@ -16,12 +16,14 @@
 
 package com.github.aafwu00.evcache.client.spring;
 
+import java.time.Duration;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import static org.apache.commons.lang3.Validate.inclusiveBetween;
-import static org.apache.commons.lang3.Validate.matchesPattern;
-import static org.apache.commons.lang3.Validate.notEmpty;
+import com.netflix.evcache.EVCacheClientPoolConfigurationProperties;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Configuration for {@link EVCacheManager}
@@ -30,61 +32,59 @@ import static org.apache.commons.lang3.Validate.notEmpty;
  */
 public class EVCacheConfiguration {
     /**
-     * Name of the Cache
+     * Name of the Cache, @{@link org.springframework.cache.annotation.Cacheable} cacheNames
      */
     private final String name;
     /**
      * Name of the EVCache App, Cluster Name, Recommend Upper Case
      */
     private final String appName;
-    /**
-     * Cache Prefix Key, Don't contain colon(:) character
-     */
-    private final String cachePrefix;
-    /**
-     * Default Time To Live(TTL), Seconds
-     */
-    private final int timeToLive;
-    /**
-     * Whether to allow for {@code null} values
-     */
-    private final boolean allowNullValues;
-    /**
-     * Retry across Server Group for cache misses and exceptions
-     */
-    private final boolean serverGroupRetry;
-    /**
-     * Exceptions are not propagated and null values are returned
-     */
-    private final boolean enableExceptionThrowing;
+    private final EVCacheClientPoolConfigurationProperties properties;
 
     /**
      * Instantiates a new EVCache configuration.
      *
-     * @param name                    the cache name
-     * @param appName                 the evcache app name
-     * @param cachePrefix             the cache prefix
-     * @param timeToLive              the time to live
-     * @param allowNullValues         the allow null values
-     * @param serverGroupRetry        the server group retry
-     * @param enableExceptionThrowing the enable exception throwing
+     * @param name       Name of the Cache, @{@link org.springframework.cache.annotation.Cacheable} cacheNames
+     * @param appName    Name of the EVCache App, Cluster Name, Recommend Upper Case
+     * @param properties EVCache Client Configuration
      */
     public EVCacheConfiguration(final String name,
                                 final String appName,
-                                final String cachePrefix,
-                                final int timeToLive,
-                                final boolean allowNullValues,
-                                final boolean serverGroupRetry,
-                                final boolean enableExceptionThrowing) {
-        this.name = notEmpty(name);
-        this.appName = notEmpty(appName);
-        this.cachePrefix = notEmpty(cachePrefix);
-        this.timeToLive = timeToLive;
-        this.allowNullValues = allowNullValues;
-        this.serverGroupRetry = serverGroupRetry;
-        this.enableExceptionThrowing = enableExceptionThrowing;
-        matchesPattern(cachePrefix, "[^:]*$", "'cachePrefix' must not contain colon(:) character");
-        inclusiveBetween(1, Integer.MAX_VALUE, timeToLive, "'timeToLive' must be positive integer");
+                                final EVCacheClientPoolConfigurationProperties properties) {
+        this.name = name;
+        this.appName = appName;
+        this.properties = requireNonNull(properties);
+    }
+
+    /**
+     * Instantiates a new EVCache configuration.
+     *
+     * @param name                     Name of the Cache, @{@link org.springframework.cache.annotation.Cacheable} cacheNames
+     * @param appName                  Name of the EVCache App, Cluster Name, Recommend Upper Case
+     * @param keyPrefix                Name of Cache Prefix Key, Don't contain colon(:) character
+     * @param timeToLive               Default Time To Live(TTL), Seconds
+     * @param retryEnabled             Retry across Server Group for cache misses and exceptions
+     * @param exceptionThrowingEnabled Exceptions are not propagated and null values are returned
+     */
+    public EVCacheConfiguration(final String name,
+                                final String appName,
+                                final String keyPrefix,
+                                final Duration timeToLive,
+                                final boolean retryEnabled,
+                                final boolean exceptionThrowingEnabled) {
+        this(name, appName, create(keyPrefix, timeToLive, retryEnabled, exceptionThrowingEnabled));
+    }
+
+    private static EVCacheClientPoolConfigurationProperties create(final String keyPrefix,
+                                                                   final Duration timeToLive,
+                                                                   final boolean retryEnabled,
+                                                                   final boolean exceptionThrowingEnabled) {
+        final EVCacheClientPoolConfigurationProperties result = new EVCacheClientPoolConfigurationProperties();
+        result.setKeyPrefix(keyPrefix);
+        result.setTimeToLive(timeToLive);
+        result.setRetryEnabled(retryEnabled);
+        result.setExceptionThrowingEnabled(exceptionThrowingEnabled);
+        return result;
     }
 
     @Override
@@ -116,23 +116,7 @@ public class EVCacheConfiguration {
         return appName;
     }
 
-    public String getCachePrefix() {
-        return cachePrefix;
-    }
-
-    public int getTimeToLive() {
-        return timeToLive;
-    }
-
-    public boolean isAllowNullValues() {
-        return allowNullValues;
-    }
-
-    public boolean isServerGroupRetry() {
-        return serverGroupRetry;
-    }
-
-    public boolean isEnableExceptionThrowing() {
-        return enableExceptionThrowing;
+    public EVCacheClientPoolConfigurationProperties getProperties() {
+        return properties;
     }
 }

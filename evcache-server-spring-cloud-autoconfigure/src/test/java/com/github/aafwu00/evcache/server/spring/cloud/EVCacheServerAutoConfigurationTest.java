@@ -42,6 +42,7 @@ import com.netflix.discovery.EurekaClient;
 import net.spy.memcached.MemcachedClient;
 
 import static com.netflix.appinfo.AmazonInfo.MetaDataKey.availabilityZone;
+import static com.netflix.appinfo.AmazonInfo.MetaDataKey.localIpv4;
 import static com.netflix.appinfo.AmazonInfo.MetaDataKey.publicHostname;
 import static com.netflix.appinfo.AmazonInfo.MetaDataKey.publicIpv4;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -121,6 +122,7 @@ class EVCacheServerAutoConfigurationTest {
                                          "evcache.availability-zone=test2",
                                          "evcache.public-hostname=test3",
                                          "evcache.public-ipv4=test4",
+                                         "evcache.local-ipv4=test5",
                                          "evcache.server.health.enabled=false")
                      .withUserConfiguration(EnableEVCacheServerConfiguration.class)
                      .run(context -> assertAll(
@@ -133,7 +135,8 @@ class EVCacheServerAutoConfigurationTest {
                          () -> assertThat(getConfig(context).getASGName()).isEqualTo("test1"),
                          () -> assertThat(getAmazonInfo(context).get(availabilityZone)).isEqualTo("test2"),
                          () -> assertThat(getAmazonInfo(context).get(publicHostname)).isEqualTo("test3"),
-                         () -> assertThat(getAmazonInfo(context).get(publicIpv4)).isEqualTo("test4")
+                         () -> assertThat(getAmazonInfo(context).get(publicIpv4)).isEqualTo("test4"),
+                         () -> assertThat(getAmazonInfo(context).get(localIpv4)).isEqualTo("test5")
                      ));
     }
 

@@ -64,9 +64,9 @@ class EVCacheImplTest {
     }
 
     @Test
-    void cachePrefix() {
+    void keyPrefix() {
         doReturn("prefix").when(source).getCachePrefix();
-        assertThat(cache.getCachePrefix()).isEqualTo("prefix");
+        assertThat(cache.getKeyPrefix()).isEqualTo("prefix");
     }
 
     @Test

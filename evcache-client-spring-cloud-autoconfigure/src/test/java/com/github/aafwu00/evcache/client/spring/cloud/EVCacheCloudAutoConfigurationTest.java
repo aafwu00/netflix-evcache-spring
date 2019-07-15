@@ -63,7 +63,7 @@ class EVCacheCloudAutoConfigurationTest {
     @Test
     void should_be_loaded_EVCacheClientPoolManager() {
         contextRunner.withPropertyValues("evcache.clusters[0].appName=test",
-                                         "evcache.clusters[0].cachePrefix=test1",
+                                         "evcache.clusters[0].keyPrefix=test1",
                                          "spring.application.name=test")
                      .withUserConfiguration(EnableCachingConfiguration.class)
                      .run(context -> assertAll(
@@ -76,7 +76,7 @@ class EVCacheCloudAutoConfigurationTest {
     @Test
     void should_be_loaded_EVCacheClientPoolManager_when_simpleNodeListProvider_is_false() {
         contextRunner.withPropertyValues("evcache.clusters[0].appName=test",
-                                         "evcache.clusters[0].cachePrefix=test1",
+                                         "evcache.clusters[0].keyPrefix=test1",
                                          "spring.application.name=test",
                                          "evcache.use.simple.node.list.provider=false")
                      .withUserConfiguration(EnableCachingConfiguration.class)
@@ -95,7 +95,7 @@ class EVCacheCloudAutoConfigurationTest {
     @Test
     void should_be_loaded_EVCacheClientPoolManager_when_exists_EVCacheClientPoolManager() {
         contextRunner.withPropertyValues("evcache.clusters[0].appName=test",
-                                         "evcache.clusters[0].cachePrefix=test1",
+                                         "evcache.clusters[0].keyPrefix=test1",
                                          "spring.application.name=test")
                      .withUserConfiguration(ExistsEVCacheClientPoolManagerConfiguration.class)
                      .run(context -> assertAll(
@@ -107,7 +107,7 @@ class EVCacheCloudAutoConfigurationTest {
     @Test
     void should_not_be_loaded_EVCacheClientPoolManager_when_disabled_evcache_cloud() {
         contextRunner.withPropertyValues("evcache.clusters[0].appName=test",
-                                         "evcache.clusters[0].cachePrefix=test1",
+                                         "evcache.clusters[0].keyPrefix=test1",
                                          "evcache.cloud.enabled=false",
                                          "spring.application.name=test")
                      .withUserConfiguration(EnableCachingConfiguration.class)
@@ -122,7 +122,7 @@ class EVCacheCloudAutoConfigurationTest {
     @Test
     void should_not_be_loaded_EVCacheClientPoolManager_when_simpleNodeListProvider_is_true() {
         contextRunner.withPropertyValues("evcache.clusters[0].appName=test",
-                                         "evcache.clusters[0].cachePrefix=test1",
+                                         "evcache.clusters[0].keyPrefix=test1",
                                          "evcache.cloud.enabled=false",
                                          "evcache.use.simple.node.list.provider=true")
                      .withUserConfiguration(EnableCachingConfiguration.class)
@@ -135,7 +135,7 @@ class EVCacheCloudAutoConfigurationTest {
     @Test
     void should_not_be_loaded_EVCacheClientPoolManager_when_not_exists_eurekaClient() {
         contextRunner.withPropertyValues("evcache.clusters[0].appName=test",
-                                         "evcache.clusters[0].cachePrefix=test1",
+                                         "evcache.clusters[0].keyPrefix=test1",
                                          "spring.application.name=test")
                      .withUserConfiguration(NoEurekaClientConfiguration.class)
                      .run(context -> assertAll(

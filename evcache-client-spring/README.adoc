@@ -22,7 +22,7 @@ dependencies {
 
 [source,java]
 ----
-@Configuration
+import java.time.Duration;@Configuration
 @ComponentScan
 @EnableCaching
 public class TodoApp {
@@ -32,13 +32,13 @@ public class TodoApp {
                      .getDynamicStringProperty("TODO-NODES",
                                                "shard1=localhost:11211,localhost:11212;shard2=localhost:11213,localhost:11214") # <2>
                      .get();
-        final EVCacheConfiguration configuration = new EVCacheConfiguration();
-        configuration.setName("todos");
-        configuration.setAppName("TODO");
-        configuration.setCachePrefix("todo");
-        configuration.setTimeToLive(10);
-        configuration.setServerGroupRetry(true);
-        return new EVCacheManager(Collections.singletonList(configuration)); # <1>
+        final EVCacheClientPoolConfigurationProperties properties = new EVCacheClientPoolConfigurationProperties();
+        properties.setKeyPrefix("todo");
+        properties.setTimeToLive(Duration.ofSeconds(10));
+        properties.setRetryEnabled(true);
+        properties.setExceptionThrowingEnabled(false);
+        final EVCacheConfiguration configuration = new EVCacheConfiguration("todos", "TODO", properties); # <1>
+        return new EVCacheManager(Collections.singleton(configuration));
     }
 }
 

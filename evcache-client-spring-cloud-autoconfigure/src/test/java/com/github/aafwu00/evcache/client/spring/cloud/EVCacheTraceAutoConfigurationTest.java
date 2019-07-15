@@ -48,14 +48,14 @@ class EVCacheTraceAutoConfigurationTest {
 
     @Test
     void should_be_loaded_EVCacheManagerTraceCustomizer() {
-        contextRunner.withPropertyValues("evcache.clusters[0].appName=test", "evcache.clusters[0].cachePrefix=test1")
+        contextRunner.withPropertyValues("evcache.clusters[0].appName=test", "evcache.clusters[0].keyPrefix=test1")
                      .withUserConfiguration(EnableCachingConfiguration.class)
                      .run(context -> assertThat(context).hasSingleBean(EVCacheManagerTraceCustomizer.class));
     }
 
     @Test
     void should_be_customized_EVCacheManager() {
-        contextRunner.withPropertyValues("evcache.clusters[0].appName=test", "evcache.clusters[0].cachePrefix=test1")
+        contextRunner.withPropertyValues("evcache.clusters[0].appName=test", "evcache.clusters[0].keyPrefix=test1")
                      .withUserConfiguration(MockConfiguration.class)
                      .run(context -> verify(context.getBean(EVCacheManagerTraceCustomizer.class)).customize(any()));
     }
@@ -63,7 +63,7 @@ class EVCacheTraceAutoConfigurationTest {
     @Test
     void should_be_not_loaded_EVCacheManagerTraceCustomizer_when_not_disabled() {
         contextRunner.withPropertyValues("evcache.clusters[0].appName=test",
-                                         "evcache.clusters[0].cachePrefix=test1",
+                                         "evcache.clusters[0].keyPrefix=test1",
                                          "evcache.trace.enabled=false")
                      .withUserConfiguration(EnableCachingConfiguration.class)
                      .run(context -> assertThat(context).doesNotHaveBean(EVCacheManagerTraceCustomizer.class));

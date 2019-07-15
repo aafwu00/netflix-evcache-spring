@@ -16,11 +16,11 @@
 
 package com.github.aafwu00.evcache.client.spring.boot;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
@@ -81,9 +81,10 @@ public class EVCacheProperties {
     @Validated
     @ConfigurationProperties("evcache.clusters[]")
     public static class Cluster {
-        private static final int DEFAULT_TIME_TO_LIVE = 900;
+        private static final Duration DEFAULT_TIME_TO_LIVE = Duration.ofSeconds(900);
         /**
-         * Name of the Cache, @Cacheable cacheName, Same as `appName` + `.` + `cachePrefix` when name is blank
+         * Name of the Cache, @{@link org.springframework.cache.annotation.Cacheable} cacheName,
+         * Same as `appName` + `.` + `keyPrefix` when name is blank
          */
         private String name;
         /**
@@ -92,38 +93,26 @@ public class EVCacheProperties {
         @NotBlank
         private String appName;
         /**
-         * Cache Prefix Key, Don't contain colon(:) character
+         * Key Prefix, Don't contain colon(:) character
          * same as {@link org.springframework.cache.annotation.Cacheable} cacheNames
          */
-        @NotBlank
-        @Pattern(regexp = "[^:]+$")
-        private String cachePrefix;
+        @Pattern(regexp = "[^:]*$")
+        private String keyPrefix = "";
         /**
-         * Default Time To Live(TTL), Seconds
+         * Default Time To Live(TTL)
          */
-        @Min(0)
-        private int timeToLive = DEFAULT_TIME_TO_LIVE;
-        /**
-         * Whether to allow for {@code null} values
-         */
-        private boolean allowNullValues = true;
+        private Duration timeToLive = DEFAULT_TIME_TO_LIVE;
         /**
          * Retry across Server Group for cache misses and exceptions
          */
-        private boolean serverGroupRetry = true;
+        private boolean retryEnabled = true;
         /**
          * Exceptions are not propagated and null values are returned
          */
-        private boolean enableExceptionThrowing;
+        private boolean exceptionThrowingEnabled;
 
         protected EVCacheConfiguration toConfiguration() {
-            return new EVCacheConfiguration(determineName(),
-                                            appName,
-                                            cachePrefix,
-                                            timeToLive,
-                                            allowNullValues,
-                                            serverGroupRetry,
-                                            enableExceptionThrowing);
+            return new EVCacheConfiguration(determineName(), appName, keyPrefix, timeToLive, retryEnabled, exceptionThrowingEnabled);
         }
 
         @Override
@@ -148,10 +137,10 @@ public class EVCacheProperties {
         }
 
         public String determineName() {
-            if (StringUtils.isBlank(name)) {
-                return appName + "." + cachePrefix;
+            if (StringUtils.isBlank(getName())) {
+                return getAppName() + "." + getKeyPrefix();
             }
-            return name;
+            return getName();
         }
 
         public String getName() {
@@ -170,44 +159,36 @@ public class EVCacheProperties {
             this.appName = appName;
         }
 
-        public String getCachePrefix() {
-            return cachePrefix;
+        public String getKeyPrefix() {
+            return keyPrefix;
         }
 
-        public void setCachePrefix(final String cachePrefix) {
-            this.cachePrefix = cachePrefix;
+        public void setKeyPrefix(final String keyPrefix) {
+            this.keyPrefix = keyPrefix;
         }
 
-        public int getTimeToLive() {
+        public Duration getTimeToLive() {
             return timeToLive;
         }
 
-        public void setTimeToLive(final int timeToLive) {
+        public void setTimeToLive(final Duration timeToLive) {
             this.timeToLive = timeToLive;
         }
 
-        public boolean isAllowNullValues() {
-            return allowNullValues;
+        public boolean isRetryEnabled() {
+            return retryEnabled;
         }
 
-        public void setAllowNullValues(final boolean allowNullValues) {
-            this.allowNullValues = allowNullValues;
+        public void setRetryEnabled(final boolean retryEnabled) {
+            this.retryEnabled = retryEnabled;
         }
 
-        public boolean isServerGroupRetry() {
-            return serverGroupRetry;
+        public boolean isExceptionThrowingEnabled() {
+            return exceptionThrowingEnabled;
         }
 
-        public void setServerGroupRetry(final boolean serverGroupRetry) {
-            this.serverGroupRetry = serverGroupRetry;
-        }
-
-        public boolean isEnableExceptionThrowing() {
-            return enableExceptionThrowing;
-        }
-
-        public void setEnableExceptionThrowing(final boolean enableExceptionThrowing) {
-            this.enableExceptionThrowing = enableExceptionThrowing;
+        public void setExceptionThrowingEnabled(final boolean exceptionThrowingEnabled) {
+            this.exceptionThrowingEnabled = exceptionThrowingEnabled;
         }
     }
 }

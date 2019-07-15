@@ -16,41 +16,23 @@
 
 package com.github.aafwu00.evcache.client.spring;
 
+import java.time.Duration;
+
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
  * @author Taeho Kim
  */
 class EVCacheConfigurationTest {
-    @Test
-    void should_valid_name() {
-        assertAll(
-            () -> assertThatThrownBy(() -> create("TEST", "TEST", "", 10)).isInstanceOf(IllegalArgumentException.class),
-            () -> assertThatThrownBy(() -> create("TEST", "TEST", "test:1", 10)).isInstanceOf(IllegalArgumentException.class),
-            () -> assertThatThrownBy(() -> create("TEST", "TEST", "test1:", 10)).isInstanceOf(IllegalArgumentException.class),
-            () -> assertThat(create("TEST", "TEST", "test-1", 10)).isNotNull()
-        );
-    }
-
-    private EVCacheConfiguration create(final String name, final String appName, final String cachePrefix, final int timeToLive) {
-        return new EVCacheConfiguration(name, appName, cachePrefix, timeToLive, true, true, true);
+    private EVCacheConfiguration create(final String name, final String appName, final String keyPrefix, final int timeToLive) {
+        return new EVCacheConfiguration(name, appName, keyPrefix, Duration.ofSeconds(timeToLive), true, true);
     }
 
     @Test
-    void should_valid_time_to_live() {
-        assertAll(
-            () -> assertThatThrownBy(() -> create("TEST", "TEST", "test1", -1)).isInstanceOf(IllegalArgumentException.class),
-            () -> assertThatThrownBy(() -> create("TEST", "TEST", "test1", 0)).isInstanceOf(IllegalArgumentException.class),
-            () -> assertThat(create("TEST", "TEST", "test1", 10)).isNotNull()
-        );
-    }
-
-    @Test
-    void should_be_equals_when_appName_and_cachePrefix_are_equals() {
+    void should_be_equals_when_appName_and_keyPrefix_are_equals() {
         final EVCacheConfiguration config = create("TEST", "TEST", "test1", 1);
         assertAll(
             () -> assertThat(config).isEqualTo(config),
@@ -64,7 +46,7 @@ class EVCacheConfigurationTest {
     }
 
     @Test
-    void should_be_same_hashCode_when_appName_and_cachePrefix_are_equals() {
+    void should_be_same_hashCode_when_appName_and_keyPrefix_are_equals() {
         final EVCacheConfiguration config = create("TEST", "TEST", "test1", 1);
         assertAll(
             () -> assertThat(config).hasSameHashCodeAs(create("TEST", "TEST1", "test1", 1)),

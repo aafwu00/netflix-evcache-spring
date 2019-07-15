@@ -5,7 +5,7 @@ spring:
 evcache:
   clusters:
     - app-name: TODO
-      cache-prefix: todos
-      time-to-live: 1000
+      key-prefix: todos
+      time-to-live: 1000s
 
 TODO-NODES: shard1=localhost:11211

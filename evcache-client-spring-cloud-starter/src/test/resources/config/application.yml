@@ -6,8 +6,8 @@ evcache:
   clusters:
     - name: todos
       app-name: TODO
-      cache-prefix: todos
-      time-to-live: 1000
+      key-prefix: todos
+      time-to-live: 1000s
 
 eureka:
   client:

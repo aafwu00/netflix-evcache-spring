@@ -26,7 +26,7 @@ public interface EVCache extends Cache {
         return getNativeCache().getAppName();
     }
 
-    default String getCachePrefix() {
+    default String getKeyPrefix() {
         return getNativeCache().getCachePrefix();
     }
 

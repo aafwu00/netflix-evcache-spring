@@ -69,26 +69,28 @@ evcache:
 | Name | Default | Description
 
 | evcache.public-hostname
-|
-| Hostname of Memcached Or Rend, If blank using localhost
+| localhost name
+| Hostname of Memcached Or Rend, If blank using localhost name
 
 | evcache.public-ipv4
-|
+| localhost ip
+| Ip Address of Memcached Or Rend, If blank using localhost ip
+
+| evcache.local-ipv4
+| localhost ip
 | Ip Address of Memcached Or Rend, If blank using localhost ip
 
 | evcache.availability-zone
-|
-| Ip Address of Memcached Or Rend, If blank using localhost ip
+| defaultZone
+| Default availability zone if none is resolved based on region.
 
 | evcache.asg-name
 | DEFAULT
 | Use AWS autoscaling group name(EVCache Group Name), when Eureka ASG name if blank
 
-
 | evcache.port
 | 11211
 | Default Port of Memcached Or Rend
-
 
 | evcache.server.health.eureka.enabled
 | true

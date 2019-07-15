@@ -16,8 +16,11 @@
 
 package com.github.aafwu00.evcache.client.spring.boot;
 
+import java.time.Duration;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
@@ -40,6 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -51,6 +55,7 @@ class EVCacheAutoConfigurationTest {
 
     @BeforeEach
     void setUp() {
+        reset(cacheManagerCustomizer);
         contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(EVCacheAutoConfiguration.class,
                                                      CacheAutoConfiguration.class,
@@ -59,7 +64,7 @@ class EVCacheAutoConfigurationTest {
 
     @Test
     void should_be_loaded_EVCacheManager() {
-        contextRunner.withPropertyValues("evcache.clusters[0].appName=test", "evcache.clusters[0].cachePrefix=test1")
+        contextRunner.withPropertyValues("evcache.clusters[0].appName=test", "evcache.clusters[0].keyPrefix=test1")
                      .withUserConfiguration(EnableCachingConfiguration.class)
                      .run(context -> assertAll(
                          () -> assertThat(context).hasSingleBean(EVCacheManager.class),
@@ -76,7 +81,7 @@ class EVCacheAutoConfigurationTest {
 
     @Test
     void should_be_not_loaded_EVCacheManager_when_cacheManager_already_exists() {
-        contextRunner.withPropertyValues("evcache.clusters[0].appName=test", "evcache.clusters[0].cachePrefix=test1")
+        contextRunner.withPropertyValues("evcache.clusters[0].appName=test", "evcache.clusters[0].keyPrefix=test1")
                      .withUserConfiguration(ExistsCacheManagerConfiguration.class)
                      .run(context -> assertAll(
                          () -> assertThat(context).doesNotHaveBean(EVCacheManager.class),
@@ -117,30 +122,9 @@ class EVCacheAutoConfigurationTest {
     }
 
     @Test
-    void should_be_thrown_exception_when_evcache_prefixes_is_empty() {
-        contextRunner.withPropertyValues("evcache.clusters[0].appName=test")
-                     .withUserConfiguration(EnableCachingConfiguration.class)
-                     .run(context -> assertThat(context).hasFailed()
-                                                        .getFailure()
-                                                        .isExactlyInstanceOf(UnsatisfiedDependencyException.class)
-                                                        .hasCauseExactlyInstanceOf(ConfigurationPropertiesBindException.class));
-    }
-
-    @Test
-    void should_be_thrown_exception_when_evcache_prefixes_name_is_blank() {
-        contextRunner.withPropertyValues("evcache.clusters[0].appName=test",
-                                         "evcache.clusters[0].cachePrefix=")
-                     .withUserConfiguration(EnableCachingConfiguration.class)
-                     .run(context -> assertThat(context).hasFailed()
-                                                        .getFailure()
-                                                        .isExactlyInstanceOf(UnsatisfiedDependencyException.class)
-                                                        .hasCauseExactlyInstanceOf(ConfigurationPropertiesBindException.class));
-    }
-
-    @Test
     void should_be_thrown_exception_when_evcache_prefixes_name_contains_colon() {
         contextRunner.withPropertyValues("evcache.clusters[0].appName=test",
-                                         "evcache.clusters[0].cachePrefix=test:123")
+                                         "evcache.clusters[0].keyPrefix=test:123")
                      .withUserConfiguration(EnableCachingConfiguration.class)
                      .run(context -> assertThat(context).hasFailed()
                                                         .getFailure()
@@ -151,39 +135,36 @@ class EVCacheAutoConfigurationTest {
     @Test
     void should_be_thrown_exception_when_evcache_prefixes_ttl_is_less_then_zero() {
         contextRunner.withPropertyValues("evcache.clusters[0].appName=test",
-                                         "evcache.clusters[0].cachePrefix=test1",
-                                         "evcache.clusters[0].timeToLive=-1")
+                                         "evcache.clusters[0].keyPrefix=test1",
+                                         "evcache.clusters[0].timeToLive=-1s")
                      .withUserConfiguration(EnableCachingConfiguration.class)
                      .run(context -> assertThat(context).hasFailed()
                                                         .getFailure()
-                                                        .isExactlyInstanceOf(UnsatisfiedDependencyException.class)
-                                                        .hasCauseExactlyInstanceOf(ConfigurationPropertiesBindException.class));
+                                                        .isExactlyInstanceOf(BeanCreationException.class)
+                                                        .hasCauseExactlyInstanceOf(IllegalArgumentException.class));
     }
 
     @Test
     void should_be_loaded_EVCacheProperties() {
         contextRunner.withPropertyValues("evcache.clusters[0].app-name=test",
-                                         "evcache.clusters[0].cache-prefix=test1",
-                                         "evcache.clusters[0].time-to-live=1000",
-                                         "evcache.clusters[0].server-group-retry=true",
-                                         "evcache.clusters[0].enable-exception-throwing=true",
-                                         "evcache.clusters[0].allow-null-values=false",
+                                         "evcache.clusters[0].key-prefix=test1",
+                                         "evcache.clusters[0].time-to-live=1000s",
+                                         "evcache.clusters[0].retry-enabled=true",
+                                         "evcache.clusters[0].exception-throwing-enabled=true",
                                          "evcache.clusters[1].appName=test",
-                                         "evcache.clusters[1].cachePrefix=test2",
-                                         "evcache.clusters[1].server-group-retry=false",
+                                         "evcache.clusters[1].keyPrefix=test2",
+                                         "evcache.clusters[1].retry-enabled=false",
                                          "evcache.use.simple.node.list.provider=true")
                      .withUserConfiguration(EnableCachingConfiguration.class)
                      .run(context -> assertAll(
                          () -> assertThat(context).hasSingleBean(EVCacheProperties.class),
                          () -> assertThat(firstCluster(context).getAppName()).isEqualTo("test"),
-                         () -> assertThat(firstCluster(context).getCachePrefix()).isEqualTo("test1"),
-                         () -> assertThat(firstCluster(context).getTimeToLive()).isEqualTo(1000),
-                         () -> assertThat(firstCluster(context).isServerGroupRetry()).isTrue(),
-                         () -> assertThat(firstCluster(context).isAllowNullValues()).isFalse(),
+                         () -> assertThat(firstCluster(context).getKeyPrefix()).isEqualTo("test1"),
+                         () -> assertThat(firstCluster(context).getTimeToLive()).isEqualTo(Duration.ofSeconds(1000)),
+                         () -> assertThat(firstCluster(context).isRetryEnabled()).isTrue(),
                          () -> assertThat(secondCluster(context).getAppName()).isEqualTo("test"),
-                         () -> assertThat(secondCluster(context).getCachePrefix()).isEqualTo("test2"),
-                         () -> assertThat(secondCluster(context).isAllowNullValues()).isTrue(),
-                         () -> assertThat(secondCluster(context).isServerGroupRetry()).isFalse()
+                         () -> assertThat(secondCluster(context).getKeyPrefix()).isEqualTo("test2"),
+                         () -> assertThat(secondCluster(context).isRetryEnabled()).isFalse()
                      ));
     }
 

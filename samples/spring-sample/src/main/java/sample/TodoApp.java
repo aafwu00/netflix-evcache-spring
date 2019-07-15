@@ -16,6 +16,7 @@
 
 package sample;
 
+import java.time.Duration;
 import java.util.Collections;
 
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.github.aafwu00.evcache.client.spring.EVCacheConfiguration;
 import com.github.aafwu00.evcache.client.spring.EVCacheManager;
+import com.netflix.evcache.EVCacheClientPoolConfigurationProperties;
 import com.netflix.evcache.util.EVCacheConfig;
 
 import sample.repository.TodoRepository;
@@ -56,7 +58,12 @@ public class TodoApp {
                      .getDynamicStringProperty("TODO-NODES",
                                                "shard1=localhost:11211,localhost:11212;shard2=localhost:11213,localhost:11214")
                      .get();
-        final EVCacheConfiguration configuration = new EVCacheConfiguration("todos", "TODO", "todos", 10, true, true, true);
+        final EVCacheClientPoolConfigurationProperties properties = new EVCacheClientPoolConfigurationProperties();
+        properties.setKeyPrefix("todo");
+        properties.setTimeToLive(Duration.ofSeconds(10));
+        properties.setRetryEnabled(true);
+        properties.setExceptionThrowingEnabled(false);
+        final EVCacheConfiguration configuration = new EVCacheConfiguration("todos", "TODO", properties);
         return new EVCacheManager(Collections.singleton(configuration));
     }
 }

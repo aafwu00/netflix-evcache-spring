@@ -16,6 +16,7 @@
 
 package com.github.aafwu00.evcache.client.spring;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -50,8 +51,8 @@ class EVCacheManagerTest {
 
     @Test
     void loadCaches() {
-        final EVCacheConfiguration configuration1 = new EVCacheConfiguration("1", "TEST", "test1", 1000, true, true, true);
-        final EVCacheConfiguration configuration2 = new EVCacheConfiguration("2", "TEST", "test2", 90, false, false, false);
+        final EVCacheConfiguration configuration1 = new EVCacheConfiguration("1", "TEST", "test1", Duration.ofSeconds(1000), true, true);
+        final EVCacheConfiguration configuration2 = new EVCacheConfiguration("2", "TEST", "test2", Duration.ofSeconds(90), false, false);
         final Set<EVCacheConfiguration> configurations = new HashSet<>();
         configurations.add(configuration1);
         configurations.add(configuration2);
@@ -73,8 +74,8 @@ class EVCacheManagerTest {
     private void assertThatCache(final EVCacheImpl cache, final EVCacheConfiguration configuration) {
         assertAll(
             () -> assertThat(cache.getAppName()).isEqualTo("TEST"),
-            () -> assertThat(cache.getCachePrefix()).isEqualTo(configuration.getCachePrefix()),
-            () -> assertThat(cache.getDefaultTTL()).isEqualTo(configuration.getTimeToLive())
+            () -> assertThat(cache.getCachePrefix()).isEqualTo(configuration.getProperties().getKeyPrefix()),
+            () -> assertThat(cache.getDefaultTTL()).isEqualTo(configuration.getProperties().getTimeToLive().getSeconds())
         );
     }
 }

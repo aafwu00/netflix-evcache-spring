@@ -58,9 +58,9 @@ evcache:
   clusters:
     - name: todos # <2>
       appName: EVCACHE # <3>
-      cachePrefix: todo # <4>
-      timeToLive: 5
-      server-group-retry: true
+      keyPrefix: todo # <4>
+      timeToLive: 5s
+      retry-enabled: true
 ----
 <1> see on http://cloud.spring.io/spring-cloud-static/spring-cloud-netflix/1.4.0.RELEASE/multi/multi__service_discovery_eureka_clients.html#_registering_with_eureka
 <2> Cache Name(same as `@Cacheable` `cacheNames`)

@@ -16,6 +16,7 @@
 
 package com.github.aafwu00.evcache.client.spring.boot;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +55,7 @@ class EVCachePropertiesTest {
     }
 
     @Test
-    void should_be_equals_when_appName_and_cachePrefix_are_equals() {
+    void should_be_equals_when_appName_and_keyPrefix_are_equals() {
         final Cluster cluster = cluster("TEST", "test1");
         assertAll(
             () -> assertThat(cluster).isEqualTo(cluster),
@@ -69,7 +70,7 @@ class EVCachePropertiesTest {
     }
 
     @Test
-    void should_be_same_hashCode_when_appName_and_cachePrefix_are_equals() {
+    void should_be_same_hashCode_when_appName_and_keyPrefix_are_equals() {
         final Cluster cluster = cluster("TEST", "test1");
         assertAll(
             () -> assertThat(cluster).hasSameHashCodeAs(cluster("TEST", "test1")),
@@ -80,10 +81,10 @@ class EVCachePropertiesTest {
         );
     }
 
-    private Cluster cluster(final String appName, final String cachePrefix) {
+    private Cluster cluster(final String appName, final String keyPrefix) {
         final Cluster result = new Cluster();
         result.setAppName(appName);
-        result.setCachePrefix(cachePrefix);
+        result.setKeyPrefix(keyPrefix);
         return result;
     }
 
@@ -100,18 +101,16 @@ class EVCachePropertiesTest {
             () -> assertThat(first(properties.getClusters()).determineName()).isEqualTo("test"),
             () -> assertThat(first(properties.getClusters()).getName()).isEqualTo("test"),
             () -> assertThat(first(properties.getClusters()).getAppName()).isEqualTo("test"),
-            () -> assertThat(first(properties.getClusters()).getCachePrefix()).isEqualTo("test1"),
-            () -> assertThat(first(properties.getClusters()).getTimeToLive()).isEqualTo(1000),
-            () -> assertThat(first(properties.getClusters()).isServerGroupRetry()).isTrue(),
-            () -> assertThat(first(properties.getClusters()).isEnableExceptionThrowing()).isTrue(),
-            () -> assertThat(first(properties.getClusters()).isAllowNullValues()).isTrue(),
+            () -> assertThat(first(properties.getClusters()).getKeyPrefix()).isEmpty(),
+            () -> assertThat(first(properties.getClusters()).getTimeToLive()).isEqualTo(Duration.ofSeconds(1000)),
+            () -> assertThat(first(properties.getClusters()).isRetryEnabled()).isTrue(),
+            () -> assertThat(first(properties.getClusters()).isExceptionThrowingEnabled()).isTrue(),
             () -> assertThat(second(properties.getClusters()).determineName()).isEqualTo("test.test2"),
             () -> assertThat(second(properties.getClusters()).getName()).isNull(),
             () -> assertThat(second(properties.getClusters()).getAppName()).isEqualTo("test"),
-            () -> assertThat(second(properties.getClusters()).getCachePrefix()).isEqualTo("test2"),
-            () -> assertThat(second(properties.getClusters()).isServerGroupRetry()).isFalse(),
-            () -> assertThat(second(properties.getClusters()).isEnableExceptionThrowing()).isFalse(),
-            () -> assertThat(second(properties.getClusters()).isAllowNullValues()).isFalse()
+            () -> assertThat(second(properties.getClusters()).getKeyPrefix()).isEqualTo("test2"),
+            () -> assertThat(second(properties.getClusters()).isRetryEnabled()).isFalse(),
+            () -> assertThat(second(properties.getClusters()).isExceptionThrowingEnabled()).isFalse()
         );
     }
 
@@ -119,15 +118,13 @@ class EVCachePropertiesTest {
     void should_be_converted_to_configurations() {
         final List<EVCacheConfiguration> configurations = new ArrayList<>(properties.toConfigurations());
         assertAll(
-            () -> assertThat(first(configurations).getCachePrefix()).isEqualTo("test1"),
-            () -> assertThat(first(configurations).getTimeToLive()).isEqualTo(1000),
-            () -> assertThat(first(configurations).isServerGroupRetry()).isTrue(),
-            () -> assertThat(first(configurations).isEnableExceptionThrowing()).isTrue(),
-            () -> assertThat(first(configurations).isAllowNullValues()).isTrue(),
-            () -> assertThat(second(configurations).getCachePrefix()).isEqualTo("test2"),
-            () -> assertThat(second(configurations).isServerGroupRetry()).isFalse(),
-            () -> assertThat(second(configurations).isEnableExceptionThrowing()).isFalse(),
-            () -> assertThat(second(configurations).isAllowNullValues()).isFalse()
+            () -> assertThat(first(configurations).getProperties().getKeyPrefix()).isEmpty(),
+            () -> assertThat(first(configurations).getProperties().getTimeToLive()).isEqualTo(Duration.ofSeconds(1000)),
+            () -> assertThat(first(configurations).getProperties().getRetryEnabled()).isTrue(),
+            () -> assertThat(first(configurations).getProperties().getExceptionThrowingEnabled()).isTrue(),
+            () -> assertThat(second(configurations).getProperties().getKeyPrefix()).isEqualTo("test2"),
+            () -> assertThat(second(configurations).getProperties().getRetryEnabled()).isFalse(),
+            () -> assertThat(second(configurations).getProperties().getExceptionThrowingEnabled()).isFalse()
         );
     }
 
