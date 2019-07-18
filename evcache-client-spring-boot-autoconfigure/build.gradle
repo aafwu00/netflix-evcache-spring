@@ -5,10 +5,12 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-commons'
     implementation 'org.springframework.cloud:spring-cloud-netflix-core'
     implementation 'org.springframework.cloud:spring-cloud-netflix-archaius'
+    implementation 'org.springframework.boot:spring-boot-actuator-autoconfigure', optional
 
     implementation 'org.springframework.boot:spring-boot-starter-validation', optional
     implementation 'org.springframework.boot:spring-boot-actuator', optional
     implementation 'io.micrometer:micrometer-core', optional
+    implementation "com.netflix.spectator:spectator-reg-micrometer:${spectatorVersion}", optional
 
     testImplementation "io.micrometer:micrometer-test:${dependencyManagement.importedProperties['micrometer.version']}"
 }

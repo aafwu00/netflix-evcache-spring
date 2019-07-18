@@ -64,8 +64,8 @@ public class EVCacheAutoConfiguration {
     @Bean
     @DependsOn("evcacheClientPoolManager")
     @ConditionalOnMissingBean
-    public CacheManager cacheManager(final CacheManagerCustomizers customizers,
-                                     final EVCacheProperties properties) {
+    public EVCacheManager cacheManager(final CacheManagerCustomizers customizers,
+                                       final EVCacheProperties properties) {
         return customizers.customize(new EVCacheManager(properties.toConfigurations()));
     }
 
