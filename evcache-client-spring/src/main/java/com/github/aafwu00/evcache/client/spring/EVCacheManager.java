@@ -16,9 +16,7 @@
 
 package com.github.aafwu00.evcache.client.spring;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,7 +35,6 @@ import static java.util.Objects.requireNonNull;
  */
 public class EVCacheManager extends AbstractCacheManager {
     private final Set<EVCacheConfiguration> configurations;
-    private final List<EVCachePostConstructCustomizer> customizers;
     /**
      * Whether to allow for {@code null} values
      */
@@ -46,23 +43,13 @@ public class EVCacheManager extends AbstractCacheManager {
     public EVCacheManager(final Set<EVCacheConfiguration> configurations) {
         super();
         this.configurations = requireNonNull(configurations);
-        this.customizers = new ArrayList<>();
     }
 
     @Override
     protected Collection<? extends Cache> loadCaches() {
         return configurations.stream()
                              .map(this::create)
-                             .map(this::customize)
                              .collect(Collectors.toList());
-    }
-
-    private EVCache customize(final EVCache cache) {
-        EVCache result = cache;
-        for (final EVCachePostConstructCustomizer customizer : customizers) {
-            result = customizer.customize(result);
-        }
-        return result;
     }
 
     private EVCache create(final EVCacheConfiguration configuration) {
@@ -73,10 +60,6 @@ public class EVCacheManager extends AbstractCacheManager {
         return Builder.forApp(configuration.getAppName())
                       .withConfigurationProperties(configuration.getProperties())
                       .build();
-    }
-
-    public void addCustomizer(final EVCachePostConstructCustomizer customizer) {
-        this.customizers.add(requireNonNull(customizer));
     }
 
     public void setAllowNullValues(final boolean allowNullValues) {

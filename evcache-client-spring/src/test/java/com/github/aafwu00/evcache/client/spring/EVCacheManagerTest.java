@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.cache.Cache;
 
@@ -30,25 +29,11 @@ import com.netflix.evcache.EVCacheImpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author Taeho Kim
  */
 class EVCacheManagerTest {
-    private EVCachePostConstructCustomizer customizer;
-
-    @BeforeEach
-    void setUp() {
-        customizer = spy(new EVCachePostConstructCustomizer() {
-            @Override
-            public EVCache customize(final EVCache cache) {
-                return cache;
-            }
-        });
-    }
-
     @Test
     void loadCaches() {
         final EVCacheConfiguration configuration1 = new EVCacheConfiguration("1", "TEST", "test1", Duration.ofSeconds(1000), true, true);
@@ -57,13 +42,10 @@ class EVCacheManagerTest {
         configurations.add(configuration1);
         configurations.add(configuration2);
         final EVCacheManager manager = new EVCacheManager(configurations);
-        manager.addCustomizer(customizer);
         final List<? extends Cache> caches = new ArrayList<>(manager.loadCaches());
         assertAll(
             () -> assertThatCache(getNativeCache(caches, 0), configuration1),
-            () -> assertThatCache(getNativeCache(caches, 1), configuration2),
-            () -> verify(customizer).customize((EVCache) caches.get(0)),
-            () -> verify(customizer).customize((EVCache) caches.get(1))
+            () -> assertThatCache(getNativeCache(caches, 1), configuration2)
         );
     }
 

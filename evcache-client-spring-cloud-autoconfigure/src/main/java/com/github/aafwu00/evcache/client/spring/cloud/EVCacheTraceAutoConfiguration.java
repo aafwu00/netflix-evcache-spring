@@ -16,18 +16,19 @@
 
 package com.github.aafwu00.evcache.client.spring.cloud;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.sleuth.autoconfig.TraceAutoConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.github.aafwu00.evcache.client.spring.boot.EVCacheAutoConfiguration;
+import com.netflix.evcache.pool.EVCacheClientPoolManager;
 
 import brave.Tracing;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Spring configuration for configuring EVCache Trace defaults to be Sleuth based
@@ -37,14 +38,20 @@ import brave.Tracing;
  * @see EVCacheAutoConfiguration
  */
 @Configuration
-@ConditionalOnBean(Tracing.class)
 @ConditionalOnProperty(value = "evcache.trace.enabled", matchIfMissing = true)
-@AutoConfigureAfter(TraceAutoConfiguration.class)
-@AutoConfigureBefore(EVCacheAutoConfiguration.class)
-public class EVCacheTraceAutoConfiguration {
-    @Bean
-    @ConditionalOnMissingBean
-    public EVCacheManagerTraceCustomizer evcacheManagerSleuthCustomizer(final Tracing tracing) {
-        return new EVCacheManagerTraceCustomizer(tracing);
+@ConditionalOnBean({Tracing.class, EVCacheClientPoolManager.class})
+@AutoConfigureAfter({TraceAutoConfiguration.class, EVCacheAutoConfiguration.class})
+public class EVCacheTraceAutoConfiguration implements InitializingBean {
+    private final Tracing tracing;
+    private final EVCacheClientPoolManager manager;
+
+    public EVCacheTraceAutoConfiguration(final Tracing tracing, final EVCacheClientPoolManager manager) {
+        this.tracing = requireNonNull(tracing);
+        this.manager = requireNonNull(manager);
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        manager.addEVCacheEventListener(new TraceableListener(tracing));
     }
 }

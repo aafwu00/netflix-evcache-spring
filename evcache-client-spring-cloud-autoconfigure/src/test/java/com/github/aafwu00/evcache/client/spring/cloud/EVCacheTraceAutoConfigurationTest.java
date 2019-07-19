@@ -26,20 +26,24 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.github.aafwu00.evcache.client.spring.boot.EVCacheAutoConfiguration;
+import com.netflix.evcache.pool.EVCacheClientPoolManager;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
 /**
  * @author Taeho Kim
  */
 class EVCacheTraceAutoConfigurationTest {
+    private static EVCacheClientPoolManager manager = mock(EVCacheClientPoolManager.class);
     private ApplicationContextRunner contextRunner;
 
     @BeforeEach
     void setUp() {
+        reset(manager);
         contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(TraceAutoConfiguration.class,
                                                      EVCacheTraceAutoConfiguration.class,
@@ -47,39 +51,28 @@ class EVCacheTraceAutoConfigurationTest {
     }
 
     @Test
-    void should_be_loaded_EVCacheManagerTraceCustomizer() {
-        contextRunner.withPropertyValues("evcache.clusters[0].appName=test", "evcache.clusters[0].keyPrefix=test1")
+    void should_be_registered_TraceableListener() {
+        contextRunner.withPropertyValues("evcache.clusters[0].appName=test",
+                                         "evcache.clusters[0].keyPrefix=test1")
                      .withUserConfiguration(EnableCachingConfiguration.class)
-                     .run(context -> assertThat(context).hasSingleBean(EVCacheManagerTraceCustomizer.class));
+                     .run(context -> verify(manager).addEVCacheEventListener(any(TraceableListener.class)));
     }
 
     @Test
-    void should_be_customized_EVCacheManager() {
-        contextRunner.withPropertyValues("evcache.clusters[0].appName=test", "evcache.clusters[0].keyPrefix=test1")
-                     .withUserConfiguration(MockConfiguration.class)
-                     .run(context -> verify(context.getBean(EVCacheManagerTraceCustomizer.class)).customize(any()));
-    }
-
-    @Test
-    void should_be_not_loaded_EVCacheManagerTraceCustomizer_when_not_disabled() {
+    void should_not_registered_TraceableListener_when_disabled() {
         contextRunner.withPropertyValues("evcache.clusters[0].appName=test",
                                          "evcache.clusters[0].keyPrefix=test1",
                                          "evcache.trace.enabled=false")
                      .withUserConfiguration(EnableCachingConfiguration.class)
-                     .run(context -> assertThat(context).doesNotHaveBean(EVCacheManagerTraceCustomizer.class));
-    }
-
-    @Configuration
-    @EnableCaching
-    static class MockConfiguration {
-        @Bean
-        EVCacheManagerTraceCustomizer evcacheManagerTraceCustomizer() {
-            return mock(EVCacheManagerTraceCustomizer.class);
-        }
+                     .run(context -> verify(manager, never()).addEVCacheEventListener(any(TraceableListener.class)));
     }
 
     @Configuration
     @EnableCaching
     static class EnableCachingConfiguration {
+        @Bean
+        EVCacheClientPoolManager evcacheClientPoolManager() {
+            return manager;
+        }
     }
 }
