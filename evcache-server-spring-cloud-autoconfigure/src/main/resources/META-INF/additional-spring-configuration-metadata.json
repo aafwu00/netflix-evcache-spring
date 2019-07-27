@@ -28,6 +28,12 @@
     },
     {
       "sourceType": "com.github.aafwu00.evcache.server.spring.cloud.EVCacheServerAutoConfiguration",
+      "name": "evcache.local-ipv4",
+      "description": "Local IP Address, when DataCenter is not Amazon",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "com.github.aafwu00.evcache.server.spring.cloud.EVCacheServerAutoConfiguration",
       "defaultValue": 11211,
       "name": "evcache.port",
       "description": "see on https://github.com/Netflix/EVCache/wiki/Configuring-EVCache-Client",

@@ -58,13 +58,14 @@ eureka:
 
 evcache:
   port: 11211 # <3>
+  asg-name: Group1 # <4>
 ----
 <1> EVCache App Name
 <2> see on http://cloud.spring.io/spring-cloud-static/spring-cloud-netflix/1.4.0.RELEASE/multi/multi__service_discovery_eureka_clients.html#_registering_with_eureka
 <3> memcached server port
 <4> evcache server group, shard name of replica set
 
-.Table EVCache Sidcar Properties
+.Table EVCache Sidecar Properties
 |===
 | Name | Default | Description
 

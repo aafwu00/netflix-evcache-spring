@@ -20,3 +20,4 @@ server:
 
 evcache:
   port: 11211
+  asg-name: group1
