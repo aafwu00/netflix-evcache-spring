@@ -2,6 +2,12 @@ spring:
   application:
     name: evcache
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
 eureka:
   instance:
     prefer-ip-address: true
@@ -14,11 +20,3 @@ server:
 
 evcache:
   port: 11211
-
-logging:
-  level:
-    root: info
-    com.github.aafwu00: debug
-    com.netflix: debug
-
-

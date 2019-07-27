@@ -2,10 +2,11 @@ spring:
   application:
     name: todo
 
-logging:
-  level:
-    root: info
-    com.netflix: debug
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
 
 evcache:
   clusters:
