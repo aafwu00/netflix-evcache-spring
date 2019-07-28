@@ -16,27 +16,24 @@
 
 package com.github.aafwu00.evcache.server.spring.cloud;
 
+import java.util.Map;
+
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.cloud.commons.util.InetUtils;
-import org.springframework.cloud.commons.util.UtilAutoConfiguration;
-import org.springframework.cloud.netflix.eureka.EurekaClientAutoConfiguration;
+import org.springframework.cloud.netflix.eureka.EurekaInstanceConfigBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
 
-import com.netflix.appinfo.HealthCheckHandler;
-
 import net.spy.memcached.MemcachedClient;
 import net.spy.memcached.spring.MemcachedClientFactoryBean;
 
-import static com.netflix.appinfo.AmazonInfo.MetaDataKey.publicHostname;
-import static com.netflix.appinfo.AmazonInfo.MetaDataKey.publicIpv4;
-import static com.netflix.evcache.pool.EVCacheClientPool.DEFAULT_PORT;
-import static java.util.Objects.requireNonNull;
+import static com.netflix.evcache.pool.eureka.EurekaNodeListProvider.DEFAULT_PORT;
+import static com.netflix.evcache.pool.eureka.EurekaNodeListProvider.DEFAULT_SECURE_PORT;
+import static java.lang.Boolean.FALSE;
 
 /**
  * EVCache Server Health Configuration that setting up
@@ -46,39 +43,53 @@ import static java.util.Objects.requireNonNull;
 @Configuration
 @ConditionalOnBean(EVCacheServerMarkerConfiguration.Marker.class)
 @ConditionalOnProperty(value = "evcache.server.health.enabled", matchIfMissing = true)
-@AutoConfigureAfter(UtilAutoConfiguration.class)
-@AutoConfigureBefore(EurekaClientAutoConfiguration.class)
+@AutoConfigureAfter(EVCacheServerAutoConfiguration.class)
 public class EVCacheServerHealthAutoConfiguration {
-    private final ConfigurableEnvironment environment;
-    private final InetUtils inetUtils;
-
-    public EVCacheServerHealthAutoConfiguration(final ConfigurableEnvironment environment, final InetUtils inetUtils) {
-        this.environment = requireNonNull(environment);
-        this.inetUtils = requireNonNull(inetUtils);
-    }
-
     @Bean
     @ConditionalOnMissingBean(MemcachedClient.class)
-    public MemcachedClientFactoryBean memcachedClient() {
+    public MemcachedClientFactoryBean memcachedClient(final EurekaInstanceConfigBean eurekaInstanceConfigBean,
+                                                      final ConfigurableEnvironment environment) {
         final MemcachedClientFactoryBean bean = new MemcachedClientFactoryBean();
-        bean.setServers(address() + ":" + port());
+        bean.setServers(eurekaInstanceConfigBean.getHostname() + ":" + port(environment, eurekaInstanceConfigBean));
         return bean;
     }
 
-    private String address() {
-        final InetUtils.HostInfo hostInfo = inetUtils.findFirstNonLoopbackHostInfo();
-        return environment.getProperty("evcache." + publicHostname.getName(),
-                                       environment.getProperty("evcache." + publicIpv4.getName(), hostInfo.getIpAddress()));
+    /**
+     * @see com.netflix.evcache.pool.eureka.EurekaNodeListProvider
+     */
+    private int port(final ConfigurableEnvironment environment, final EurekaInstanceConfigBean eurekaInstanceConfigBean) {
+        final Map<String, String> metaInfo = eurekaInstanceConfigBean.getMetadataMap();
+        final Boolean isSecure = getProperty(environment,
+                                             eurekaInstanceConfigBean.getASGName() + ".use.secure",
+                                             eurekaInstanceConfigBean.getAppname() + ".use.secure");
+        if (isSecure) {
+            return toInt(metaInfo, "evcache.secure.port", DEFAULT_SECURE_PORT);
+        }
+        final int rendPort = toInt(metaInfo, "rend.port", "0");
+        if (rendPort == 0) {
+            return toInt(metaInfo, "evcache.port", DEFAULT_PORT);
+        }
+        final Boolean useBatchPort = getProperty(environment,
+                                                 eurekaInstanceConfigBean.getAppname() + ".use.batch.port",
+                                                 "evcache.use.batch.port");
+        if (useBatchPort) {
+            return toInt(metaInfo, "rend.batch.port", "0");
+        }
+        return rendPort;
     }
 
-    private String port() {
-        return environment.getProperty("rend.port", environment.getProperty("evcache.port", DEFAULT_PORT));
+    private Boolean getProperty(final ConfigurableEnvironment environment, final String firstKey, final String secondKey) {
+        return environment.getProperty(firstKey, Boolean.class, environment.getProperty(secondKey, Boolean.class, FALSE));
+    }
+
+    private int toInt(final Map<String, String> metadata, final String key, final String defaultValue) {
+        return NumberUtils.toInt(metadata.getOrDefault(key, defaultValue));
     }
 
     @Bean
     @ConditionalOnProperty(value = "evcache.server.health.eureka.enabled", matchIfMissing = true)
     @ConditionalOnMissingBean
-    public HealthCheckHandler memcachedHealthCheckHandler(final MemcachedClient client) {
+    public MemcachedHealthCheckHandler memcachedHealthCheckHandler(final MemcachedClient client) {
         return new MemcachedHealthCheckHandler(client);
     }
 
@@ -88,5 +99,4 @@ public class EVCacheServerHealthAutoConfiguration {
     public MemcachedHealthIndicator memcachedHealthIndicator(final MemcachedClient client) {
         return new MemcachedHealthIndicator(client);
     }
-
 }

@@ -28,7 +28,6 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.commons.util.UtilAutoConfiguration;
 import org.springframework.cloud.netflix.eureka.EurekaClientAutoConfiguration;
 import org.springframework.cloud.netflix.eureka.EurekaDiscoveryClientConfiguration;
-import org.springframework.cloud.netflix.eureka.config.EurekaDiscoveryClientConfigServiceAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 
 import com.couchbase.mock.Bucket;
@@ -70,7 +69,6 @@ class EVCacheServerHealthAutoConfigurationTest {
             .withConfiguration(AutoConfigurations.of(UtilAutoConfiguration.class,
                                                      EurekaDiscoveryClientConfiguration.class,
                                                      EurekaClientAutoConfiguration.class,
-                                                     EurekaDiscoveryClientConfigServiceAutoConfiguration.class,
                                                      EVCacheServerAutoConfiguration.class,
                                                      EVCacheServerHealthAutoConfiguration.class
             )).withPropertyValues("spring.cloud.service-registry.auto-registration.enabled=false");

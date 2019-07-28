@@ -298,7 +298,7 @@
         <module name="ParameterAssignment"/>
         <module name="RequireThis"/>
         <module name="ReturnCount">
-            <property name="max" value="3"/>
+            <property name="max" value="5"/>
             <property name="maxForVoid" value="1"/>
         </module>
         <module name="SimplifyBooleanExpression"/>
