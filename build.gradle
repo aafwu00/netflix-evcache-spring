@@ -2,12 +2,12 @@ plugins {
     id 'nebula.project' version '6.0.3'
     id 'nebula.info' version '5.0.3'
     id 'nebula.optional-base' version '5.0.3'
-    id 'nebula.release' version '11.0.0'
+    id 'nebula.release' version '11.1.0'
     id 'nebula.lint' version '11.5.0'
 
-    id 'nebula.maven-publish' version '12.0.2' apply false
-    id 'nebula.maven-apache-license' version '12.0.2' apply false
-    id 'nebula.source-jar' version '12.0.2' apply false
+    id 'nebula.maven-publish' version '13.0.0' apply false
+    id 'nebula.maven-apache-license' version '13.0.0' apply false
+    id 'nebula.source-jar' version '13.0.0' apply false
 
     id 'org.springframework.boot' version '2.1.6.RELEASE' apply false
     id 'io.spring.dependency-management' version '1.0.8.RELEASE' apply false
@@ -20,9 +20,9 @@ plugins {
 }
 
 ext {
-    evcacheVersion = '5.10.1'
+    evcacheVersion = '5.11.0'
     couchbaseVersion = '1.5.23'
-    spectatorVersion = '0.92.0'
+    spectatorVersion = '0.92.1'
 }
 
 allprojects {
@@ -72,7 +72,6 @@ subprojects {
 
         checkstyle {
             toolVersion = '8.19'
-            ignoreFailures = false
             maxErrors = 0
             maxWarnings = 0
             configFile = rootProject.file('config/checkstyle/checkstyle_checks.xml')
