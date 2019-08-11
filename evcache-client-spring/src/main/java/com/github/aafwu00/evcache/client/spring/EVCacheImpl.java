@@ -59,6 +59,11 @@ public class EVCacheImpl extends AbstractValueAdaptingCache implements EVCache {
         }
     }
 
+    /**
+     * Not Support Synchronize
+     *
+     * @see org.springframework.cache.annotation.Cacheable#sync()
+     */
     @SuppressWarnings("unchecked")
     @Override
     public <T> T get(final Object key, final Callable<T> valueLoader) {
@@ -67,9 +72,9 @@ public class EVCacheImpl extends AbstractValueAdaptingCache implements EVCache {
             return (T) fromStoreValue(cached);
         }
         try {
-            final T call = valueLoader.call();
-            put(key, call);
-            return (T) fromStoreValue(call);
+            final T value = valueLoader.call();
+            put(key, value);
+            return (T) fromStoreValue(value);
             // CHECKSTYLE:OFF
         } catch (final Exception ex) {
             // CHECKSTYLE:ON
