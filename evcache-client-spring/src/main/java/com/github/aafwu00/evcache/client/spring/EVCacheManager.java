@@ -17,6 +17,7 @@
 package com.github.aafwu00.evcache.client.spring;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -26,6 +27,7 @@ import org.springframework.cache.support.AbstractCacheManager;
 
 import com.netflix.evcache.EVCache.Builder;
 
+import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -35,14 +37,21 @@ import static java.util.Objects.requireNonNull;
  */
 public class EVCacheManager extends AbstractCacheManager {
     private final Set<EVCacheConfiguration> configurations;
+    private final List<Builder.Customizer> customizers;
     /**
      * Whether to allow for {@code null} values
      */
     private boolean allowNullValues = true;
 
     public EVCacheManager(final Set<EVCacheConfiguration> configurations) {
+        this(configurations, emptyList());
+    }
+
+    public EVCacheManager(final Set<EVCacheConfiguration> configurations,
+                          final List<Builder.Customizer> customizers) {
         super();
         this.configurations = requireNonNull(configurations);
+        this.customizers = requireNonNull(customizers);
     }
 
     @Override
@@ -59,6 +68,7 @@ public class EVCacheManager extends AbstractCacheManager {
     private com.netflix.evcache.EVCache build(final EVCacheConfiguration configuration) {
         return Builder.forApp(configuration.getAppName())
                       .withConfigurationProperties(configuration.getProperties())
+                      .addCustomizers(customizers)
                       .build();
     }
 

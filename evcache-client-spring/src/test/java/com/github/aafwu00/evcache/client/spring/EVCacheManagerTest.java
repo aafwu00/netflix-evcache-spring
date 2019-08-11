@@ -25,10 +25,17 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.springframework.cache.Cache;
 
+import com.netflix.evcache.EVCache;
 import com.netflix.evcache.EVCacheImpl;
 
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Taeho Kim
@@ -41,12 +48,14 @@ class EVCacheManagerTest {
         final Set<EVCacheConfiguration> configurations = new HashSet<>();
         configurations.add(configuration1);
         configurations.add(configuration2);
-        final EVCacheManager manager = new EVCacheManager(configurations);
+        final EVCache.Builder.Customizer customizer = mock(EVCache.Builder.Customizer.class);
+        final EVCacheManager manager = new EVCacheManager(configurations, singletonList(customizer));
         final List<? extends Cache> caches = new ArrayList<>(manager.loadCaches());
         assertAll(
             () -> assertThatCache(getNativeCache(caches, 0), configuration1),
             () -> assertThatCache(getNativeCache(caches, 1), configuration2)
         );
+        verify(customizer, times(2)).customize(eq("TEST"), any());
     }
 
     private EVCacheImpl getNativeCache(final List<? extends Cache> caches, final int index) {

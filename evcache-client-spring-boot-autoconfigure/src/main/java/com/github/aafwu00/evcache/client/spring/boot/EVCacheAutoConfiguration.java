@@ -16,8 +16,6 @@
 
 package com.github.aafwu00.evcache.client.spring.boot;
 
-import java.util.List;
-
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -29,16 +27,20 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cloud.netflix.archaius.ArchaiusAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
 import com.github.aafwu00.evcache.client.spring.EVCacheManager;
+import com.netflix.evcache.EVCache;
 import com.netflix.evcache.connection.ConnectionFactoryBuilder;
 import com.netflix.evcache.connection.IConnectionBuilder;
 import com.netflix.evcache.pool.EVCacheClientPoolManager;
 import com.netflix.evcache.pool.EVCacheNodeList;
 import com.netflix.evcache.pool.SimpleNodeListProvider;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for the EVCache. Creates a
@@ -51,22 +53,25 @@ import com.netflix.evcache.pool.SimpleNodeListProvider;
  */
 @Configuration
 @ConditionalOnEVCache
-@AutoConfigureAfter(name = "org.springframework.cloud.netflix.archaius.ArchaiusAutoConfiguration")
+@AutoConfigureAfter(ArchaiusAutoConfiguration.class)
 @AutoConfigureBefore(CacheAutoConfiguration.class)
 @EnableConfigurationProperties(EVCacheProperties.class)
 public class EVCacheAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
-    public CacheManagerCustomizers cacheManagerCustomizers(final ObjectProvider<List<CacheManagerCustomizer<?>>> customizers) {
-        return new CacheManagerCustomizers(customizers.getIfAvailable());
+    public CacheManagerCustomizers cacheManagerCustomizers(final ObjectProvider<CacheManagerCustomizer<?>> customizers) {
+        return new CacheManagerCustomizers(customizers.orderedStream().collect(toList()));
     }
 
     @Bean
     @DependsOn("evcacheClientPoolManager")
     @ConditionalOnMissingBean
     public EVCacheManager cacheManager(final CacheManagerCustomizers customizers,
-                                       final EVCacheProperties properties) {
-        return customizers.customize(new EVCacheManager(properties.toConfigurations()));
+                                       final EVCacheProperties properties,
+                                       final ObjectProvider<EVCache.Builder.Customizer> builders) {
+        final EVCacheManager cacheManager = new EVCacheManager(properties.toConfigurations(),
+                                                               builders.orderedStream().collect(toList()));
+        return customizers.customize(cacheManager);
     }
 
     @Bean(destroyMethod = "shutdown")

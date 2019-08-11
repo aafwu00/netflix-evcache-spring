@@ -37,11 +37,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.github.aafwu00.evcache.client.spring.EVCacheManager;
+import com.netflix.evcache.EVCache.Builder;
 import com.netflix.evcache.pool.EVCacheClientPoolManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -51,11 +53,13 @@ import static org.mockito.Mockito.verify;
  */
 class EVCacheAutoConfigurationTest {
     private static CacheManagerCustomizer<EVCacheManager> cacheManagerCustomizer = mock(CacheManagerCustomizer.class);
+    private static Builder.Customizer customizer = mock(Builder.Customizer.class);
     private ApplicationContextRunner contextRunner;
 
     @BeforeEach
     void setUp() {
         reset(cacheManagerCustomizer);
+        reset(customizer);
         contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(EVCacheAutoConfiguration.class,
                                                      CacheAutoConfiguration.class,
@@ -69,7 +73,8 @@ class EVCacheAutoConfigurationTest {
                      .run(context -> assertAll(
                          () -> assertThat(context).hasSingleBean(EVCacheManager.class),
                          () -> assertThat(context).hasSingleBean(EVCacheClientPoolManager.class),
-                         () -> verify(cacheManagerCustomizer).customize(any(EVCacheManager.class))
+                         () -> verify(cacheManagerCustomizer).customize(any(EVCacheManager.class)),
+                         () -> verify(customizer).customize(eq("TEST"), any(Builder.class))
                      ));
     }
 
@@ -190,6 +195,11 @@ class EVCacheAutoConfigurationTest {
         @Bean
         CacheManagerCustomizer<EVCacheManager> cacheManagerCustomizer() {
             return cacheManagerCustomizer;
+        }
+
+        @Bean
+        Builder.Customizer customizer() {
+            return customizer;
         }
     }
 
