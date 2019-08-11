@@ -3,24 +3,24 @@ plugins {
     id 'nebula.info' version '5.0.3'
     id 'nebula.optional-base' version '5.0.3'
     id 'nebula.release' version '11.1.0'
-    id 'nebula.lint' version '11.5.0'
+    id 'nebula.lint' version '12.0.0'
 
-    id 'nebula.maven-publish' version '13.0.0' apply false
-    id 'nebula.maven-apache-license' version '13.0.0' apply false
-    id 'nebula.source-jar' version '13.0.0' apply false
+    id 'nebula.maven-publish' version '13.2.0' apply false
+    id 'nebula.maven-apache-license' version '13.2.0' apply false
+    id 'nebula.source-jar' version '13.2.0' apply false
 
-    id 'org.springframework.boot' version '2.1.6.RELEASE' apply false
+    id 'org.springframework.boot' version '2.1.7.RELEASE' apply false
     id 'io.spring.dependency-management' version '1.0.8.RELEASE' apply false
     id 'io.spring.propdeps' version '0.0.10.RELEASE' apply false
 
     id 'com.github.spotbugs' version '1.6.9' apply false
 
-    id 'com.github.ben-manes.versions' version '0.21.0'
+    id 'com.github.ben-manes.versions' version '0.22.0'
     id 'com.dorongold.task-tree' version '1.4'
 }
 
 ext {
-    evcacheVersion = '5.11.0'
+    evcacheVersion = '5.11.1'
     couchbaseVersion = '1.5.23'
     spectatorVersion = '0.92.1'
 }
@@ -82,7 +82,7 @@ subprojects {
         }
 
         pmd {
-            toolVersion = '6.16.0'
+            toolVersion = '6.17.0'
             ruleSetFiles = rootProject.files('config/pmd/rulesets.xml')
             sourceSets = [project.sourceSets.main as SourceSet]
             ignoreFailures = true
