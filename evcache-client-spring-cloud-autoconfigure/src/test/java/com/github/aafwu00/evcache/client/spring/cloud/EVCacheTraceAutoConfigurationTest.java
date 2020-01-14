@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.github.aafwu00.evcache.client.spring.boot.EVCacheAutoConfiguration;
+import com.netflix.evcache.EVCacheTracingEventListener;
 import com.netflix.evcache.pool.EVCacheClientPoolManager;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -51,20 +52,20 @@ class EVCacheTraceAutoConfigurationTest {
     }
 
     @Test
-    void should_be_registered_TraceableListener() {
+    void should_be_registered_EVCacheTracingEventListener() {
         contextRunner.withPropertyValues("evcache.clusters[0].appName=test",
                                          "evcache.clusters[0].keyPrefix=test1")
                      .withUserConfiguration(EnableCachingConfiguration.class)
-                     .run(context -> verify(manager).addEVCacheEventListener(any(TraceableListener.class)));
+                     .run(context -> verify(manager).addEVCacheEventListener(any(EVCacheTracingEventListener.class)));
     }
 
     @Test
-    void should_not_registered_TraceableListener_when_disabled() {
+    void should_not_registered_EVCacheTracingEventListener_when_disabled() {
         contextRunner.withPropertyValues("evcache.clusters[0].appName=test",
                                          "evcache.clusters[0].keyPrefix=test1",
                                          "evcache.trace.enabled=false")
                      .withUserConfiguration(EnableCachingConfiguration.class)
-                     .run(context -> verify(manager, never()).addEVCacheEventListener(any(TraceableListener.class)));
+                     .run(context -> verify(manager, never()).addEVCacheEventListener(any(EVCacheTracingEventListener.class)));
     }
 
     @Configuration

@@ -19,11 +19,14 @@ package com.github.aafwu00.evcache.client.spring.cloud;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.sleuth.autoconfig.TraceAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 
 import com.github.aafwu00.evcache.client.spring.boot.EVCacheAutoConfiguration;
+import com.netflix.evcache.EVCacheTracingEventListener;
 import com.netflix.evcache.pool.EVCacheClientPoolManager;
 
 import brave.Tracing;
@@ -39,6 +42,8 @@ import static java.util.Objects.requireNonNull;
  */
 @Configuration
 @ConditionalOnProperty(value = "evcache.trace.enabled", matchIfMissing = true)
+@ConditionalOnClass(EVCacheTracingEventListener.class)
+@ConditionalOnMissingBean(EVCacheTracingEventListener.class)
 @ConditionalOnBean({Tracing.class, EVCacheClientPoolManager.class})
 @AutoConfigureAfter({TraceAutoConfiguration.class, EVCacheAutoConfiguration.class})
 public class EVCacheTraceAutoConfiguration implements InitializingBean {
@@ -52,6 +57,6 @@ public class EVCacheTraceAutoConfiguration implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        manager.addEVCacheEventListener(new TraceableListener(tracing));
+        new EVCacheTracingEventListener(manager, tracing.tracer());
     }
 }

@@ -3,6 +3,7 @@ dependencies {
 
     implementation 'org.springframework.cloud:spring-cloud-netflix-archaius'
     implementation 'org.springframework.cloud:spring-cloud-netflix-eureka-client'
+    implementation "com.netflix.evcache:evcache-zipkin-tracing:${evcacheVersion}", optional
     implementation 'org.springframework.cloud:spring-cloud-sleuth-core', optional
 
     implementation 'org.springframework.boot:spring-boot-starter-validation', optional
