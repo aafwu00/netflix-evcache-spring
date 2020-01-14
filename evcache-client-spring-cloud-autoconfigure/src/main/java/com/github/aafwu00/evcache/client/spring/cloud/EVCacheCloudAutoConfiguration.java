@@ -34,6 +34,7 @@ import com.netflix.evcache.connection.DIConnectionFactoryBuilderProvider;
 import com.netflix.evcache.connection.IConnectionBuilder;
 import com.netflix.evcache.pool.EVCacheNodeList;
 import com.netflix.evcache.pool.eureka.EurekaNodeListProvider;
+import com.netflix.evcache.util.EVCacheConfig;
 
 /**
  * Spring configuration for configuring EVCache defaults to be Eureka based
@@ -56,13 +57,15 @@ public class EVCacheCloudAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public IConnectionBuilder connectionBuilder(final EurekaClient eurekaClient) {
-        return new DIConnectionFactoryBuilderProvider(eurekaClient);
+    public IConnectionBuilder connectionBuilder(final EurekaClient eurekaClient, final EVCacheConfig evcacheConfig) {
+        return new DIConnectionFactoryBuilderProvider(eurekaClient, evcacheConfig.getPropertyRepository());
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public EVCacheNodeList evcacheNodeList(final ApplicationInfoManager applicationInfoManager, final EurekaClient eurekaClient) {
-        return new EurekaNodeListProvider(applicationInfoManager, eurekaClient);
+    public EVCacheNodeList evcacheNodeList(final ApplicationInfoManager applicationInfoManager,
+                                           final EurekaClient eurekaClient,
+                                           final EVCacheConfig evcacheConfig) {
+        return new EurekaNodeListProvider(applicationInfoManager, eurekaClient, evcacheConfig.getPropertyRepository());
     }
 }

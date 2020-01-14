@@ -55,9 +55,9 @@ public class TodoApp {
     @Bean
     public CacheManager cacheManager() {
         EVCacheConfig.getInstance()
-                     .getDynamicStringProperty("TODO-NODES",
-                                               "shard1=localhost:11211,localhost:11212;shard2=localhost:11213,localhost:11214")
-                     .get();
+                     .getPropertyRepository()
+                     .get("TODO-NODES", String.class)
+                     .orElseGet("shard1=localhost:11211,localhost:11212;shard2=localhost:11213,localhost:11214");
         final EVCacheClientPoolConfigurationProperties properties = new EVCacheClientPoolConfigurationProperties();
         properties.setKeyPrefix("todo");
         properties.setTimeToLive(Duration.ofSeconds(10));

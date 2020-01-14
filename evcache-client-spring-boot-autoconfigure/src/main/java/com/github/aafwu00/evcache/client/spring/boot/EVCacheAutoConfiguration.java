@@ -28,17 +28,21 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.netflix.archaius.ArchaiusAutoConfiguration;
+import org.springframework.cloud.netflix.archaius.ConfigurableEnvironmentConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
 import com.github.aafwu00.evcache.client.spring.EVCacheManager;
+import com.netflix.archaius.DefaultPropertyFactory;
+import com.netflix.archaius.commons.CommonsToConfig;
 import com.netflix.evcache.EVCache;
 import com.netflix.evcache.connection.ConnectionFactoryBuilder;
 import com.netflix.evcache.connection.IConnectionBuilder;
 import com.netflix.evcache.pool.EVCacheClientPoolManager;
 import com.netflix.evcache.pool.EVCacheNodeList;
 import com.netflix.evcache.pool.SimpleNodeListProvider;
+import com.netflix.evcache.util.EVCacheConfig;
 
 import static java.util.stream.Collectors.toList;
 
@@ -77,8 +81,17 @@ public class EVCacheAutoConfiguration {
     @Bean(destroyMethod = "shutdown")
     @ConditionalOnMissingBean
     public EVCacheClientPoolManager evcacheClientPoolManager(final IConnectionBuilder connectionBuilder,
-                                                             final EVCacheNodeList evcacheNodeList) {
-        return new EVCacheClientPoolManager(connectionBuilder, evcacheNodeList);
+                                                             final EVCacheNodeList evcacheNodeList,
+                                                             final EVCacheConfig evcacheConfig) {
+        return new EVCacheClientPoolManager(connectionBuilder, evcacheNodeList, evcacheConfig);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public EVCacheConfig evcacheConfig(final ConfigurableEnvironmentConfiguration configurableEnvironmentConfiguration) {
+        final CommonsToConfig config = new CommonsToConfig(configurableEnvironmentConfiguration);
+        final DefaultPropertyFactory factory = DefaultPropertyFactory.from(config);
+        return new EVCacheConfig(factory);
     }
 
     @Bean

@@ -26,9 +26,9 @@ plugins {
 }
 
 ext {
-    evcacheVersion = '5.11.2'
+    evcacheVersion = '5.12.21'
     couchbaseVersion = '1.5.23'
-    spectatorVersion = '0.93.0'
+    spectatorVersion = '0.99.2'
 }
 
 allprojects {

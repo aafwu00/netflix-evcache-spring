@@ -5,6 +5,8 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-commons'
     implementation 'org.springframework.cloud:spring-cloud-netflix-core'
     implementation 'org.springframework.cloud:spring-cloud-netflix-archaius'
+    implementation 'com.netflix.archaius:archaius2-commons-configuration:2.3.16'
+
     implementation 'org.springframework.boot:spring-boot-actuator-autoconfigure', optional
 
     implementation 'org.springframework.boot:spring-boot-starter-validation', optional

@@ -87,7 +87,9 @@ class EVCacheCloudAutoConfigurationTest {
                          () -> assertThat(context.getBean(Environment.class)
                                                  .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isFalse(),
                          () -> assertThat(EVCacheConfig.getInstance()
-                                                       .getDynamicBooleanProperty("evcache.use.simple.node.list.provider", true)
+                                                       .getPropertyRepository()
+                                                       .get("evcache.use.simple.node.list.provider", Boolean.TYPE)
+                                                       .orElse(true)
                                                        .get()).isFalse()
                      ));
     }
