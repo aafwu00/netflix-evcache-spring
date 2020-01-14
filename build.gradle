@@ -1,22 +1,28 @@
-plugins {
-    id 'nebula.project' version '6.0.3'
-    id 'nebula.info' version '5.0.3'
-    id 'nebula.optional-base' version '5.0.3'
-    id 'nebula.release' version '11.1.0'
-    id 'nebula.lint' version '12.0.0'
+buildscript {
+    dependencies {
+        classpath 'com.google.guava:guava:28.2-jre'// workaround for failing spotbugs
+    }
+}
 
-    id 'nebula.maven-publish' version '13.2.0' apply false
-    id 'nebula.maven-apache-license' version '13.2.0' apply false
-    id 'nebula.source-jar' version '13.2.0' apply false
+plugins {
+    id 'nebula.project' version '7.0.4'
+    id 'nebula.info' version '5.2.0'
+    id 'nebula.optional-base' version '5.0.3'
+    id 'nebula.release' version '13.2.1'
+    id 'nebula.lint' version '16.0.2'
+
+    id 'nebula.maven-publish' version '14.1.1' apply false
+    id 'nebula.maven-apache-license' version '14.1.1' apply false
+    id 'nebula.source-jar' version '14.1.1' apply false
 
     id 'org.springframework.boot' version '2.1.7.RELEASE' apply false
     id 'io.spring.dependency-management' version '1.0.8.RELEASE' apply false
     id 'io.spring.propdeps' version '0.0.10.RELEASE' apply false
 
-    id 'com.github.spotbugs' version '1.6.9' apply false
+    id 'com.github.spotbugs' version '3.0.0' apply false
 
-    id 'com.github.ben-manes.versions' version '0.22.0'
-    id 'com.dorongold.task-tree' version '1.4'
+    id 'com.github.ben-manes.versions' version '0.27.0'
+    id 'com.dorongold.task-tree' version '1.5'
 }
 
 ext {
@@ -82,7 +88,7 @@ subprojects {
         }
 
         pmd {
-            toolVersion = '6.17.0'
+            toolVersion = '6.20.0'
             ruleSetFiles = rootProject.files('config/pmd/rulesets.xml')
             sourceSets = [project.sourceSets.main as SourceSet]
             ignoreFailures = true
@@ -90,7 +96,7 @@ subprojects {
         }
 
         spotbugs {
-            toolVersion = '3.1.12'
+            toolVersion = '4.0.0-beta4'
             ignoreFailures = true
             effort = 'max'
             reportLevel = 'high'
@@ -103,7 +109,7 @@ subprojects {
         }
 
         jacoco {
-            toolVersion = '0.8.4'
+            toolVersion = '0.8.5'
         }
 
         jacocoTestReport {
@@ -149,7 +155,7 @@ subprojects {
 
     dependencies {
         if (!project.name.contains('sample')) {
-            spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.9.0'
+            spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.10.1'
         }
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
         testImplementation 'org.junit.jupiter:junit-jupiter-api'
