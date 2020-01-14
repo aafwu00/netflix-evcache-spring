@@ -5,10 +5,10 @@ buildscript {
 }
 
 plugins {
-    id 'nebula.project' version '7.0.4'
+    id 'nebula.project' version '7.0.5'
     id 'nebula.info' version '5.2.0'
     id 'nebula.optional-base' version '5.0.3'
-    id 'nebula.release' version '13.2.1'
+    id 'nebula.release' version '14.0.2'
     id 'nebula.lint' version '16.0.2'
 
     id 'nebula.maven-publish' version '14.1.1' apply false
