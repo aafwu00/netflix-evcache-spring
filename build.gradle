@@ -81,8 +81,7 @@ subprojects {
             maxErrors = 0
             maxWarnings = 0
             configFile = rootProject.file('config/checkstyle/checkstyle_checks.xml')
-            configProperties = ['checkstyle.header.file'       : "${rootProject.projectDir}/config/checkstyle/java.header",
-                                'checkstyle.regexp.header.file': "${rootProject.projectDir}/config/checkstyle/java_regexp.header",
+            configProperties = ['checkstyle.regexp.header.file': "${rootProject.projectDir}/config/checkstyle/java_regexp.header",
                                 'checkstyle.suppressions.file' : "${rootProject.projectDir}/config/checkstyle/suppressions.xml",
                                 'checkstyle.importcontrol.file': "${rootProject.projectDir}/config/checkstyle/import-control.xml"]
         }
