@@ -16,7 +16,6 @@
 
 package com.github.aafwu00.evcache.client.spring.boot;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -48,15 +47,15 @@ public class EVCacheMetricsAutoConfiguration {
     @ConditionalOnClass(MicrometerRegistry.class)
     public static class SpectatorRegistration {
         @Bean
-        public static BeanPostProcessor micrometerRegistryBeanPostProcessor() {
+        public BeanPostProcessor micrometerRegistryBeanPostProcessor() {
             return new BeanPostProcessor() {
                 @Override
-                public Object postProcessBeforeInitialization(final Object bean, final String beanName) throws BeansException {
+                public Object postProcessBeforeInitialization(final Object bean, final String beanName) {
                     return bean;
                 }
 
                 @Override
-                public Object postProcessAfterInitialization(final Object bean, final String beanName) throws BeansException {
+                public Object postProcessAfterInitialization(final Object bean, final String beanName) {
                     if (bean instanceof MeterRegistry) {
                         Spectator.globalRegistry()
                                  .add(new MicrometerRegistry((MeterRegistry) bean));

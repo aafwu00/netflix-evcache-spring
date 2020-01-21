@@ -16,8 +16,8 @@
 
 package com.github.aafwu00.evcache.server.spring.cloud;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,7 @@ class EVCacheServerEnvironmentPostProcessor implements EnvironmentPostProcessor,
 
     @Override
     public void postProcessEnvironment(final ConfigurableEnvironment environment, final SpringApplication application) {
-        final Map<String, Object> source = new HashMap<>();
+        final Map<String, Object> source = new ConcurrentHashMap<>();
         if (!environment.containsProperty("eureka.instance.asg-name")) {
             final String asgName = environment.getProperty("evcache.asg-name", "DEFAULT");
             source.put("eureka.instance.asg-name", asgName);

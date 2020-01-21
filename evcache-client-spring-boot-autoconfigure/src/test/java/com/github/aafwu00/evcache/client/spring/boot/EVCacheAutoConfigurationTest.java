@@ -52,10 +52,12 @@ import static org.mockito.Mockito.verify;
  * @author Taeho Kim
  */
 class EVCacheAutoConfigurationTest {
+    @SuppressWarnings("unchecked")
     private static CacheManagerCustomizer<EVCacheManager> cacheManagerCustomizer = mock(CacheManagerCustomizer.class);
     private static Builder.Customizer customizer = mock(Builder.Customizer.class);
     private ApplicationContextRunner contextRunner;
 
+    @SuppressWarnings("unchecked")
     @BeforeEach
     void setUp() {
         reset(cacheManagerCustomizer);

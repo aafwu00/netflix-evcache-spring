@@ -75,6 +75,7 @@ class EVCacheMetricsAutoConfigurationTest {
                      .run(context -> assertThat(context).doesNotHaveBean(EVCacheMeterBinderProvider.class));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void should_be_not_loaded_MicrometerRegistry_when_MeterRegistry_not_exists() {
         contextRunner.withUserConfiguration(EnableEVCacheManagerConfiguration.class)
@@ -84,6 +85,7 @@ class EVCacheMetricsAutoConfigurationTest {
                      });
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void should_be_loaded_MicrometerRegistry_when_MeterRegistry() {
         contextRunner.withUserConfiguration(EnableMicrometerRegistryConfiguration.class)

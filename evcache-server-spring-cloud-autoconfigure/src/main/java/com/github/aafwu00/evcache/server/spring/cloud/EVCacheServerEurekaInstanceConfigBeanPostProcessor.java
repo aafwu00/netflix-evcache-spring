@@ -18,7 +18,6 @@ package com.github.aafwu00.evcache.server.spring.cloud;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.cloud.netflix.eureka.EurekaClientConfigBean;
 import org.springframework.cloud.netflix.eureka.EurekaInstanceConfigBean;
@@ -51,12 +50,12 @@ class EVCacheServerEurekaInstanceConfigBeanPostProcessor implements BeanPostProc
     }
 
     @Override
-    public Object postProcessBeforeInitialization(final Object bean, final String beanName) throws BeansException {
+    public Object postProcessBeforeInitialization(final Object bean, final String beanName) {
         return bean;
     }
 
     @Override
-    public Object postProcessAfterInitialization(final Object bean, final String beanName) throws BeansException {
+    public Object postProcessAfterInitialization(final Object bean, final String beanName) {
         if (!isAssignableValue(EurekaInstanceConfigBean.class, bean)) {
             return bean;
         }

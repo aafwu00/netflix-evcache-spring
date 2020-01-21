@@ -28,20 +28,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.binder.cache.CacheMeterBinder;
 
-import static com.netflix.evcache.metrics.EVCacheMetricsFactory.CACHE;
-import static com.netflix.evcache.metrics.EVCacheMetricsFactory.CACHE_HIT;
-import static com.netflix.evcache.metrics.EVCacheMetricsFactory.CALL_TAG;
-import static com.netflix.evcache.metrics.EVCacheMetricsFactory.CALL_TYPE_TAG;
-import static com.netflix.evcache.metrics.EVCacheMetricsFactory.DELETE_OPERATION;
-import static com.netflix.evcache.metrics.EVCacheMetricsFactory.GET_OPERATION;
-import static com.netflix.evcache.metrics.EVCacheMetricsFactory.NO;
-import static com.netflix.evcache.metrics.EVCacheMetricsFactory.OVERALL_CALL;
-import static com.netflix.evcache.metrics.EVCacheMetricsFactory.PREFIX;
-import static com.netflix.evcache.metrics.EVCacheMetricsFactory.READ;
-import static com.netflix.evcache.metrics.EVCacheMetricsFactory.SET_OPERATION;
-import static com.netflix.evcache.metrics.EVCacheMetricsFactory.WRITE;
-import static com.netflix.evcache.metrics.EVCacheMetricsFactory.YES;
-
 public class EVCacheMeterBinder extends CacheMeterBinder {
     private final EVCacheMetricsFactory instance;
     private final String appName;
@@ -62,9 +48,9 @@ public class EVCacheMeterBinder extends CacheMeterBinder {
 
     @Override
     protected long hitCount() {
-        return timers().filter(timer -> containTag(timer.id(), CALL_TYPE_TAG, READ))
-                       .filter(timer -> containTag(timer.id(), CALL_TAG, GET_OPERATION))
-                       .filter(timer -> containTag(timer.id(), CACHE_HIT, YES))
+        return timers().filter(timer -> containTag(timer.id(), EVCacheMetricsFactory.CALL_TYPE_TAG, EVCacheMetricsFactory.READ))
+                       .filter(timer -> containTag(timer.id(), EVCacheMetricsFactory.CALL_TAG, EVCacheMetricsFactory.GET_OPERATION))
+                       .filter(timer -> containTag(timer.id(), EVCacheMetricsFactory.CACHE_HIT, EVCacheMetricsFactory.YES))
                        .mapToLong(Timer::count)
                        .sum();
     }
@@ -73,9 +59,9 @@ public class EVCacheMeterBinder extends CacheMeterBinder {
         return instance.getAllTimers()
                        .values()
                        .stream()
-                       .filter(timer -> OVERALL_CALL.equals(timer.id().name()))
-                       .filter(timer -> containTag(timer.id(), CACHE, appName))
-                       .filter(timer -> containTag(timer.id(), PREFIX, keyPrefix));
+                       .filter(timer -> EVCacheMetricsFactory.OVERALL_CALL.equals(timer.id().name()))
+                       .filter(timer -> containTag(timer.id(), EVCacheMetricsFactory.CACHE, appName))
+                       .filter(timer -> containTag(timer.id(), EVCacheMetricsFactory.PREFIX, keyPrefix));
     }
 
     private boolean containTag(final Id id, final String key, final String value) {
@@ -92,30 +78,31 @@ public class EVCacheMeterBinder extends CacheMeterBinder {
 
     @Override
     protected Long missCount() {
-        return timers().filter(timer -> containTag(timer.id(), CALL_TYPE_TAG, READ))
-                       .filter(timer -> containTag(timer.id(), CALL_TAG, GET_OPERATION))
-                       .filter(timer -> containTag(timer.id(), CACHE_HIT, NO))
+        return timers().filter(timer -> containTag(timer.id(), EVCacheMetricsFactory.CALL_TYPE_TAG, EVCacheMetricsFactory.READ))
+                       .filter(timer -> containTag(timer.id(), EVCacheMetricsFactory.CALL_TAG, EVCacheMetricsFactory.GET_OPERATION))
+                       .filter(timer -> containTag(timer.id(), EVCacheMetricsFactory.CACHE_HIT, EVCacheMetricsFactory.NO))
                        .mapToLong(Timer::count)
                        .sum();
     }
 
     @Override
     protected Long evictionCount() {
-        return timers().filter(timer -> containTag(timer.id(), CALL_TYPE_TAG, WRITE))
-                       .filter(timer -> containTag(timer.id(), CALL_TAG, DELETE_OPERATION))
+        return timers().filter(timer -> containTag(timer.id(), EVCacheMetricsFactory.CALL_TYPE_TAG, EVCacheMetricsFactory.WRITE))
+                       .filter(timer -> containTag(timer.id(), EVCacheMetricsFactory.CALL_TAG, EVCacheMetricsFactory.DELETE_OPERATION))
                        .mapToLong(Timer::count)
                        .sum();
     }
 
     @Override
     protected long putCount() {
-        return timers().filter(timer -> containTag(timer.id(), CALL_TYPE_TAG, WRITE))
-                       .filter(timer -> containTag(timer.id(), CALL_TAG, SET_OPERATION))
+        return timers().filter(timer -> containTag(timer.id(), EVCacheMetricsFactory.CALL_TYPE_TAG, EVCacheMetricsFactory.WRITE))
+                       .filter(timer -> containTag(timer.id(), EVCacheMetricsFactory.CALL_TAG, EVCacheMetricsFactory.SET_OPERATION))
                        .mapToLong(Timer::count)
                        .sum();
     }
 
     @Override
     protected void bindImplementationSpecificMetrics(final MeterRegistry registry) {
+        // nothing
     }
 }

@@ -88,9 +88,9 @@ subprojects {
 
         pmd {
             toolVersion = '6.20.0'
-            ruleSetFiles = rootProject.files('config/pmd/rulesets.xml')
             sourceSets = [project.sourceSets.main as SourceSet]
-            ignoreFailures = true
+            ruleSets = []
+            ruleSetFiles = rootProject.files('config/pmd/rulesets.xml')
             rulePriority = 3
         }
 
