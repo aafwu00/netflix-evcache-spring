@@ -16,22 +16,21 @@
 
 package com.github.aafwu00.evcache.client.spring.boot;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import com.github.aafwu00.evcache.client.spring.EVCache;
 import com.netflix.evcache.metrics.EVCacheMetricsFactory;
 import com.netflix.spectator.api.DefaultRegistry;
 import com.netflix.spectator.api.Spectator;
 import com.netflix.spectator.api.Tag;
 import com.netflix.spectator.api.Timer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static com.netflix.evcache.metrics.EVCacheMetricsFactory.CACHE;
 import static com.netflix.evcache.metrics.EVCacheMetricsFactory.CACHE_HIT;

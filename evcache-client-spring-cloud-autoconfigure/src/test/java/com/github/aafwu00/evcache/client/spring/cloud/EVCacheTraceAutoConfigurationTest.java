@@ -16,6 +16,9 @@
 
 package com.github.aafwu00.evcache.client.spring.cloud;
 
+import com.github.aafwu00.evcache.client.spring.boot.EVCacheAutoConfiguration;
+import com.netflix.evcache.EVCacheTracingEventListener;
+import com.netflix.evcache.pool.EVCacheClientPoolManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -24,10 +27,6 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.sleuth.autoconfig.TraceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import com.github.aafwu00.evcache.client.spring.boot.EVCacheAutoConfiguration;
-import com.netflix.evcache.EVCacheTracingEventListener;
-import com.netflix.evcache.pool.EVCacheClientPoolManager;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;

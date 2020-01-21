@@ -16,16 +16,15 @@
 
 package com.github.aafwu00.evcache.client.spring;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.netflix.evcache.EVCache.Builder;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.support.AbstractCacheManager;
 
-import com.netflix.evcache.EVCache.Builder;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
@@ -47,6 +46,12 @@ public class EVCacheManager extends AbstractCacheManager {
         this(configurations, emptyList());
     }
 
+    /**
+     * Create a new EVCacheManager for the given configurations and customizers
+     *
+     * @param configurations To be applied by for {@link Builder}`s {@link com.netflix.evcache.EVCacheClientPoolConfigurationProperties}
+     * @param customizers    To be applied by for {@link Builder}`s customizer
+     */
     public EVCacheManager(final Set<EVCacheConfiguration> configurations,
                           final List<Builder.Customizer> customizers) {
         super();

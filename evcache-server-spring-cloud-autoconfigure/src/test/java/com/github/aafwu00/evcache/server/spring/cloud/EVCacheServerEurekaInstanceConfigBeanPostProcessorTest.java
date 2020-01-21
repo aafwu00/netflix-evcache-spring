@@ -16,9 +16,7 @@
 
 package com.github.aafwu00.evcache.server.spring.cloud;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.netflix.appinfo.AmazonInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.cloud.commons.util.InetUtils;
@@ -28,7 +26,8 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.StandardEnvironment;
 
-import com.netflix.appinfo.AmazonInfo;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;

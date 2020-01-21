@@ -16,13 +16,14 @@
 
 package com.github.aafwu00.evcache.server.spring.cloud;
 
-import java.util.concurrent.TimeUnit;
-
+import net.spy.memcached.MemcachedClient;
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 
-import net.spy.memcached.MemcachedClient;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static java.util.Objects.requireNonNull;
 
@@ -45,9 +46,16 @@ public class MemcachedHealthIndicator extends AbstractHealthIndicator {
 
     @Override
     protected void doHealthCheck(final Health.Builder builder) throws Exception {
-        if (client.set(KEY, EXPIRATION, VALUE).get()
-            && VALUE.equals(client.asyncGet(KEY).get(DURATION, TimeUnit.SECONDS))) {
+        if (isAvailableSetOperation() && isValidValue()) {
             builder.up();
         }
+    }
+
+    private boolean isValidValue() throws InterruptedException, TimeoutException, ExecutionException {
+        return VALUE.equals(client.asyncGet(KEY).get(DURATION, TimeUnit.SECONDS));
+    }
+
+    private Boolean isAvailableSetOperation() throws InterruptedException, ExecutionException {
+        return client.set(KEY, EXPIRATION, VALUE).get();
     }
 }

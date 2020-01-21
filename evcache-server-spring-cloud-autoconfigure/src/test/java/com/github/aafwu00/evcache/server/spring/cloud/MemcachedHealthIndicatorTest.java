@@ -16,15 +16,14 @@
 
 package com.github.aafwu00.evcache.server.spring.cloud;
 
-import java.util.concurrent.TimeUnit;
-
+import net.spy.memcached.MemcachedClient;
+import net.spy.memcached.internal.GetFuture;
+import net.spy.memcached.internal.OperationFuture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.actuate.health.Health;
 
-import net.spy.memcached.MemcachedClient;
-import net.spy.memcached.internal.GetFuture;
-import net.spy.memcached.internal.OperationFuture;
+import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;

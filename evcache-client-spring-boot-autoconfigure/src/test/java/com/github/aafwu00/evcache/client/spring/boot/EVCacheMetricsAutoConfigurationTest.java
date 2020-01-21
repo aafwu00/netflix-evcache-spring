@@ -16,9 +16,12 @@
 
 package com.github.aafwu00.evcache.client.spring.boot;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.github.aafwu00.evcache.client.spring.EVCacheManager;
+import com.netflix.spectator.api.Registry;
+import com.netflix.spectator.api.Spectator;
+import com.netflix.spectator.micrometer.MicrometerRegistry;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,13 +30,8 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.github.aafwu00.evcache.client.spring.EVCacheManager;
-import com.netflix.spectator.api.Registry;
-import com.netflix.spectator.api.Spectator;
-import com.netflix.spectator.micrometer.MicrometerRegistry;
-
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;

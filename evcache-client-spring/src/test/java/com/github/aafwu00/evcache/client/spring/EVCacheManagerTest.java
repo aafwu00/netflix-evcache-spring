@@ -16,17 +16,16 @@
 
 package com.github.aafwu00.evcache.client.spring;
 
+import com.netflix.evcache.EVCache;
+import com.netflix.evcache.EVCacheImpl;
+import org.junit.jupiter.api.Test;
+import org.springframework.cache.Cache;
+
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.cache.Cache;
-
-import com.netflix.evcache.EVCache;
-import com.netflix.evcache.EVCacheImpl;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;

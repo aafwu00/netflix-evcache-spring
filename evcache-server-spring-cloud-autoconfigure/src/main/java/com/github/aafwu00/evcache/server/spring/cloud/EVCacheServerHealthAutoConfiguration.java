@@ -16,8 +16,8 @@
 
 package com.github.aafwu00.evcache.server.spring.cloud;
 
-import java.util.Map;
-
+import net.spy.memcached.MemcachedClient;
+import net.spy.memcached.spring.MemcachedClientFactoryBean;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -28,8 +28,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
 
-import net.spy.memcached.MemcachedClient;
-import net.spy.memcached.spring.MemcachedClientFactoryBean;
+import java.util.Map;
 
 import static com.netflix.evcache.pool.eureka.EurekaNodeListProvider.DEFAULT_PORT;
 import static com.netflix.evcache.pool.eureka.EurekaNodeListProvider.DEFAULT_SECURE_PORT;
@@ -57,7 +56,8 @@ public class EVCacheServerHealthAutoConfiguration {
     /**
      * @see com.netflix.evcache.pool.eureka.EurekaNodeListProvider
      */
-    private int port(final ConfigurableEnvironment environment, final EurekaInstanceConfigBean eurekaInstanceConfigBean) {
+    private int port(final ConfigurableEnvironment environment,
+                     final EurekaInstanceConfigBean eurekaInstanceConfigBean) {
         final Map<String, String> metaInfo = eurekaInstanceConfigBean.getMetadataMap();
         final Boolean isSecure = getProperty(environment,
                                              eurekaInstanceConfigBean.getASGName() + ".use.secure",
@@ -78,8 +78,16 @@ public class EVCacheServerHealthAutoConfiguration {
         return rendPort;
     }
 
-    private Boolean getProperty(final ConfigurableEnvironment environment, final String firstKey, final String secondKey) {
-        return environment.getProperty(firstKey, Boolean.class, environment.getProperty(secondKey, Boolean.class, FALSE));
+    private Boolean getProperty(final ConfigurableEnvironment environment,
+                                final String firstKey,
+                                final String secondKey) {
+        return getProperty(environment, firstKey, getProperty(environment, secondKey, FALSE));
+    }
+
+    private Boolean getProperty(final ConfigurableEnvironment environment,
+                                final String key,
+                                final Boolean defaultValue) {
+        return environment.getProperty(key, Boolean.class, defaultValue);
     }
 
     private int toInt(final Map<String, String> metadata, final String key, final String defaultValue) {

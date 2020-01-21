@@ -16,12 +16,14 @@
 
 package com.github.aafwu00.evcache.client.spring.cloud;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
+import com.couchbase.mock.Bucket;
+import com.couchbase.mock.BucketConfiguration;
+import com.couchbase.mock.CouchbaseMock;
+import com.netflix.appinfo.AmazonInfo;
+import com.netflix.appinfo.ApplicationInfoManager;
+import com.netflix.appinfo.InstanceInfo;
+import com.netflix.discovery.DiscoveryClient;
+import com.netflix.discovery.shared.Application;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
@@ -40,14 +42,11 @@ import org.springframework.stereotype.Repository;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.couchbase.mock.Bucket;
-import com.couchbase.mock.BucketConfiguration;
-import com.couchbase.mock.CouchbaseMock;
-import com.netflix.appinfo.AmazonInfo;
-import com.netflix.appinfo.ApplicationInfoManager;
-import com.netflix.appinfo.InstanceInfo;
-import com.netflix.discovery.DiscoveryClient;
-import com.netflix.discovery.shared.Application;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static com.couchbase.mock.memcached.Storage.StorageType.CACHE;
 import static org.assertj.core.api.Assertions.assertThat;

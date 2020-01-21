@@ -39,10 +39,10 @@ public class EVCacheServerAutoConfiguration {
         return HasFeatures.namedFeature("EVCache Server", EVCacheServerAutoConfiguration.class);
     }
 
+    @SuppressWarnings("checkstyle:linelength")
     @Bean
-    public EVCacheServerEurekaInstanceConfigBeanPostProcessor evcacheServerEurekaInstanceConfigBeanPostProcessor(
-        final ConfigurableEnvironment environment,
-        final EurekaClientConfigBean eurekaClientConfigBean) {
+    public EVCacheServerEurekaInstanceConfigBeanPostProcessor evcacheServerEurekaInstanceConfigBeanPostProcessor(final ConfigurableEnvironment environment,
+                                                                                                                 final EurekaClientConfigBean eurekaClientConfigBean) {
         return new EVCacheServerEurekaInstanceConfigBeanPostProcessor(environment, eurekaClientConfigBean);
     }
 }

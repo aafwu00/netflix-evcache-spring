@@ -16,6 +16,10 @@
 
 package com.github.aafwu00.evcache.client.spring.cloud;
 
+import brave.Tracing;
+import com.github.aafwu00.evcache.client.spring.boot.EVCacheAutoConfiguration;
+import com.netflix.evcache.EVCacheTracingEventListener;
+import com.netflix.evcache.pool.EVCacheClientPoolManager;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -24,12 +28,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.sleuth.autoconfig.TraceAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
-
-import com.github.aafwu00.evcache.client.spring.boot.EVCacheAutoConfiguration;
-import com.netflix.evcache.EVCacheTracingEventListener;
-import com.netflix.evcache.pool.EVCacheClientPoolManager;
-
-import brave.Tracing;
 
 import static java.util.Objects.requireNonNull;
 

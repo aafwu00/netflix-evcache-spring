@@ -16,8 +16,9 @@
 
 package com.github.aafwu00.evcache.client.spring.boot;
 
-import java.time.Duration;
-
+import com.github.aafwu00.evcache.client.spring.EVCacheManager;
+import com.netflix.evcache.EVCache.Builder;
+import com.netflix.evcache.pool.EVCacheClientPoolManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.BeanCreationException;
@@ -36,9 +37,7 @@ import org.springframework.cloud.netflix.archaius.ArchaiusAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.github.aafwu00.evcache.client.spring.EVCacheManager;
-import com.netflix.evcache.EVCache.Builder;
-import com.netflix.evcache.pool.EVCacheClientPoolManager;
+import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;

@@ -16,9 +16,10 @@
 
 package com.github.aafwu00.evcache.server.spring.cloud;
 
-import java.io.IOException;
-import java.util.Collections;
-
+import com.couchbase.mock.Bucket;
+import com.couchbase.mock.BucketConfiguration;
+import com.couchbase.mock.CouchbaseMock;
+import net.spy.memcached.MemcachedClient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,11 +31,8 @@ import org.springframework.cloud.netflix.eureka.EurekaClientAutoConfiguration;
 import org.springframework.cloud.netflix.eureka.EurekaDiscoveryClientConfiguration;
 import org.springframework.context.annotation.Configuration;
 
-import com.couchbase.mock.Bucket;
-import com.couchbase.mock.BucketConfiguration;
-import com.couchbase.mock.CouchbaseMock;
-
-import net.spy.memcached.MemcachedClient;
+import java.io.IOException;
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;

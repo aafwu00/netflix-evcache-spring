@@ -16,9 +16,10 @@
 
 package sample;
 
-import java.time.Duration;
-import java.util.Collections;
-
+import com.github.aafwu00.evcache.client.spring.EVCacheConfiguration;
+import com.github.aafwu00.evcache.client.spring.EVCacheManager;
+import com.netflix.evcache.EVCacheClientPoolConfigurationProperties;
+import com.netflix.evcache.util.EVCacheConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.CacheManager;
@@ -28,13 +29,10 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-
-import com.github.aafwu00.evcache.client.spring.EVCacheConfiguration;
-import com.github.aafwu00.evcache.client.spring.EVCacheManager;
-import com.netflix.evcache.EVCacheClientPoolConfigurationProperties;
-import com.netflix.evcache.util.EVCacheConfig;
-
 import sample.repository.TodoRepository;
+
+import java.time.Duration;
+import java.util.Collections;
 
 /**
  * @author Taeho Kim

@@ -16,6 +16,11 @@
 
 package com.github.aafwu00.evcache.client.spring.boot;
 
+import com.github.aafwu00.evcache.client.spring.EVCacheManager;
+import com.netflix.spectator.api.Spectator;
+import com.netflix.spectator.micrometer.MicrometerRegistry;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.binder.MeterBinder;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -24,13 +29,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import com.github.aafwu00.evcache.client.spring.EVCacheManager;
-import com.netflix.spectator.api.Spectator;
-import com.netflix.spectator.micrometer.MicrometerRegistry;
-
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.binder.MeterBinder;
 
 @Configuration
 @ConditionalOnClass(MeterBinder.class)

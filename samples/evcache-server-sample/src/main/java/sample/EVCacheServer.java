@@ -16,10 +16,9 @@
 
 package sample;
 
+import com.github.aafwu00.evcache.server.spring.cloud.EnableEVCacheServer;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-
-import com.github.aafwu00.evcache.server.spring.cloud.EnableEVCacheServer;
 
 /**
  * see application.yml

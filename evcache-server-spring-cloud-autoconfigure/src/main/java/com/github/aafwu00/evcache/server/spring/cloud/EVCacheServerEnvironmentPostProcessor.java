@@ -16,9 +16,6 @@
 
 package com.github.aafwu00.evcache.server.spring.cloud;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -26,6 +23,9 @@ import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * EVCache Server Configuration that setting up {@link com.netflix.appinfo.EurekaInstanceConfig}.
@@ -54,7 +54,9 @@ class EVCacheServerEnvironmentPostProcessor implements EnvironmentPostProcessor,
                    .addLast(new MapPropertySource("evcache-server", source));
     }
 
-    private void putMetadataIfAbsent(final Map<String, Object> metadata, final ConfigurableEnvironment environment, final String key) {
+    private void putMetadataIfAbsent(final Map<String, Object> metadata,
+                                     final ConfigurableEnvironment environment,
+                                     final String key) {
         if (environment.containsProperty(key)) {
             final Integer value = environment.getProperty(key, Integer.class);
             metadata.putIfAbsent("eureka.instance.metadata-map." + key, value);

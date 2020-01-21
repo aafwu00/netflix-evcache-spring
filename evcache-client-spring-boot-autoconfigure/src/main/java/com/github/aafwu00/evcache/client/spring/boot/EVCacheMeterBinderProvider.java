@@ -16,12 +16,10 @@
 
 package com.github.aafwu00.evcache.client.spring.boot;
 
-import org.springframework.boot.actuate.metrics.cache.CacheMeterBinderProvider;
-
 import com.github.aafwu00.evcache.client.spring.EVCache;
-
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.binder.MeterBinder;
+import org.springframework.boot.actuate.metrics.cache.CacheMeterBinderProvider;
 
 public class EVCacheMeterBinderProvider implements CacheMeterBinderProvider<EVCache> {
     @Override

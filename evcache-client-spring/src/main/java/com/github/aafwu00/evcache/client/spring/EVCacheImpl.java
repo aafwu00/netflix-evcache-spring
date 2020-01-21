@@ -16,11 +16,11 @@
 
 package com.github.aafwu00.evcache.client.spring;
 
-import java.util.concurrent.Callable;
-
 import org.springframework.cache.Cache;
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 import org.springframework.util.Assert;
+
+import java.util.concurrent.Callable;
 
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
@@ -34,7 +34,17 @@ public class EVCacheImpl extends AbstractValueAdaptingCache implements EVCache {
     private final String name;
     private final com.netflix.evcache.EVCache cache;
 
-    public EVCacheImpl(final String name, final com.netflix.evcache.EVCache cache, final boolean allowNullValues) {
+    /**
+     * Create a {@link EVCache} instance with the specified name and the
+     * given internal {@link com.netflix.evcache.EVCache} to use.
+     *
+     * @param name            the name of the cache
+     * @param cache           the backing EVCache instance
+     * @param allowNullValues whether to accept and convert {@code null}
+     */
+    public EVCacheImpl(final String name,
+                       final com.netflix.evcache.EVCache cache,
+                       final boolean allowNullValues) {
         super(allowNullValues);
         this.name = requireNonNull(name);
         this.cache = requireNonNull(cache);
@@ -75,9 +85,7 @@ public class EVCacheImpl extends AbstractValueAdaptingCache implements EVCache {
             final T value = valueLoader.call();
             put(key, value);
             return (T) fromStoreValue(value);
-            // CHECKSTYLE:OFF
         } catch (final Exception ex) {
-            // CHECKSTYLE:ON
             throw new ValueRetrievalException(key, valueLoader, ex);
         }
     }

@@ -16,15 +16,6 @@
 
 package com.github.aafwu00.evcache.client.spring.cloud;
 
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.client.actuator.HasFeatures;
-import org.springframework.cloud.netflix.archaius.ArchaiusAutoConfiguration;
-import org.springframework.cloud.netflix.eureka.EurekaClientAutoConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
 import com.github.aafwu00.evcache.client.spring.boot.ConditionalOnEVCache;
 import com.github.aafwu00.evcache.client.spring.boot.EVCacheAutoConfiguration;
 import com.netflix.appinfo.ApplicationInfoManager;
@@ -35,6 +26,14 @@ import com.netflix.evcache.connection.IConnectionBuilder;
 import com.netflix.evcache.pool.EVCacheNodeList;
 import com.netflix.evcache.pool.eureka.EurekaNodeListProvider;
 import com.netflix.evcache.util.EVCacheConfig;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.cloud.client.actuator.HasFeatures;
+import org.springframework.cloud.netflix.archaius.ArchaiusAutoConfiguration;
+import org.springframework.cloud.netflix.eureka.EurekaClientAutoConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * Spring configuration for configuring EVCache defaults to be Eureka based

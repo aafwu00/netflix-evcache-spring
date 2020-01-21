@@ -16,12 +16,11 @@
 
 package com.github.aafwu00.evcache.server.spring.cloud;
 
-import java.util.Arrays;
-
 import com.netflix.appinfo.HealthCheckHandler;
 import com.netflix.appinfo.InstanceInfo;
-
 import net.spy.memcached.MemcachedClient;
+
+import java.util.Arrays;
 
 import static com.netflix.appinfo.InstanceInfo.InstanceStatus.UNKNOWN;
 import static java.util.Objects.requireNonNull;

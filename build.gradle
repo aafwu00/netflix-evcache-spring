@@ -77,13 +77,12 @@ subprojects {
         apply plugin: 'com.github.ben-manes.versions'
 
         checkstyle {
-            toolVersion = '8.19'
+            toolVersion = '8.28'
+            sourceSets = [project.sourceSets.main as SourceSet]
+            configFile = rootProject.file('config/checkstyle/google_checks.xml')
+            configProperties = ['checkstyle.regexp.header.file': "${rootProject.projectDir}/config/checkstyle/java_regexp.header"]
             maxErrors = 0
             maxWarnings = 0
-            configFile = rootProject.file('config/checkstyle/checkstyle_checks.xml')
-            configProperties = ['checkstyle.regexp.header.file': "${rootProject.projectDir}/config/checkstyle/java_regexp.header",
-                                'checkstyle.suppressions.file' : "${rootProject.projectDir}/config/checkstyle/suppressions.xml",
-                                'checkstyle.importcontrol.file': "${rootProject.projectDir}/config/checkstyle/import-control.xml"]
         }
 
         pmd {
@@ -95,8 +94,7 @@ subprojects {
         }
 
         spotbugs {
-            toolVersion = '4.0.0-beta4'
-            ignoreFailures = true
+            toolVersion = '4.0.0-RC1'
             effort = 'max'
             reportLevel = 'high'
         }
@@ -118,6 +116,18 @@ subprojects {
                 csv.enabled = false
             }
         }
+
+        jacocoTestCoverageVerification {
+            violationRules {
+                rule {
+                    limit {
+                        minimum = 0.7
+                    }
+                }
+            }
+        }
+
+        check.dependsOn(jacocoTestReport, jacocoTestCoverageVerification)
     }
 
     if (project.name.endsWith('sample')) {

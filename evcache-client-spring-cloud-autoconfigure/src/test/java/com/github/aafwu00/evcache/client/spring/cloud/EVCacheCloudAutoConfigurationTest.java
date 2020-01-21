@@ -16,6 +16,16 @@
 
 package com.github.aafwu00.evcache.client.spring.cloud;
 
+import com.github.aafwu00.evcache.client.spring.boot.EVCacheAutoConfiguration;
+import com.netflix.appinfo.ApplicationInfoManager;
+import com.netflix.appinfo.DataCenterInfo;
+import com.netflix.appinfo.InstanceInfo;
+import com.netflix.appinfo.MyDataCenterInfo;
+import com.netflix.discovery.EurekaClient;
+import com.netflix.evcache.connection.DIConnectionFactoryBuilderProvider;
+import com.netflix.evcache.pool.EVCacheClientPoolManager;
+import com.netflix.evcache.pool.eureka.EurekaNodeListProvider;
+import com.netflix.evcache.util.EVCacheConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -27,17 +37,6 @@ import org.springframework.cloud.netflix.archaius.ArchaiusAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-
-import com.github.aafwu00.evcache.client.spring.boot.EVCacheAutoConfiguration;
-import com.netflix.appinfo.ApplicationInfoManager;
-import com.netflix.appinfo.DataCenterInfo;
-import com.netflix.appinfo.InstanceInfo;
-import com.netflix.appinfo.MyDataCenterInfo;
-import com.netflix.discovery.EurekaClient;
-import com.netflix.evcache.connection.DIConnectionFactoryBuilderProvider;
-import com.netflix.evcache.pool.EVCacheClientPoolManager;
-import com.netflix.evcache.pool.eureka.EurekaNodeListProvider;
-import com.netflix.evcache.util.EVCacheConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

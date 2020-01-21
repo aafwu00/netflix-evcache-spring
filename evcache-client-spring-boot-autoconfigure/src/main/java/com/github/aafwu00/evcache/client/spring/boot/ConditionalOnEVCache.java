@@ -16,12 +16,6 @@
 
 package com.github.aafwu00.evcache.client.spring.boot;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -32,6 +26,12 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.interceptor.CacheAspectSupport;
 import org.springframework.cloud.netflix.archaius.ConfigurableEnvironmentConfiguration;
 import org.springframework.context.annotation.Conditional;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * {@link Conditional} that checks whether or not a default info contributor is enabled.

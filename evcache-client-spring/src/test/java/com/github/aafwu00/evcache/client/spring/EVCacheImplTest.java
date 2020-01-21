@@ -16,13 +16,13 @@
 
 package com.github.aafwu00.evcache.client.spring;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-
 import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.cache.Cache;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

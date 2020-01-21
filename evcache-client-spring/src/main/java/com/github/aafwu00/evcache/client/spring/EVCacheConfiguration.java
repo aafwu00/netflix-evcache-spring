@@ -16,12 +16,11 @@
 
 package com.github.aafwu00.evcache.client.spring;
 
-import java.time.Duration;
-
+import com.netflix.evcache.EVCacheClientPoolConfigurationProperties;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import com.netflix.evcache.EVCacheClientPoolConfigurationProperties;
+import java.time.Duration;
 
 import static java.util.Objects.requireNonNull;
 
@@ -64,7 +63,7 @@ public class EVCacheConfiguration {
      * @param keyPrefix                Name of Cache Prefix Key, Don't contain colon(:) character
      * @param timeToLive               Default Time To Live(TTL), Seconds
      * @param retryEnabled             Retry across Server Group for cache misses and exceptions
-     * @param exceptionThrowingEnabled Exceptions are not propagated and null values are returned
+     * @param exceptionThrowingEnabled Whether or not exception throwing is to be enabled.
      */
     public EVCacheConfiguration(final String name,
                                 final String appName,

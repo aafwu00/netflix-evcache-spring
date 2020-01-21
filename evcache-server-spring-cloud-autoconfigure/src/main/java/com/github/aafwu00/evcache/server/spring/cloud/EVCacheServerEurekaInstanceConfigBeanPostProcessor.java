@@ -16,6 +16,9 @@
 
 package com.github.aafwu00.evcache.server.spring.cloud;
 
+import com.netflix.appinfo.AmazonInfo;
+import com.netflix.appinfo.AmazonInfo.MetaDataKey;
+import com.netflix.appinfo.DataCenterInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -23,12 +26,8 @@ import org.springframework.cloud.netflix.eureka.EurekaClientConfigBean;
 import org.springframework.cloud.netflix.eureka.EurekaInstanceConfigBean;
 import org.springframework.core.env.ConfigurableEnvironment;
 
-import com.netflix.appinfo.AmazonInfo;
-import com.netflix.appinfo.AmazonInfo.MetaDataKey;
-import com.netflix.appinfo.DataCenterInfo;
-
 import static java.util.Objects.requireNonNull;
-import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
+import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 import static org.springframework.cloud.netflix.eureka.EurekaClientConfigBean.DEFAULT_ZONE;
 import static org.springframework.util.ClassUtils.isAssignableValue;
 
@@ -39,6 +38,7 @@ import static org.springframework.util.ClassUtils.isAssignableValue;
  * @see com.netflix.evcache.pool.eureka.EurekaNodeListProvider
  */
 class EVCacheServerEurekaInstanceConfigBeanPostProcessor implements BeanPostProcessor {
+    @SuppressWarnings("checkstyle:linelength")
     private static final Logger LOGGER = LoggerFactory.getLogger(EVCacheServerEurekaInstanceConfigBeanPostProcessor.class);
     private final ConfigurableEnvironment environment;
     private final EurekaClientConfigBean eurekaClientConfigBean;
@@ -86,11 +86,15 @@ class EVCacheServerEurekaInstanceConfigBeanPostProcessor implements BeanPostProc
     }
 
     private String availabilityZone() {
-        final String[] availabilityZones = eurekaClientConfigBean.getAvailabilityZones(eurekaClientConfigBean.getRegion());
-        if (isNotEmpty(availabilityZones)) {
-            return availabilityZones[0];
+        final String[] availabilityZones = eurekaClientConfigBean.getAvailabilityZones(region());
+        if (isEmpty(availabilityZones)) {
+            return DEFAULT_ZONE;
         }
-        return DEFAULT_ZONE;
+        return availabilityZones[0];
+    }
+
+    private String region() {
+        return eurekaClientConfigBean.getRegion();
     }
 
     private void addMetadata(final AmazonInfo.Builder builder, final MetaDataKey key, final String defaultValue) {

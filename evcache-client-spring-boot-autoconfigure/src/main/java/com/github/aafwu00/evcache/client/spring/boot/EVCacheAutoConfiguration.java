@@ -16,6 +16,16 @@
 
 package com.github.aafwu00.evcache.client.spring.boot;
 
+import com.github.aafwu00.evcache.client.spring.EVCacheManager;
+import com.netflix.archaius.DefaultPropertyFactory;
+import com.netflix.archaius.commons.CommonsToConfig;
+import com.netflix.evcache.EVCache;
+import com.netflix.evcache.connection.ConnectionFactoryBuilder;
+import com.netflix.evcache.connection.IConnectionBuilder;
+import com.netflix.evcache.pool.EVCacheClientPoolManager;
+import com.netflix.evcache.pool.EVCacheNodeList;
+import com.netflix.evcache.pool.SimpleNodeListProvider;
+import com.netflix.evcache.util.EVCacheConfig;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -33,24 +43,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
-import com.github.aafwu00.evcache.client.spring.EVCacheManager;
-import com.netflix.archaius.DefaultPropertyFactory;
-import com.netflix.archaius.commons.CommonsToConfig;
-import com.netflix.evcache.EVCache;
-import com.netflix.evcache.connection.ConnectionFactoryBuilder;
-import com.netflix.evcache.connection.IConnectionBuilder;
-import com.netflix.evcache.pool.EVCacheClientPoolManager;
-import com.netflix.evcache.pool.EVCacheNodeList;
-import com.netflix.evcache.pool.SimpleNodeListProvider;
-import com.netflix.evcache.util.EVCacheConfig;
-
 import static java.util.stream.Collectors.toList;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for the EVCache. Creates a
  * {@link CacheManager} if necessary when caching is enabled via {@link EnableCaching}.
- * <p>
- * Cache store can be auto-detected or specified explicitly via configuration.
+ *
+ * <p>* Cache store can be auto-detected or specified explicitly via configuration.
  *
  * @author Taeho Kim
  * @see EnableCaching
@@ -61,6 +60,7 @@ import static java.util.stream.Collectors.toList;
 @AutoConfigureBefore(CacheAutoConfiguration.class)
 @EnableConfigurationProperties(EVCacheProperties.class)
 public class EVCacheAutoConfiguration {
+    @SuppressWarnings("checkstyle:linelength")
     @Bean
     @ConditionalOnMissingBean
     public CacheManagerCustomizers cacheManagerCustomizers(final ObjectProvider<CacheManagerCustomizer<?>> customizers) {
@@ -88,8 +88,8 @@ public class EVCacheAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public EVCacheConfig evcacheConfig(final ConfigurableEnvironmentConfiguration configurableEnvironmentConfiguration) {
-        final CommonsToConfig config = new CommonsToConfig(configurableEnvironmentConfiguration);
+    public EVCacheConfig evcacheConfig(final ConfigurableEnvironmentConfiguration configuration) {
+        final CommonsToConfig config = new CommonsToConfig(configuration);
         final DefaultPropertyFactory factory = DefaultPropertyFactory.from(config);
         return new EVCacheConfig(factory);
     }

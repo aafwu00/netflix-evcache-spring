@@ -16,19 +16,18 @@
 
 package com.github.aafwu00.evcache.client.spring.cloud;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
+import com.netflix.appinfo.ApplicationInfoManager;
+import com.netflix.discovery.EurekaClient;
 import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Conditional;
 
-import com.netflix.appinfo.ApplicationInfoManager;
-import com.netflix.discovery.EurekaClient;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * {@link Conditional} that checks whether or not a default info contributor is enabled.
@@ -66,7 +65,9 @@ public @interface ConditionalOnEVCacheCloud {
         static class OnEVCacheCloudEnabled {
         }
 
-        @ConditionalOnProperty(value = "evcache.use.simple.node.list.provider", havingValue = "false", matchIfMissing = true)
+        @ConditionalOnProperty(value = "evcache.use.simple.node.list.provider",
+                               havingValue = "false",
+                               matchIfMissing = true)
         static class OnEVCacheUseSimpleNodeListProviderDisabled {
         }
     }

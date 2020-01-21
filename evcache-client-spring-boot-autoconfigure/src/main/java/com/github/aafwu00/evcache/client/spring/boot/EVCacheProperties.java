@@ -16,15 +16,7 @@
 
 package com.github.aafwu00.evcache.client.spring.boot;
 
-import java.time.Duration;
-import java.util.List;
-import java.util.Set;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
-
+import com.github.aafwu00.evcache.client.spring.EVCacheConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -32,7 +24,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.validation.annotation.Validated;
 
-import com.github.aafwu00.evcache.client.spring.EVCacheConfiguration;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
+import java.time.Duration;
+import java.util.List;
+import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
 
@@ -107,12 +105,17 @@ public class EVCacheProperties {
          */
         private boolean retryEnabled = true;
         /**
-         * Exceptions are not propagated and null values are returned
+         * Whether or not exception throwing is to be enabled.
          */
         private boolean exceptionThrowingEnabled;
 
         protected EVCacheConfiguration toConfiguration() {
-            return new EVCacheConfiguration(determineName(), appName, keyPrefix, timeToLive, retryEnabled, exceptionThrowingEnabled);
+            return new EVCacheConfiguration(determineName(),
+                                            appName,
+                                            keyPrefix,
+                                            timeToLive,
+                                            retryEnabled,
+                                            exceptionThrowingEnabled);
         }
 
         @Override
@@ -136,7 +139,7 @@ public class EVCacheProperties {
                 .toHashCode();
         }
 
-        public String determineName() {
+        protected String determineName() {
             if (StringUtils.isBlank(getName())) {
                 return getAppName() + "." + getKeyPrefix();
             }
