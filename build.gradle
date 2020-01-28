@@ -93,15 +93,20 @@ subprojects {
             rulePriority = 3
         }
 
+        configurations {
+            spotbugsStylesheets { transitive = false }
+        }
         spotbugs {
             toolVersion = '4.0.0-RC1'
             effort = 'max'
             reportLevel = 'high'
+            spotbugsTest.enabled = false
         }
         tasks.withType(com.github.spotbugs.SpotBugsTask) {
             reports {
                 xml.enabled = false
                 html.enabled = true
+                html.stylesheet = resources.text.fromArchiveEntry(configurations.spotbugsStylesheets, "color.xsl")
             }
         }
 
@@ -164,7 +169,14 @@ subprojects {
 
     dependencies {
         if (!project.name.contains('sample')) {
+            // for spotbugs
             spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.10.1'
+
+            compileOnly "com.github.spotbugs:spotbugs:${spotbugs.toolVersion}"
+            compileOnly 'net.jcip:jcip-annotations:1.0'
+            compileOnly "com.github.spotbugs:spotbugs-annotations:${spotbugs.toolVersion}"
+            testImplementation 'com.google.code.findbugs:jsr305:3.0.2'
+            spotbugsStylesheets "com.github.spotbugs:spotbugs:${spotbugs.toolVersion}"
         }
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
         testImplementation 'org.junit.jupiter:junit-jupiter-api'
