@@ -21,7 +21,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.ConstructorBinding;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.boot.context.properties.bind.DefaultValue;
+import org.springframework.boot.convert.DurationUnit;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
@@ -29,9 +32,11 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Set;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
 
 /**
@@ -40,19 +45,30 @@ import static java.util.stream.Collectors.toSet;
  * @author Taeho Kim
  */
 @Validated
+@ConstructorBinding
 @ConfigurationProperties("evcache")
 public class EVCacheProperties {
     /**
      * Enable EVCache
      */
-    private boolean enabled = true;
+    private final boolean enabled;
     /**
-     * Clusters
+     * Clusters properties
      */
     @NotEmpty
     @Valid
     @NestedConfigurationProperty
-    private List<Cluster> clusters;
+    private final List<Cluster> clusters;
+
+    /**
+     * @param enabled  Enable EVCache
+     * @param clusters Clusters properties
+     */
+    public EVCacheProperties(@DefaultValue("true") final boolean enabled,
+                             @NotEmpty @Valid final List<Cluster> clusters) {
+        this.enabled = enabled;
+        this.clusters = requireNonNull(clusters);
+    }
 
     protected Set<EVCacheConfiguration> toConfigurations() {
         return clusters.stream()
@@ -64,50 +80,63 @@ public class EVCacheProperties {
         return enabled;
     }
 
-    public void setEnabled(final boolean enabled) {
-        this.enabled = enabled;
-    }
-
     public List<Cluster> getClusters() {
         return clusters;
     }
 
-    public void setClusters(final List<Cluster> clusters) {
-        this.clusters = clusters;
-    }
-
     @Validated
-    @ConfigurationProperties("evcache.clusters[]")
     public static class Cluster {
-        private static final Duration DEFAULT_TIME_TO_LIVE = Duration.ofSeconds(900);
         /**
          * Name of the Cache, @{@link org.springframework.cache.annotation.Cacheable} cacheName,
          * Same as `appName` + `.` + `keyPrefix` when name is blank
          */
-        private String name;
+        private final String name;
         /**
          * Name of the EVCache App cluster, Recommend Upper Case
          */
         @NotBlank
-        private String appName;
+        private final String appName;
         /**
          * Key Prefix, Don't contain colon(:) character
-         * same as {@link org.springframework.cache.annotation.Cacheable} cacheNames
          */
         @Pattern(regexp = "[^:]*$")
-        private String keyPrefix = "";
+        private final String keyPrefix;
         /**
          * Default Time To Live(TTL)
          */
-        private Duration timeToLive = DEFAULT_TIME_TO_LIVE;
+        @DurationUnit(ChronoUnit.SECONDS)
+        private final Duration timeToLive;
         /**
          * Retry across Server Group for cache misses and exceptions
          */
-        private boolean retryEnabled = true;
+        private final boolean retryEnabled;
         /**
          * Whether or not exception throwing is to be enabled.
          */
-        private boolean exceptionThrowingEnabled;
+        private final boolean exceptionThrowingEnabled;
+
+        /**
+         * @param name                     Name of the Cache, @{@link org.springframework.cache.annotation.Cacheable} cacheName,  Same as
+         *                                 `appName` + `.` + `keyPrefix` when name is blank
+         * @param appName                  Name of the EVCache App cluster, Recommend Upper Case
+         * @param keyPrefix                Key Prefix, Don't contain colon(:) character
+         * @param timeToLive               Default Time To Live(TTL)
+         * @param retryEnabled             Retry across Server Group for cache misses and exceptions
+         * @param exceptionThrowingEnabled Whether or not exception throwing is to be enabled.
+         */
+        public Cluster(final String name,
+                       @NotBlank final String appName,
+                       @Pattern(regexp = "[^:]*$") @DefaultValue("") final String keyPrefix,
+                       @DefaultValue("900s") final Duration timeToLive,
+                       @DefaultValue("true") final boolean retryEnabled,
+                       final boolean exceptionThrowingEnabled) {
+            this.name = name;
+            this.appName = requireNonNull(appName);
+            this.keyPrefix = requireNonNull(keyPrefix);
+            this.timeToLive = requireNonNull(timeToLive);
+            this.retryEnabled = retryEnabled;
+            this.exceptionThrowingEnabled = exceptionThrowingEnabled;
+        }
 
         protected EVCacheConfiguration toConfiguration() {
             return new EVCacheConfiguration(determineName(),
@@ -150,48 +179,24 @@ public class EVCacheProperties {
             return name;
         }
 
-        public void setName(final String name) {
-            this.name = name;
-        }
-
         public String getAppName() {
             return appName;
-        }
-
-        public void setAppName(final String appName) {
-            this.appName = appName;
         }
 
         public String getKeyPrefix() {
             return keyPrefix;
         }
 
-        public void setKeyPrefix(final String keyPrefix) {
-            this.keyPrefix = keyPrefix;
-        }
-
         public Duration getTimeToLive() {
             return timeToLive;
-        }
-
-        public void setTimeToLive(final Duration timeToLive) {
-            this.timeToLive = timeToLive;
         }
 
         public boolean isRetryEnabled() {
             return retryEnabled;
         }
 
-        public void setRetryEnabled(final boolean retryEnabled) {
-            this.retryEnabled = retryEnabled;
-        }
-
         public boolean isExceptionThrowingEnabled() {
             return exceptionThrowingEnabled;
-        }
-
-        public void setExceptionThrowingEnabled(final boolean exceptionThrowingEnabled) {
-            this.exceptionThrowingEnabled = exceptionThrowingEnabled;
         }
     }
 }

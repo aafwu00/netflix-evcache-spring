@@ -81,16 +81,11 @@ class EVCachePropertiesTest {
     }
 
     private Cluster cluster(final String appName, final String keyPrefix) {
-        final Cluster result = new Cluster();
-        result.setAppName(appName);
-        result.setKeyPrefix(keyPrefix);
-        return result;
+        return new Cluster(null, appName, keyPrefix, Duration.ofSeconds(1), false, false);
     }
 
     private Cluster cluster(final String name) {
-        final Cluster result = new Cluster();
-        result.setName(name);
-        return result;
+        return new Cluster(name, "", "", Duration.ofSeconds(1), false, false);
     }
 
     @Test
