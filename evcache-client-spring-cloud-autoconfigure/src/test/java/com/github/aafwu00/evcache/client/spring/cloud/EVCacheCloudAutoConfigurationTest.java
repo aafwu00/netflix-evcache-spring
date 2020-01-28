@@ -100,8 +100,8 @@ class EVCacheCloudAutoConfigurationTest {
                                          "spring.application.name=test")
                      .withUserConfiguration(ExistsEVCacheClientPoolManagerConfiguration.class)
                      .run(context -> assertAll(
-                         () -> assertThat(context.getBean(DIConnectionFactoryBuilderProvider.class)).isNotNull(),
-                         () -> assertThat(context.getBean(EurekaNodeListProvider.class)).isNotNull()
+                         () -> assertThat(context).hasSingleBean(DIConnectionFactoryBuilderProvider.class),
+                         () -> assertThat(context).hasSingleBean(EurekaNodeListProvider.class)
                      ));
     }
 

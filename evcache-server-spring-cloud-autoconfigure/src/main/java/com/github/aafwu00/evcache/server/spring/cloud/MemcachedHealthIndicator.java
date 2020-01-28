@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * Simple implementation of a {@link HealthIndicator} returning status information for Memcached.
@@ -33,10 +33,10 @@ import static java.util.Objects.requireNonNull;
  * @author Taeho Kim
  */
 public class MemcachedHealthIndicator extends AbstractHealthIndicator {
-    private static final String KEY = "__com.netflix.evcache.server.healthcheck";
-    private static final String VALUE = "Greed is good!";
-    private static final long DURATION = 5;
-    private static final int EXPIRATION = 300;
+    protected static final String KEY = "__com.netflix.evcache.server.healthcheck";
+    protected static final String VALUE = "Greed is good!";
+    protected static final long DURATION = 5;
+    protected static final int EXPIRATION = 300;
     private final MemcachedClient client;
 
     public MemcachedHealthIndicator(final MemcachedClient client) {
@@ -48,14 +48,16 @@ public class MemcachedHealthIndicator extends AbstractHealthIndicator {
     protected void doHealthCheck(final Health.Builder builder) throws Exception {
         if (isAvailableSetOperation() && isValidValue()) {
             builder.up();
+        } else {
+            builder.outOfService();
         }
     }
 
     private boolean isValidValue() throws InterruptedException, TimeoutException, ExecutionException {
-        return VALUE.equals(client.asyncGet(KEY).get(DURATION, TimeUnit.SECONDS));
+        return VALUE.equals(client.asyncGet(KEY).get(DURATION, SECONDS));
     }
 
-    private Boolean isAvailableSetOperation() throws InterruptedException, ExecutionException {
-        return client.set(KEY, EXPIRATION, VALUE).get();
+    private Boolean isAvailableSetOperation() throws InterruptedException, ExecutionException, TimeoutException {
+        return client.set(KEY, EXPIRATION, VALUE).get(DURATION, SECONDS);
     }
 }

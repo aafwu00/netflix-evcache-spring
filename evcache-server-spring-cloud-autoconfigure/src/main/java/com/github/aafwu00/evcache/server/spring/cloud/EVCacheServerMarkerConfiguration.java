@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * Responsible for adding in a marker bean to activate
  * {@link EVCacheServerAutoConfiguration}
- * {@link EVCacheServerHealthAutoConfiguration}
+ * {@link MemcachedHealthContributorAutoConfiguration}
  *
  * @author Taeho Kim
  */

@@ -1,7 +1,9 @@
 # AutoConfiguration
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 com.github.aafwu00.evcache.server.spring.cloud.EVCacheServerAutoConfiguration,\
-com.github.aafwu00.evcache.server.spring.cloud.EVCacheServerHealthAutoConfiguration
+com.github.aafwu00.evcache.server.spring.cloud.MemcachedAutoConfiguration,\
+com.github.aafwu00.evcache.server.spring.cloud.MemcachedReactiveHealthContributorAutoConfiguration,\
+com.github.aafwu00.evcache.server.spring.cloud.MemcachedHealthContributorAutoConfiguration
 # Environment Post Processors
 org.springframework.boot.env.EnvironmentPostProcessor=\
 com.github.aafwu00.evcache.server.spring.cloud.EVCacheServerEnvironmentPostProcessor

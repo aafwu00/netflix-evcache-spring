@@ -20,7 +20,6 @@ import com.github.aafwu00.evcache.client.spring.boot.ConditionalOnEVCache;
 import com.github.aafwu00.evcache.client.spring.boot.EVCacheAutoConfiguration;
 import com.netflix.appinfo.ApplicationInfoManager;
 import com.netflix.discovery.EurekaClient;
-import com.netflix.evcache.EVCache;
 import com.netflix.evcache.connection.DIConnectionFactoryBuilderProvider;
 import com.netflix.evcache.connection.IConnectionBuilder;
 import com.netflix.evcache.pool.EVCacheNodeList;
@@ -29,7 +28,6 @@ import com.netflix.evcache.util.EVCacheConfig;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.client.actuator.HasFeatures;
 import org.springframework.cloud.netflix.archaius.ArchaiusAutoConfiguration;
 import org.springframework.cloud.netflix.eureka.EurekaClientAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -49,10 +47,6 @@ import org.springframework.context.annotation.Configuration;
 @AutoConfigureAfter({ArchaiusAutoConfiguration.class, EurekaClientAutoConfiguration.class})
 @AutoConfigureBefore(EVCacheAutoConfiguration.class)
 public class EVCacheCloudAutoConfiguration {
-    @Bean
-    public HasFeatures evcacheCloudClientFeature() {
-        return HasFeatures.namedFeature("Netflix EVCache Cloud Client", EVCache.class);
-    }
 
     @Bean
     @ConditionalOnMissingBean

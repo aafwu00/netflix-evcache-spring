@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ package com.github.aafwu00.evcache.server.spring.cloud;
 import net.spy.memcached.MemcachedClient;
 import net.spy.memcached.spring.MemcachedClientFactoryBean;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.boot.actuate.autoconfigure.health.ConditionalOnEnabledHealthIndicator;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.netflix.eureka.EurekaInstanceConfigBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,15 +35,15 @@ import static com.netflix.evcache.pool.eureka.EurekaNodeListProvider.DEFAULT_SEC
 import static java.lang.Boolean.FALSE;
 
 /**
- * EVCache Server Health Configuration that setting up
+ * Memcached Configuration look on {@code org.springframework.cloud.netflix.sidecar.SidecarConfiguration}
  *
  * @author Taeho Kim
  */
 @Configuration
 @ConditionalOnBean(EVCacheServerMarkerConfiguration.Marker.class)
-@ConditionalOnProperty(value = "evcache.server.health.enabled", matchIfMissing = true)
+@ConditionalOnEnabledHealthIndicator("memcached")
 @AutoConfigureAfter(EVCacheServerAutoConfiguration.class)
-public class EVCacheServerHealthAutoConfiguration {
+public class MemcachedAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(MemcachedClient.class)
     public MemcachedClientFactoryBean memcachedClient(final EurekaInstanceConfigBean eurekaInstanceConfigBean,
@@ -59,23 +59,50 @@ public class EVCacheServerHealthAutoConfiguration {
     private int port(final ConfigurableEnvironment environment,
                      final EurekaInstanceConfigBean eurekaInstanceConfigBean) {
         final Map<String, String> metaInfo = eurekaInstanceConfigBean.getMetadataMap();
-        final Boolean isSecure = getProperty(environment,
-                                             eurekaInstanceConfigBean.getASGName() + ".use.secure",
-                                             eurekaInstanceConfigBean.getAppname() + ".use.secure");
-        if (isSecure) {
-            return toInt(metaInfo, "evcache.secure.port", DEFAULT_SECURE_PORT);
+        if (isSecure(environment, eurekaInstanceConfigBean)) {
+            return evcacheSecurePort(metaInfo);
         }
-        final int rendPort = toInt(metaInfo, "rend.port", "0");
-        if (rendPort == 0) {
-            return toInt(metaInfo, "evcache.port", DEFAULT_PORT);
+        if (!hasRendPort(metaInfo)) {
+            return evcachePort(metaInfo);
         }
-        final Boolean useBatchPort = getProperty(environment,
-                                                 eurekaInstanceConfigBean.getAppname() + ".use.batch.port",
-                                                 "evcache.use.batch.port");
-        if (useBatchPort) {
-            return toInt(metaInfo, "rend.batch.port", "0");
+        if (useBatchPort(environment, eurekaInstanceConfigBean)) {
+            return rendBatchPort(metaInfo);
         }
-        return rendPort;
+        return rendPort(metaInfo);
+    }
+
+    private Boolean isSecure(final ConfigurableEnvironment environment,
+                             final EurekaInstanceConfigBean eurekaInstanceConfigBean) {
+        return getProperty(environment,
+                           eurekaInstanceConfigBean.getASGName() + ".use.secure",
+                           eurekaInstanceConfigBean.getAppname() + ".use.secure");
+    }
+
+    private int evcacheSecurePort(final Map<String, String> metaInfo) {
+        return toInt(metaInfo, "evcache.secure.port", DEFAULT_SECURE_PORT);
+    }
+
+    private boolean hasRendPort(final Map<String, String> metaInfo) {
+        return metaInfo.containsKey("rend.port");
+    }
+
+    private int evcachePort(final Map<String, String> metaInfo) {
+        return toInt(metaInfo, "evcache.port", DEFAULT_PORT);
+    }
+
+    private Boolean useBatchPort(final ConfigurableEnvironment environment,
+                                 final EurekaInstanceConfigBean eurekaInstanceConfigBean) {
+        return getProperty(environment,
+                           eurekaInstanceConfigBean.getAppname() + ".use.batch.port",
+                           "evcache.use.batch.port");
+    }
+
+    private int rendBatchPort(final Map<String, String> metaInfo) {
+        return toInt(metaInfo, "rend.batch.port", "0");
+    }
+
+    private int rendPort(final Map<String, String> metaInfo) {
+        return toInt(metaInfo, "rend.port", "0");
     }
 
     private Boolean getProperty(final ConfigurableEnvironment environment,
@@ -92,19 +119,5 @@ public class EVCacheServerHealthAutoConfiguration {
 
     private int toInt(final Map<String, String> metadata, final String key, final String defaultValue) {
         return NumberUtils.toInt(metadata.getOrDefault(key, defaultValue));
-    }
-
-    @Bean
-    @ConditionalOnProperty(value = "evcache.server.health.eureka.enabled", matchIfMissing = true)
-    @ConditionalOnMissingBean
-    public MemcachedHealthCheckHandler memcachedHealthCheckHandler(final MemcachedClient client) {
-        return new MemcachedHealthCheckHandler(client);
-    }
-
-    @Bean
-    @ConditionalOnProperty(value = "evcache.server.health.memcached.enabled", matchIfMissing = true)
-    @ConditionalOnMissingBean
-    public MemcachedHealthIndicator memcachedHealthIndicator(final MemcachedClient client) {
-        return new MemcachedHealthIndicator(client);
     }
 }

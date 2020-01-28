@@ -10,5 +10,7 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-actuator-autoconfigure', optional
 
-    testImplementation "com.couchbase.mock:CouchbaseMock:${couchbaseVersion}"
+    implementation 'io.projectreactor:reactor-core', optional
+
+    testImplementation 'io.projectreactor:reactor-test'
 }

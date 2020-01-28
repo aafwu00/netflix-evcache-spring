@@ -22,30 +22,29 @@ import net.spy.memcached.internal.OperationFuture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.actuate.health.Health;
+import reactor.test.StepVerifier;
 
 import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author Taeho Kim
  */
-class MemcachedHealthIndicatorTest {
+class MemcachedReactiveHealthIndicatorTest {
     private Health.Builder builder;
     private MemcachedClient client;
-    private MemcachedHealthIndicator indicator;
+    private MemcachedReactiveHealthIndicator indicator;
     private OperationFuture<Boolean> setFuture;
     private GetFuture<String> getFuture;
 
     @SuppressWarnings("unchecked")
     @BeforeEach
     void setUp() {
-        builder = mock(Health.Builder.class);
+        builder = new Health.Builder();
         client = mock(MemcachedClient.class);
-        indicator = new MemcachedHealthIndicator(client);
+        indicator = new MemcachedReactiveHealthIndicator(client);
         setFuture = mock(OperationFuture.class);
         getFuture = mock(GetFuture.class);
     }
@@ -56,16 +55,20 @@ class MemcachedHealthIndicatorTest {
         doReturn(true).when(setFuture).get(5, TimeUnit.SECONDS);
         doReturn(getFuture).when(client).asyncGet("__com.netflix.evcache.server.healthcheck");
         doReturn("Greed is good!").when(getFuture).get(5, TimeUnit.SECONDS);
-        indicator.doHealthCheck(builder);
-        verify(builder).up();
+        StepVerifier.create(indicator.doHealthCheck(builder))
+                    .expectNext(new Health.Builder().up().build())
+                    .verifyComplete();
     }
 
     @Test
     void should_be_outOfService_when_set_operation_is_false() throws Exception {
         doReturn(setFuture).when(client).set("__com.netflix.evcache.server.healthcheck", 300, "Greed is good!");
         doReturn(false).when(setFuture).get(5, TimeUnit.SECONDS);
-        indicator.doHealthCheck(builder);
-        verify(builder).outOfService();
+        doReturn(getFuture).when(client).asyncGet("__com.netflix.evcache.server.healthcheck");
+        doReturn("Greed is good!").when(getFuture).get(5, TimeUnit.SECONDS);
+        StepVerifier.create(indicator.doHealthCheck(builder))
+                    .expectNext(new Health.Builder().outOfService().build())
+                    .verifyComplete();
     }
 
     @Test
@@ -74,7 +77,8 @@ class MemcachedHealthIndicatorTest {
         doReturn(true).when(setFuture).get(5, TimeUnit.SECONDS);
         doReturn(getFuture).when(client).asyncGet("__com.netflix.evcache.server.healthcheck");
         doReturn("").when(getFuture).get(5, TimeUnit.SECONDS);
-        indicator.doHealthCheck(builder);
-        verify(builder, never()).up();
+        StepVerifier.create(indicator.doHealthCheck(builder))
+                    .expectNext(new Health.Builder().outOfService().build())
+                    .verifyComplete();
     }
 }

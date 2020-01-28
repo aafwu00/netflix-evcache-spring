@@ -93,16 +93,8 @@ evcache:
 | 11211
 | Default Port of Memcached Or Rend
 
-| evcache.server.health.memcached.enabled
-| true
+| management.health.memcached.enabled
+|
 | Spring Boot Health Check for Memcached
-
-| evcache.server.health.eureka.enabled
-| true
-| Eureka Health Check for Memcached
-
-| evcache.server.metrics.enabled
-| true
-| Spring Boot Metrics for Memcached
 
 |===

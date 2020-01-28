@@ -18,9 +18,9 @@ package com.github.aafwu00.evcache.server.spring.cloud;
 
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.cloud.client.actuator.HasFeatures;
 import org.springframework.cloud.netflix.eureka.EurekaClientAutoConfiguration;
 import org.springframework.cloud.netflix.eureka.EurekaClientConfigBean;
+import org.springframework.cloud.netflix.eureka.EurekaInstanceConfigBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -31,14 +31,9 @@ import org.springframework.core.env.ConfigurableEnvironment;
  * @author Taeho Kim
  */
 @Configuration
-@ConditionalOnBean(EVCacheServerMarkerConfiguration.Marker.class)
+@ConditionalOnBean({EurekaInstanceConfigBean.class, EVCacheServerMarkerConfiguration.Marker.class})
 @AutoConfigureAfter(EurekaClientAutoConfiguration.class)
 public class EVCacheServerAutoConfiguration {
-    @Bean
-    public HasFeatures evcacheServerFeature() {
-        return HasFeatures.namedFeature("EVCache Server", EVCacheServerAutoConfiguration.class);
-    }
-
     @SuppressWarnings("checkstyle:linelength")
     @Bean
     public EVCacheServerEurekaInstanceConfigBeanPostProcessor evcacheServerEurekaInstanceConfigBeanPostProcessor(final ConfigurableEnvironment environment,

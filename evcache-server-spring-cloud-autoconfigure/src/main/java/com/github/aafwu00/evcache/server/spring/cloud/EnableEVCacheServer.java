@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
 /**
  * Annotation to activate EVCache Server related configuration
  * {@link EVCacheServerAutoConfiguration}
- * {@link EVCacheServerHealthAutoConfiguration}
+ * {@link MemcachedHealthContributorAutoConfiguration}
  *
  * @author Taeho Kim
  */

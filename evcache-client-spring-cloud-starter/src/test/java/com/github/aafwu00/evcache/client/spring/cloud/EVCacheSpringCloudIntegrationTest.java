@@ -19,6 +19,7 @@ package com.github.aafwu00.evcache.client.spring.cloud;
 import com.couchbase.mock.Bucket;
 import com.couchbase.mock.BucketConfiguration;
 import com.couchbase.mock.CouchbaseMock;
+import com.couchbase.mock.memcached.Item;
 import com.netflix.appinfo.AmazonInfo;
 import com.netflix.appinfo.ApplicationInfoManager;
 import com.netflix.appinfo.InstanceInfo;
@@ -116,9 +117,9 @@ class EVCacheSpringCloudIntegrationTest {
     @Test
     void cached() {
         repository.findAll();
-        assertThat(server.getBuckets().get("memcached").getMasterItems(CACHE)).isNotEmpty();
-        server.getBuckets().get("memcached").getMasterItems(CACHE)
-              .forEach(item -> assertThat(item.getKeySpec().key).isEqualTo("todos:findAll"));
+        final Iterable<Item> items = server.getBuckets().get("memcached").getMasterItems(CACHE);
+        assertThat(items).isNotEmpty()
+                         .allMatch(item -> "todos:findAll".equals(item.getKeySpec().key));
     }
 
     @SpringBootApplication
