@@ -1,18 +1,14 @@
 dependencies {
     api "com.netflix.evcache:evcache-client:${evcacheVersion}"
 
-    implementation 'com.netflix.eureka:eureka-client'
-
     implementation 'org.springframework.boot:spring-boot-autoconfigure'
-    implementation 'org.springframework.boot:spring-boot-actuator', optional
+    implementation 'org.springframework.cloud:spring-cloud-commons'
+    implementation 'org.springframework.cloud:spring-cloud-context'
+    implementation 'org.springframework.cloud:spring-cloud-netflix-core'
+    implementation 'org.springframework.cloud:spring-cloud-netflix-archaius'
+    implementation 'org.springframework.cloud:spring-cloud-netflix-eureka-client'
 
-    implementation 'org.springframework.boot:spring-boot-starter-validation', optional
-
-    implementation 'org.springframework.cloud:spring-cloud-netflix-core', optional
-    implementation 'org.springframework.cloud:spring-cloud-commons', optional
-    implementation 'org.springframework.cloud:spring-cloud-netflix-eureka-client', optional
-
-    implementation 'io.micrometer:micrometer-core', optional
+    implementation 'org.springframework.boot:spring-boot-actuator-autoconfigure', optional
 
     testImplementation "com.couchbase.mock:CouchbaseMock:${couchbaseVersion}"
 }

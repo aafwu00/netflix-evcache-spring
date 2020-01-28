@@ -3,5 +3,9 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-cache'
 
+    implementation 'org.springframework.boot:spring-boot-starter-validation', optional
+    implementation 'org.springframework.boot:spring-boot-actuator', optional
+    implementation "com.netflix.spectator:spectator-reg-micrometer:${spectatorVersion}", optional
+
     testImplementation "com.couchbase.mock:CouchbaseMock:${couchbaseVersion}"
 }
