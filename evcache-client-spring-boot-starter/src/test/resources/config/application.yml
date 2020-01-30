@@ -8,4 +8,5 @@ evcache:
       key-prefix: todos
       time-to-live: 1000s
 
-TODO-NODES: shard1=localhost:11211
+# using testcontainers
+#TODO-NODES: shard1=localhost:11211

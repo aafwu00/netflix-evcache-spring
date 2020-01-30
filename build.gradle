@@ -27,7 +27,6 @@ plugins {
 
 ext {
     evcacheVersion = '5.12.21'
-    couchbaseVersion = '1.5.25'
     spectatorVersion = '0.99.2'
 }
 
@@ -177,6 +176,9 @@ subprojects {
             compileOnly "com.github.spotbugs:spotbugs-annotations:${spotbugs.toolVersion}"
             testImplementation 'com.google.code.findbugs:jsr305:3.0.2'
             spotbugsStylesheets "com.github.spotbugs:spotbugs:${spotbugs.toolVersion}"
+        }
+        if (project.name.endsWith('starter')) {
+            testImplementation 'org.testcontainers:junit-jupiter:1.12.5'
         }
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
         testImplementation 'org.junit.jupiter:junit-jupiter-api'
