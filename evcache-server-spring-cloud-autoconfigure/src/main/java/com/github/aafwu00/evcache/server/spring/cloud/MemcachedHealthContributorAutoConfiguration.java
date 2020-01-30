@@ -36,7 +36,7 @@ import java.util.Map;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(MemcachedClient.class)
-@ConditionalOnBean(EVCacheServerMarkerConfiguration.Marker.class)
+@ConditionalOnBean({MemcachedClient.class, EVCacheServerMarkerConfiguration.Marker.class})
 @ConditionalOnEnabledHealthIndicator("memcached")
 @AutoConfigureAfter(MemcachedAutoConfiguration.class)
 @SuppressWarnings({"checkstyle:linelength", "checkstyle:indentation"})

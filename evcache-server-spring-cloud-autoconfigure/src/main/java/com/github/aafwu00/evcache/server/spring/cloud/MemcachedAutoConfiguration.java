@@ -44,13 +44,14 @@ import static java.lang.Boolean.FALSE;
 @ConditionalOnEnabledHealthIndicator("memcached")
 @AutoConfigureAfter(EVCacheServerAutoConfiguration.class)
 public class MemcachedAutoConfiguration {
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     @Bean
     @ConditionalOnMissingBean(MemcachedClient.class)
-    public MemcachedClientFactoryBean memcachedClient(final EurekaInstanceConfigBean eurekaInstanceConfigBean,
-                                                      final ConfigurableEnvironment environment) {
-        final MemcachedClientFactoryBean bean = new MemcachedClientFactoryBean();
-        bean.setServers(eurekaInstanceConfigBean.getHostname() + ":" + port(environment, eurekaInstanceConfigBean));
-        return bean;
+    public MemcachedClient memcachedClient(final EurekaInstanceConfigBean eurekaInstanceConfigBean,
+                                           final ConfigurableEnvironment environment) throws Exception {
+        final MemcachedClientFactoryBean factory = new MemcachedClientFactoryBean();
+        factory.setServers(eurekaInstanceConfigBean.getHostname() + ":" + port(environment, eurekaInstanceConfigBean));
+        return (MemcachedClient) factory.getObject();
     }
 
     /**

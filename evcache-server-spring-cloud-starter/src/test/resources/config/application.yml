@@ -1,0 +1,14 @@
+eureka:
+  instance:
+    prefer-ip-address: true
+#  client:
+#    service-url:
+#      defaultZone: http://localhost:${server.port}/eureka
+
+spring:
+  application:
+    name: evcache
+
+evcache:
+#  port: 11211
+  asg-name: group1
