@@ -8,6 +8,8 @@ image:https://codecov.io/gh/aafwu00/netflix-evcache-spring/branch/master/graph/b
 
 = Netflix EVCache Spring
 
+image:https://api.codacy.com/project/badge/Grade/3f6cd2cfa6d2422b81c7fc85ae7ee268[link="https://app.codacy.com/manual/aafwu00/netflix-evcache-spring?utm_source=github.com&utm_medium=referral&utm_content=aafwu00/netflix-evcache-spring&utm_campaign=Badge_Grade_Settings"]
+
 This project provides Netflix EVCache integrations for Spring Cache Abstraction, Spring Boot, Spring Cloud
 
 == Getting Start
