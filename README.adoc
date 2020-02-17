@@ -1,7 +1,6 @@
 image:https://img.shields.io/badge/License-Apache%202.0-blue.svg["License Apache 2.0", link="https://opensource.org/licenses/Apache-2.0"]
 image:https://jitpack.io/v/aafwu00/netflix-evcache-spring.svg["Release", link=
 "https://jitpack.io/#aafwu00/netflix-evcache-spring"]
-image:https://circleci.com/gh/aafwu00/netflix-evcache-spring.svg?style=svg["CircleCI", link="https://circleci.com/gh/aafwu00/netflix-evcache-spring"]
 image:https://app.fossa.io/api/projects/git%2Bgithub.com%2Faafwu00%2Fnetflix-evcache-spring.svg?type=shield["FOSSA Status", link="https://app.fossa.io/projects/git%2Bgithub.com%2Faafwu00%2Fnetflix-evcache-spring?ref=badge_shield"]
 image:https://codecov.io/gh/aafwu00/netflix-evcache-spring/branch/master/graph/badge.svg["codecov", link="https://codecov.io/gh/aafwu00/netflix-evcache-spring"]
 
