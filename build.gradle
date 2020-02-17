@@ -6,14 +6,14 @@ buildscript {
 
 plugins {
     id 'nebula.project' version '7.0.7'
-    id 'nebula.info' version '5.2.0'
+    id 'nebula.info' version '6.0.0'
     id 'nebula.optional-base' version '5.0.3'
-    id 'nebula.release' version '14.0.3'
+    id 'nebula.release' version '14.0.4'
     id 'nebula.lint' version '16.0.2'
 
-    id 'nebula.maven-publish' version '14.1.1' apply false
-    id 'nebula.maven-apache-license' version '14.1.1' apply false
-    id 'nebula.source-jar' version '14.1.1' apply false
+    id 'nebula.maven-publish' version '16.0.0' apply false
+    id 'nebula.maven-apache-license' version '16.0.0' apply false
+    id 'nebula.source-jar' version '16.0.0' apply false
 
     id 'org.springframework.boot' version '2.2.4.RELEASE' apply false
     id 'io.spring.dependency-management' version '1.0.9.RELEASE' apply false
@@ -26,7 +26,7 @@ plugins {
 }
 
 ext {
-    evcacheVersion = '5.12.21'
+    evcacheVersion = '5.12.23'
     spectatorVersion = '0.99.2'
 }
 
@@ -96,7 +96,7 @@ subprojects {
             spotbugsStylesheets { transitive = false }
         }
         spotbugs {
-            toolVersion = '4.0.0-RC1'
+            toolVersion = '4.0.0'
             effort = 'max'
             reportLevel = 'high'
             spotbugsTest.enabled = false
@@ -113,25 +113,28 @@ subprojects {
             toolVersion = '0.8.5'
         }
 
+        jacocoTestCoverageVerification {
+            violationRules {
+                rule {                    
+                    limit {
+                        minimum = 0.70
+                    }
+                }
+            }
+        }
+
         jacocoTestReport {
             reports {
                 html.enabled = true
                 xml.enabled = true
                 csv.enabled = false
             }
+            finalizedBy 'jacocoTestCoverageVerification'
         }
 
-        jacocoTestCoverageVerification {
-            violationRules {
-                rule {
-                    limit {
-                        minimum = 0.7
-                    }
-                }
-            }
+        check {
+            finalizedBy 'jacocoTestReport'
         }
-
-        check.dependsOn(jacocoTestReport, jacocoTestCoverageVerification)
     }
 
     if (project.name.endsWith('sample')) {
