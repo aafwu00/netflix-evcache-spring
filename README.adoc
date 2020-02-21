@@ -3,6 +3,7 @@ image:https://jitpack.io/v/aafwu00/netflix-evcache-spring.svg["Release", link=
 "https://jitpack.io/#aafwu00/netflix-evcache-spring"]
 image:https://app.fossa.io/api/projects/git%2Bgithub.com%2Faafwu00%2Fnetflix-evcache-spring.svg?type=shield["FOSSA Status", link="https://app.fossa.io/projects/git%2Bgithub.com%2Faafwu00%2Fnetflix-evcache-spring?ref=badge_shield"]
 image:https://codecov.io/gh/aafwu00/netflix-evcache-spring/branch/master/graph/badge.svg["codecov", link="https://codecov.io/gh/aafwu00/netflix-evcache-spring"]
+image:https://github.com/aafwu00/netflix-evcache-spring/workflows/Java%20CI/badge.svg["Java CI", link="https://github.com/aafwu00/netflix-evcache-spring/actions?query=workflow%3A%22Java+CI%22"]
 
 = Netflix EVCache Spring
 
