@@ -16,7 +16,6 @@
 
 package com.github.aafwu00.evcache.server.spring.cloud;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Tags;
 import org.junit.jupiter.api.Test;
@@ -26,15 +25,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.netflix.eureka.serviceregistry.EurekaAutoServiceRegistration;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -45,18 +44,13 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
-@ContextConfiguration(initializers = EVCacheServerSpringCloudIntegrationTest.Initializer.class)
+@Testcontainers
 @Tags({@Tag("integration"), @Tag("docker")})
 class EVCacheServerSpringCloudIntegrationTest {
-    public static final GenericContainer MEMCACHED;
-    public static final GenericContainer EUREKA;
-
-    static {
-        MEMCACHED = new GenericContainer<>("memcached:alpine").withExposedPorts(11211);
-        MEMCACHED.start();
-        EUREKA = new GenericContainer<>("springcloud/eureka").withExposedPorts(8761);
-        EUREKA.start();
-    }
+    @Container
+    static final GenericContainer MEMCACHED = new GenericContainer<>("memcached:alpine").withExposedPorts(11211);
+    @Container
+    static final GenericContainer EUREKA = new GenericContainer<>("springcloud/eureka").withExposedPorts(8761);
 
     @Autowired
     private EurekaAutoServiceRegistration registration;
@@ -65,14 +59,14 @@ class EVCacheServerSpringCloudIntegrationTest {
     @Autowired
     private MemcachedHealthIndicator healthIndicator;
 
-    @AfterAll
-    static void afterAll() {
-        EUREKA.stop();
-        MEMCACHED.stop();
+    @DynamicPropertySource
+    static void eurekaProperties(final DynamicPropertyRegistry registry) {
+        registry.add("eureka.instance.metadata-map.evcache.port", MEMCACHED::getFirstMappedPort);
+        registry.add("eureka.client.serviceUrl.defaultZone", () -> "http://" + EUREKA.getContainerIpAddress() + ":" + EUREKA.getFirstMappedPort() + "/eureka/");
     }
 
     @Test
-    @Timeout(60)
+    @Timeout(120)
     void up() throws InterruptedException {
         registration.start();
         while (isEmpty(discoveryClient.getInstances("evcache"))) {
@@ -87,14 +81,4 @@ class EVCacheServerSpringCloudIntegrationTest {
     static class TodoApp {
     }
 
-    static class Initializer
-        implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        @Override
-        public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
-            TestPropertyValues.of(
-                "eureka.instance.metadata-map.evcache.port:" + MEMCACHED.getFirstMappedPort(),
-                "eureka.client.serviceUrl.defaultZone:" + "http://" + EUREKA.getContainerIpAddress() + ":" + EUREKA.getFirstMappedPort() + "/eureka/"
-            ).applyTo(configurableApplicationContext.getEnvironment());
-        }
-    }
 }

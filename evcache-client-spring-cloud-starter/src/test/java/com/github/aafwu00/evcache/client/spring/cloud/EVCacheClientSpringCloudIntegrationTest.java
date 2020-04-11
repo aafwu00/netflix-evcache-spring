@@ -23,8 +23,6 @@ import com.netflix.discovery.DiscoveryClient;
 import com.netflix.discovery.shared.Application;
 import net.spy.memcached.MemcachedClient;
 import net.spy.memcached.spring.MemcachedClientFactoryBean;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Tags;
 import org.junit.jupiter.api.Test;
@@ -32,19 +30,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.stereotype.Repository;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -62,28 +60,20 @@ import static org.mockito.Mockito.mock;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DirtiesContext
-@ContextConfiguration(initializers = EVCacheClientSpringCloudIntegrationTest.Initializer.class)
+@Testcontainers
 @Tags({@Tag("integration"), @Tag("docker")})
 class EVCacheClientSpringCloudIntegrationTest {
-    public static final GenericContainer MEMCACHED;
-
-    static {
-        MEMCACHED = new GenericContainer<>("memcached:alpine").withExposedPorts(11211);
-        MEMCACHED.start();
-    }
+    @Container
+    static final GenericContainer MEMCACHED = new GenericContainer<>("memcached:alpine").withExposedPorts(11211);
 
     @Autowired
     private TodoApp.TodoRepository repository;
     @Autowired
     private MemcachedClient client;
 
-    @BeforeAll
-    static void beforeAll() {
-    }
-
-    @AfterAll
-    static void afterAll() {
-        MEMCACHED.stop();
+    @DynamicPropertySource
+    static void evcacheProperties(final DynamicPropertyRegistry registry) {
+        registry.add("evcache.port", MEMCACHED::getFirstMappedPort);
     }
 
     @Test
@@ -102,12 +92,12 @@ class EVCacheClientSpringCloudIntegrationTest {
         public ApplicationInfoManager applicationInfoManager() {
             final ApplicationInfoManager applicationInfoManager = mock(ApplicationInfoManager.class);
             doReturn(InstanceInfo.Builder.newBuilder()
-                                         .setAppName("test")
-                                         .setStatus(InstanceInfo.InstanceStatus.UP)
-                                         .setHostName(HOSTNAME)
-                                         .setIPAddr(IP_ADDRESS)
-                                         .build())
-                .when(applicationInfoManager).getInfo();
+                    .setAppName("test")
+                    .setStatus(InstanceInfo.InstanceStatus.UP)
+                    .setHostName(HOSTNAME)
+                    .setIPAddr(IP_ADDRESS)
+                    .build())
+                    .when(applicationInfoManager).getInfo();
             return applicationInfoManager;
         }
 
@@ -115,22 +105,22 @@ class EVCacheClientSpringCloudIntegrationTest {
         public DiscoveryClient eurekaClient(final ConfigurableEnvironment environment) {
             final Application application = new Application("TODO");
             final AmazonInfo amazonInfo = AmazonInfo.Builder.newBuilder()
-                                                            .addMetadata(AmazonInfo.MetaDataKey.availabilityZone, "DEFAULT")
-                                                            .addMetadata(AmazonInfo.MetaDataKey.publicHostname, HOSTNAME)
-                                                            .addMetadata(AmazonInfo.MetaDataKey.publicIpv4, IP_ADDRESS)
-                                                            .addMetadata(AmazonInfo.MetaDataKey.localHostname, HOSTNAME)
-                                                            .addMetadata(AmazonInfo.MetaDataKey.localIpv4, IP_ADDRESS)
-                                                            .build();
+                    .addMetadata(AmazonInfo.MetaDataKey.availabilityZone, "DEFAULT")
+                    .addMetadata(AmazonInfo.MetaDataKey.publicHostname, HOSTNAME)
+                    .addMetadata(AmazonInfo.MetaDataKey.publicIpv4, IP_ADDRESS)
+                    .addMetadata(AmazonInfo.MetaDataKey.localHostname, HOSTNAME)
+                    .addMetadata(AmazonInfo.MetaDataKey.localIpv4, IP_ADDRESS)
+                    .build();
             final InstanceInfo instanceInfo = InstanceInfo.Builder.newBuilder()
-                                                                  .setInstanceId("EVCACHE-1")
-                                                                  .setAppName("TODO")
-                                                                  .setStatus(InstanceInfo.InstanceStatus.UP)
-                                                                  .setHostName(HOSTNAME)
-                                                                  .setIPAddr(IP_ADDRESS)
-                                                                  .setDataCenterInfo(amazonInfo)
-                                                                  .setASGName("SHARD1")
-                                                                  .add("evcache.port", environment.getProperty("evcache.port"))
-                                                                  .build();
+                    .setInstanceId("EVCACHE-1")
+                    .setAppName("TODO")
+                    .setStatus(InstanceInfo.InstanceStatus.UP)
+                    .setHostName(HOSTNAME)
+                    .setIPAddr(IP_ADDRESS)
+                    .setDataCenterInfo(amazonInfo)
+                    .setASGName("SHARD1")
+                    .add("evcache.port", environment.getProperty("evcache.port"))
+                    .build();
             application.addInstance(instanceInfo);
             final DiscoveryClient discoveryClient = mock(DiscoveryClient.class);
             doReturn(application).when(discoveryClient).getApplication("TODO");
@@ -172,7 +162,7 @@ class EVCacheClientSpringCloudIntegrationTest {
                 if (that == null || getClass() != that.getClass()) {
                     return false;
                 }
-                Todo todo = (Todo) that;
+                final Todo todo = (Todo) that;
                 return Objects.equals(title, todo.title);
             }
 
@@ -180,16 +170,6 @@ class EVCacheClientSpringCloudIntegrationTest {
             public int hashCode() {
                 return Objects.hash(title);
             }
-        }
-    }
-
-    static class Initializer
-        implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        @Override
-        public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
-            TestPropertyValues.of(
-                "evcache.port:" + MEMCACHED.getFirstMappedPort()
-            ).applyTo(configurableApplicationContext.getEnvironment());
         }
     }
 }

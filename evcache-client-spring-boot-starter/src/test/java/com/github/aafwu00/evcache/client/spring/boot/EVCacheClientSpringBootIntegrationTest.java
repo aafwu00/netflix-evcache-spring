@@ -19,7 +19,6 @@ package com.github.aafwu00.evcache.client.spring.boot;
 import net.spy.memcached.MemcachedClient;
 import net.spy.memcached.spring.MemcachedClientFactoryBean;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Tags;
 import org.junit.jupiter.api.Test;
@@ -27,18 +26,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.stereotype.Repository;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -54,24 +53,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @DirtiesContext
-@ContextConfiguration(initializers = EVCacheClientSpringBootIntegrationTest.Initializer.class)
+@Testcontainers
 @Tags({@Tag("integration"), @Tag("docker")})
 class EVCacheClientSpringBootIntegrationTest {
-    public static final GenericContainer MEMCACHED;
-
-    static {
-        MEMCACHED = new GenericContainer<>("memcached:alpine").withExposedPorts(11211);
-        MEMCACHED.start();
-    }
+    @Container
+    static final GenericContainer MEMCACHED = new GenericContainer<>("memcached:alpine").withExposedPorts(11211);
 
     @Autowired
     private TodoApp.TodoRepository repository;
     @Autowired
     private MemcachedClient client;
 
-    @AfterAll
-    static void afterAll() {
-        MEMCACHED.stop();
+    @DynamicPropertySource
+    static void evcacheProperties(final DynamicPropertyRegistry registry) {
+        registry.add("TODO-NODES", () -> "shard1=" + MEMCACHED.getContainerIpAddress() + ":" + MEMCACHED.getFirstMappedPort());
     }
 
     @Test
@@ -118,7 +113,7 @@ class EVCacheClientSpringBootIntegrationTest {
                 if (that == null || getClass() != that.getClass()) {
                     return false;
                 }
-                Todo todo = (Todo) that;
+                final Todo todo = (Todo) that;
                 return Objects.equals(title, todo.title);
             }
 
@@ -129,13 +124,4 @@ class EVCacheClientSpringBootIntegrationTest {
         }
     }
 
-    static class Initializer
-        implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        @Override
-        public void initialize(final ConfigurableApplicationContext configurableApplicationContext) {
-            TestPropertyValues.of(
-                "TODO-NODES:shard1=" + MEMCACHED.getContainerIpAddress() + ":" + MEMCACHED.getFirstMappedPort()
-            ).applyTo(configurableApplicationContext.getEnvironment());
-        }
-    }
 }

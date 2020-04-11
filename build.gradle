@@ -170,7 +170,7 @@ subprojects {
             spotbugs 'com.github.spotbugs:spotbugs:4.0.1'
         }
         if (project.name.endsWith('starter')) {
-            testImplementation 'org.testcontainers:junit-jupiter:1.12.5'
+            testImplementation 'org.testcontainers:junit-jupiter:1.13.0'
         }
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
         testImplementation 'org.junit.jupiter:junit-jupiter-api'
