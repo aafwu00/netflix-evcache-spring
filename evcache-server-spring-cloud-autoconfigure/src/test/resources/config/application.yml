@@ -7,10 +7,6 @@ eureka:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
 
-management:
-  security:
-    enabled: false
-
 logging:
   level:
     root: off

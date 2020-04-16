@@ -28,7 +28,6 @@ import com.netflix.evcache.pool.eureka.EurekaNodeListProvider;
 import com.netflix.evcache.util.EVCacheConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -36,11 +35,8 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.netflix.archaius.ArchaiusAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -65,11 +61,9 @@ class EVCacheCloudAutoConfigurationTest {
                                          "evcache.clusters[0].keyPrefix=test1",
                                          "spring.application.name=test")
                      .withUserConfiguration(EnableCachingConfiguration.class)
-                     .run(context -> assertAll(
-                         () -> assertThat(context).hasSingleBean(EVCacheClientPoolManager.class),
-                         () -> assertThat(context).hasSingleBean(DIConnectionFactoryBuilderProvider.class),
-                         () -> assertThat(context).hasSingleBean(EurekaNodeListProvider.class)
-                     ));
+                     .run(context -> assertThat(context).hasSingleBean(EVCacheClientPoolManager.class)
+                                                        .hasSingleBean(DIConnectionFactoryBuilderProvider.class)
+                                                        .hasSingleBean(EurekaNodeListProvider.class));
     }
 
     @Test
@@ -79,18 +73,15 @@ class EVCacheCloudAutoConfigurationTest {
                                          "spring.application.name=test",
                                          "evcache.use.simple.node.list.provider=false")
                      .withUserConfiguration(EnableCachingConfiguration.class)
-                     .run(context -> assertAll(
-                         () -> assertThat(context).hasSingleBean(EVCacheClientPoolManager.class),
-                         () -> assertThat(context).hasSingleBean(DIConnectionFactoryBuilderProvider.class),
-                         () -> assertThat(context).hasSingleBean(EurekaNodeListProvider.class),
-                         () -> assertThat(context.getBean(Environment.class)
-                                                 .getProperty("evcache.use.simple.node.list.provider", Boolean.class)).isFalse(),
-                         () -> assertThat(EVCacheConfig.getInstance()
-                                                       .getPropertyRepository()
-                                                       .get("evcache.use.simple.node.list.provider", Boolean.TYPE)
-                                                       .orElse(true)
-                                                       .get()).isFalse()
-                     ));
+                     .run(context -> assertThat(context).hasSingleBean(EVCacheClientPoolManager.class)
+                                                        .hasSingleBean(DIConnectionFactoryBuilderProvider.class)
+                                                        .hasSingleBean(EurekaNodeListProvider.class));
+        assertThat(EVCacheConfig.getInstance()
+                                .getPropertyRepository()
+                                .get("evcache.use.simple.node.list.provider", Boolean.TYPE)
+                                .orElse(true)
+                                .get()).isFalse();
+
     }
 
     @Test
@@ -99,10 +90,8 @@ class EVCacheCloudAutoConfigurationTest {
                                          "evcache.clusters[0].keyPrefix=test1",
                                          "spring.application.name=test")
                      .withUserConfiguration(ExistsEVCacheClientPoolManagerConfiguration.class)
-                     .run(context -> assertAll(
-                         () -> assertThat(context).hasSingleBean(DIConnectionFactoryBuilderProvider.class),
-                         () -> assertThat(context).hasSingleBean(EurekaNodeListProvider.class)
-                     ));
+                     .run(context -> assertThat(context).hasSingleBean(DIConnectionFactoryBuilderProvider.class)
+                                                        .hasSingleBean(EurekaNodeListProvider.class));
     }
 
     @Test
@@ -112,12 +101,8 @@ class EVCacheCloudAutoConfigurationTest {
                                          "evcache.cloud.enabled=false",
                                          "spring.application.name=test")
                      .withUserConfiguration(EnableCachingConfiguration.class)
-                     .run(context -> assertAll(
-                         () -> assertThatThrownBy(() -> context.getBean(EurekaNodeListProvider.class)).isExactlyInstanceOf(
-                             NoSuchBeanDefinitionException.class),
-                         () -> assertThatThrownBy(() -> context.getBean(DIConnectionFactoryBuilderProvider.class)).isExactlyInstanceOf(
-                             NoSuchBeanDefinitionException.class)
-                     ));
+                     .run(context -> assertThat(context).doesNotHaveBean(EurekaNodeListProvider.class)
+                                                        .doesNotHaveBean(DIConnectionFactoryBuilderProvider.class));
     }
 
     @Test
@@ -127,10 +112,7 @@ class EVCacheCloudAutoConfigurationTest {
                                          "evcache.cloud.enabled=false",
                                          "evcache.use.simple.node.list.provider=true")
                      .withUserConfiguration(EnableCachingConfiguration.class)
-                     .run(context -> assertAll(
-                         () -> assertThatThrownBy(() -> context.getBean(EurekaNodeListProvider.class)).isExactlyInstanceOf(
-                             NoSuchBeanDefinitionException.class)
-                     ));
+                     .run(context -> assertThat(context).doesNotHaveBean(EurekaNodeListProvider.class));
     }
 
     @Test
@@ -139,9 +121,7 @@ class EVCacheCloudAutoConfigurationTest {
                                          "evcache.clusters[0].keyPrefix=test1",
                                          "spring.application.name=test")
                      .withUserConfiguration(NoEurekaClientConfiguration.class)
-                     .run(context -> assertAll(
-                         () -> assertThat(context).doesNotHaveBean(EurekaNodeListProvider.class)
-                     ));
+                     .run(context -> assertThat(context).doesNotHaveBean(EurekaNodeListProvider.class));
     }
 
     @Test

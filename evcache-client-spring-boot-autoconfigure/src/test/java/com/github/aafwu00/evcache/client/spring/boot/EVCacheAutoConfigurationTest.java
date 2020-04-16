@@ -17,6 +17,7 @@
 package com.github.aafwu00.evcache.client.spring.boot;
 
 import com.github.aafwu00.evcache.client.spring.EVCacheManager;
+import com.github.aafwu00.evcache.client.spring.boot.EVCacheProperties.Cluster;
 import com.netflix.evcache.EVCache.Builder;
 import com.netflix.evcache.pool.EVCacheClientPoolManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +28,6 @@ import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizer;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBindException;
-import org.springframework.boot.test.context.assertj.AssertableApplicationContext;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -37,10 +37,11 @@ import org.springframework.cloud.netflix.archaius.ArchaiusAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.time.Duration;
+import java.util.Objects;
+import java.util.function.Supplier;
 
+import static java.time.Duration.ofSeconds;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -71,12 +72,11 @@ class EVCacheAutoConfigurationTest {
     void should_be_loaded_EVCacheManager() {
         contextRunner.withPropertyValues("evcache.clusters[0].appName=test", "evcache.clusters[0].keyPrefix=test1")
                      .withUserConfiguration(EnableCachingConfiguration.class)
-                     .run(context -> assertAll(
-                         () -> assertThat(context).hasSingleBean(EVCacheManager.class),
-                         () -> assertThat(context).hasSingleBean(EVCacheClientPoolManager.class),
-                         () -> verify(cacheManagerCustomizer).customize(any(EVCacheManager.class)),
-                         () -> verify(customizer).customize(eq("TEST"), any(Builder.class))
-                     ));
+                     .run(context -> assertThat(context).hasSingleBean(EVCacheManager.class)
+                                                        .hasSingleBean(EVCacheManager.class)
+                                                        .hasSingleBean(EVCacheClientPoolManager.class));
+        verify(cacheManagerCustomizer).customize(any(EVCacheManager.class));
+        verify(customizer).customize(eq("TEST"), any(Builder.class));
     }
 
     @Test
@@ -89,32 +89,26 @@ class EVCacheAutoConfigurationTest {
     void should_be_not_loaded_EVCacheManager_when_cacheManager_already_exists() {
         contextRunner.withPropertyValues("evcache.clusters[0].appName=test", "evcache.clusters[0].keyPrefix=test1")
                      .withUserConfiguration(ExistsCacheManagerConfiguration.class)
-                     .run(context -> assertAll(
-                         () -> assertThat(context).doesNotHaveBean(EVCacheManager.class),
-                         () -> assertThat(context).doesNotHaveBean(EVCacheClientPoolManager.class)
-                     ));
+                     .run(context -> assertThat(context).doesNotHaveBean(EVCacheManager.class)
+                                                        .doesNotHaveBean(EVCacheClientPoolManager.class));
     }
 
     @Test
     void should_be_not_loaded_EVCacheManager_when_evcache_enable_is_false() {
         contextRunner.withPropertyValues("evcache.enabled=false")
                      .withUserConfiguration(EnableCachingConfiguration.class)
-                     .run(context -> assertAll(
-                         () -> assertThat(context).hasSingleBean(CacheManager.class),
-                         () -> assertThat(context).doesNotHaveBean(EVCacheManager.class),
-                         () -> assertThat(context).doesNotHaveBean(EVCacheClientPoolManager.class)
-                     ));
+                     .run(context -> assertThat(context).hasSingleBean(CacheManager.class)
+                                                        .doesNotHaveBean(EVCacheManager.class)
+                                                        .doesNotHaveBean(EVCacheClientPoolManager.class));
     }
 
     @Test
     void should_be_not_loaded_EVCacheManager_when_cache_type_is_none() {
         contextRunner.withPropertyValues("spring.cache.type=none", "evcache.enabled=true")
                      .withUserConfiguration(EnableCachingConfiguration.class)
-                     .run(context -> assertAll(
-                         () -> assertThat(context).hasSingleBean(NoOpCacheManager.class),
-                         () -> assertThat(context).doesNotHaveBean(EVCacheManager.class),
-                         () -> assertThat(context).doesNotHaveBean(EVCacheClientPoolManager.class)
-                     ));
+                     .run(context -> assertThat(context).hasSingleBean(NoOpCacheManager.class)
+                                                        .doesNotHaveBean(EVCacheManager.class)
+                                                        .doesNotHaveBean(EVCacheClientPoolManager.class));
     }
 
     @Test
@@ -162,28 +156,29 @@ class EVCacheAutoConfigurationTest {
                                          "evcache.clusters[1].retry-enabled=false",
                                          "evcache.use.simple.node.list.provider=true")
                      .withUserConfiguration(EnableCachingConfiguration.class)
-                     .run(context -> assertAll(
-                         () -> assertThat(context).hasSingleBean(EVCacheProperties.class),
-                         () -> assertThat(firstCluster(context).getAppName()).isEqualTo("test"),
-                         () -> assertThat(firstCluster(context).getKeyPrefix()).isEqualTo("test1"),
-                         () -> assertThat(firstCluster(context).getTimeToLive()).isEqualTo(Duration.ofSeconds(1000)),
-                         () -> assertThat(firstCluster(context).isRetryEnabled()).isTrue(),
-                         () -> assertThat(secondCluster(context).getAppName()).isEqualTo("test"),
-                         () -> assertThat(secondCluster(context).getKeyPrefix()).isEqualTo("test2"),
-                         () -> assertThat(secondCluster(context).isRetryEnabled()).isFalse()
-                     ));
+                     .run(context -> assertThat(context).hasSingleBean(EVCacheProperties.class)
+                                                        .getBean(EVCacheProperties.class)
+                                                        .matches(this::withFirstCluster)
+                                                        .matches(this::withSecondCluster));
     }
 
-    private EVCacheProperties.Cluster firstCluster(final AssertableApplicationContext context) {
-        return property(context).getClusters().get(0);
+    private boolean withFirstCluster(final EVCacheProperties properties) {
+        final Cluster first = properties.getClusters().get(0);
+        return isEqualTo(first::getAppName, "test") &&
+               isEqualTo(first::getKeyPrefix, "test1") &&
+               isEqualTo(first::getTimeToLive, ofSeconds(1000)) &&
+               isEqualTo(first::isRetryEnabled, true);
     }
 
-    private EVCacheProperties property(final AssertableApplicationContext context) {
-        return context.getBean(EVCacheProperties.class);
+    private boolean withSecondCluster(final EVCacheProperties properties) {
+        final Cluster second = properties.getClusters().get(1);
+        return isEqualTo(second::getAppName, "test") &&
+               isEqualTo(second::getKeyPrefix, "test2") &&
+               isEqualTo(second::isRetryEnabled, false);
     }
 
-    private EVCacheProperties.Cluster secondCluster(final AssertableApplicationContext context) {
-        return property(context).getClusters().get(1);
+    private <T> boolean isEqualTo(final Supplier<T> actual, final T expect) {
+        return Objects.equals(actual.get(), expect);
     }
 
     @Configuration

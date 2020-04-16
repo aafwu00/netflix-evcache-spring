@@ -41,8 +41,8 @@ class MemcachedReactiveHealthContributorAutoConfigurationTest {
                                                      EurekaClientAutoConfiguration.class,
                                                      EVCacheServerAutoConfiguration.class,
                                                      MemcachedAutoConfiguration.class,
-                                                     MemcachedReactiveHealthContributorAutoConfiguration.class
-            )).withPropertyValues("spring.cloud.service-registry.auto-registration.enabled=false");
+                                                     MemcachedReactiveHealthContributorAutoConfiguration.class))
+            .withPropertyValues("spring.cloud.service-registry.auto-registration.enabled=false");
     }
 
     @Test

@@ -29,7 +29,6 @@ import java.util.Set;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -42,18 +41,26 @@ import static org.mockito.Mockito.verify;
 class EVCacheManagerTest {
     @Test
     void loadCaches() {
-        final EVCacheConfiguration configuration1 = new EVCacheConfiguration("1", "TEST", "test1", Duration.ofSeconds(1000), true, true);
-        final EVCacheConfiguration configuration2 = new EVCacheConfiguration("2", "TEST", "test2", Duration.ofSeconds(90), false, false);
+        final EVCacheConfiguration configuration1 = new EVCacheConfiguration("1",
+                                                                             "TEST",
+                                                                             "test1",
+                                                                             Duration.ofSeconds(1000),
+                                                                             true,
+                                                                             true);
+        final EVCacheConfiguration configuration2 = new EVCacheConfiguration("2",
+                                                                             "TEST",
+                                                                             "test2",
+                                                                             Duration.ofSeconds(90),
+                                                                             false,
+                                                                             false);
         final Set<EVCacheConfiguration> configurations = new HashSet<>();
         configurations.add(configuration1);
         configurations.add(configuration2);
         final EVCache.Builder.Customizer customizer = mock(EVCache.Builder.Customizer.class);
         final EVCacheManager manager = new EVCacheManager(configurations, singletonList(customizer));
         final List<? extends Cache> caches = new ArrayList<>(manager.loadCaches());
-        assertAll(
-            () -> assertThatCache(getNativeCache(caches, 0), configuration1),
-            () -> assertThatCache(getNativeCache(caches, 1), configuration2)
-        );
+        assertThatCache(getNativeCache(caches, 0), configuration1);
+        assertThatCache(getNativeCache(caches, 1), configuration2);
         verify(customizer, times(2)).customize(eq("TEST"), any());
     }
 
@@ -62,10 +69,10 @@ class EVCacheManagerTest {
     }
 
     private void assertThatCache(final EVCacheImpl cache, final EVCacheConfiguration configuration) {
-        assertAll(
-            () -> assertThat(cache.getAppName()).isEqualTo("TEST"),
-            () -> assertThat(cache.getCachePrefix()).isEqualTo(configuration.getProperties().getKeyPrefix()),
-            () -> assertThat(cache.getDefaultTTL()).isEqualTo(configuration.getProperties().getTimeToLive().getSeconds())
-        );
+        assertThat(cache.getAppName()).isEqualTo("TEST");
+        assertThat(cache.getCachePrefix()).isEqualTo(configuration.getProperties().getKeyPrefix());
+        assertThat(cache.getDefaultTTL()).isEqualTo(configuration.getProperties()
+                                                                 .getTimeToLive()
+                                                                 .getSeconds());
     }
 }

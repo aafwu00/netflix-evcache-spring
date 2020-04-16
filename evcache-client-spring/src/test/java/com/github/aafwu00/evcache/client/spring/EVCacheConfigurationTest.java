@@ -21,38 +21,34 @@ import org.junit.jupiter.api.Test;
 import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
  * @author Taeho Kim
  */
 class EVCacheConfigurationTest {
-    private EVCacheConfiguration create(final String name, final String appName, final String keyPrefix, final int timeToLive) {
+    private EVCacheConfiguration create(final String name,
+                                        final String appName,
+                                        final String keyPrefix,
+                                        final int timeToLive) {
         return new EVCacheConfiguration(name, appName, keyPrefix, Duration.ofSeconds(timeToLive), true, true);
     }
 
     @Test
-    void should_be_equals_when_appName_and_keyPrefix_are_equals() {
+    void should_be_equals_when_name_are_equals() {
         final EVCacheConfiguration config = create("TEST", "TEST", "test1", 1);
-        assertAll(
-            () -> assertThat(config).isEqualTo(config),
-            () -> assertThat(config).isEqualTo(create("TEST", "TEST1", "test1", 1)),
-            () -> assertThat(config).isEqualTo(create("TEST", "TEST", "test", 1)),
-            () -> assertThat(config).isNotEqualTo(null),
-            () -> assertThat(config).isNotEqualTo(1),
-            () -> assertThat(config).isNotEqualTo(create("TEST1", "TEST1", "test1", 1)),
-            () -> assertThat(config).isNotEqualTo(create("TEST1", "TEST", "test", 1))
-        );
+        assertThat(config).isEqualTo(create("TEST", "TEST", "test1", 1));
+        assertThat(config).isEqualTo(create("TEST", "TEST1", "test1", 1));
+        assertThat(config).isEqualTo(create("TEST", "TEST", "test", 1));
+        assertThat(config).isNotEqualTo(create("TEST1", "TEST1", "test1", 1));
+        assertThat(config).isNotEqualTo(create("TEST1", "TEST", "test", 1));
     }
 
     @Test
-    void should_be_same_hashCode_when_appName_and_keyPrefix_are_equals() {
+    void should_be_hashCode_when_name_are_equals() {
         final EVCacheConfiguration config = create("TEST", "TEST", "test1", 1);
-        assertAll(
-            () -> assertThat(config).hasSameHashCodeAs(create("TEST", "TEST1", "test1", 1)),
-            () -> assertThat(config).hasSameHashCodeAs(create("TEST", "TEST", "test", 1)),
-            () -> assertThat(config.hashCode()).isNotEqualTo(create("TEST1", "TEST1", "test1", 1).hashCode()),
-            () -> assertThat(config.hashCode()).isNotEqualTo(create("TEST1", "TEST", "test", 1).hashCode())
-        );
+        assertThat(config).hasSameHashCodeAs(create("TEST", "TEST1", "test1", 1));
+        assertThat(config).hasSameHashCodeAs(create("TEST", "TEST", "test", 1));
+        assertThat(config.hashCode()).isNotEqualTo(create("TEST1", "TEST1", "test1", 1).hashCode());
+        assertThat(config.hashCode()).isNotEqualTo(create("TEST1", "TEST", "test", 1).hashCode());
     }
 }

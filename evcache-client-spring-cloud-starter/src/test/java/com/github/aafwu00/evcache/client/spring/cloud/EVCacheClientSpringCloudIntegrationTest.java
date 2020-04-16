@@ -92,12 +92,12 @@ class EVCacheClientSpringCloudIntegrationTest {
         public ApplicationInfoManager applicationInfoManager() {
             final ApplicationInfoManager applicationInfoManager = mock(ApplicationInfoManager.class);
             doReturn(InstanceInfo.Builder.newBuilder()
-                    .setAppName("test")
-                    .setStatus(InstanceInfo.InstanceStatus.UP)
-                    .setHostName(HOSTNAME)
-                    .setIPAddr(IP_ADDRESS)
-                    .build())
-                    .when(applicationInfoManager).getInfo();
+                                         .setAppName("test")
+                                         .setStatus(InstanceInfo.InstanceStatus.UP)
+                                         .setHostName(HOSTNAME)
+                                         .setIPAddr(IP_ADDRESS)
+                                         .build())
+                .when(applicationInfoManager).getInfo();
             return applicationInfoManager;
         }
 
@@ -105,22 +105,25 @@ class EVCacheClientSpringCloudIntegrationTest {
         public DiscoveryClient eurekaClient(final ConfigurableEnvironment environment) {
             final Application application = new Application("TODO");
             final AmazonInfo amazonInfo = AmazonInfo.Builder.newBuilder()
-                    .addMetadata(AmazonInfo.MetaDataKey.availabilityZone, "DEFAULT")
-                    .addMetadata(AmazonInfo.MetaDataKey.publicHostname, HOSTNAME)
-                    .addMetadata(AmazonInfo.MetaDataKey.publicIpv4, IP_ADDRESS)
-                    .addMetadata(AmazonInfo.MetaDataKey.localHostname, HOSTNAME)
-                    .addMetadata(AmazonInfo.MetaDataKey.localIpv4, IP_ADDRESS)
-                    .build();
+                                                            .addMetadata(AmazonInfo.MetaDataKey.availabilityZone,
+                                                                         "DEFAULT")
+                                                            .addMetadata(AmazonInfo.MetaDataKey.publicHostname,
+                                                                         HOSTNAME)
+                                                            .addMetadata(AmazonInfo.MetaDataKey.publicIpv4, IP_ADDRESS)
+                                                            .addMetadata(AmazonInfo.MetaDataKey.localHostname, HOSTNAME)
+                                                            .addMetadata(AmazonInfo.MetaDataKey.localIpv4, IP_ADDRESS)
+                                                            .build();
             final InstanceInfo instanceInfo = InstanceInfo.Builder.newBuilder()
-                    .setInstanceId("EVCACHE-1")
-                    .setAppName("TODO")
-                    .setStatus(InstanceInfo.InstanceStatus.UP)
-                    .setHostName(HOSTNAME)
-                    .setIPAddr(IP_ADDRESS)
-                    .setDataCenterInfo(amazonInfo)
-                    .setASGName("SHARD1")
-                    .add("evcache.port", environment.getProperty("evcache.port"))
-                    .build();
+                                                                  .setInstanceId("EVCACHE-1")
+                                                                  .setAppName("TODO")
+                                                                  .setStatus(InstanceInfo.InstanceStatus.UP)
+                                                                  .setHostName(HOSTNAME)
+                                                                  .setIPAddr(IP_ADDRESS)
+                                                                  .setDataCenterInfo(amazonInfo)
+                                                                  .setASGName("SHARD1")
+                                                                  .add("evcache.port",
+                                                                       environment.getProperty("evcache.port"))
+                                                                  .build();
             application.addInstance(instanceInfo);
             final DiscoveryClient discoveryClient = mock(DiscoveryClient.class);
             doReturn(application).when(discoveryClient).getApplication("TODO");

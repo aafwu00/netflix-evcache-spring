@@ -61,19 +61,22 @@ class EVCacheServerEurekaInstanceConfigBeanPostProcessorTest {
 
     @Test
     void should_be_do_nothing_when_before_initialization() {
-        assertThat(processor.postProcessBeforeInitialization(eurekaInstanceConfigBean, "beanName")).isEqualTo(eurekaInstanceConfigBean);
+        assertThat(processor.postProcessBeforeInitialization(eurekaInstanceConfigBean, "beanName"))
+            .isEqualTo(eurekaInstanceConfigBean);
     }
 
     @Test
     void should_be_do_nothing_when_not_EurekaInstanceConfigBean() {
-        assertThat(processor.postProcessAfterInitialization(eurekaClientConfigBean, "beanName")).isEqualTo(eurekaClientConfigBean);
+        assertThat(processor.postProcessAfterInitialization(eurekaClientConfigBean, "beanName"))
+            .isEqualTo(eurekaClientConfigBean);
         verify(eurekaInstanceConfigBean, never()).setDataCenterInfo(any());
     }
 
     @Test
     void should_be_do_nothing_when_dataCenter_is_amazon() {
         doReturn(AmazonInfo.Builder.newBuilder().build()).when(eurekaInstanceConfigBean).getDataCenterInfo();
-        assertThat(processor.postProcessAfterInitialization(eurekaInstanceConfigBean, "beanName")).isEqualTo(eurekaInstanceConfigBean);
+        assertThat(processor.postProcessAfterInitialization(eurekaInstanceConfigBean, "beanName"))
+            .isEqualTo(eurekaInstanceConfigBean);
         verify(eurekaInstanceConfigBean, never()).setDataCenterInfo(any());
     }
 
@@ -87,7 +90,8 @@ class EVCacheServerEurekaInstanceConfigBeanPostProcessorTest {
         metadata.put("evcache.public-ipv4", "test5");
         metadata.put("evcache.local-ipv4", "test6");
         environment.getPropertySources().addLast(new MapPropertySource("test", metadata));
-        assertThat(processor.postProcessAfterInitialization(eurekaInstanceConfigBean, "beanName")).isEqualTo(eurekaInstanceConfigBean);
+        assertThat(processor.postProcessAfterInitialization(eurekaInstanceConfigBean, "beanName"))
+            .isEqualTo(eurekaInstanceConfigBean);
         final AmazonInfo dataCenterInfo = (AmazonInfo) eurekaInstanceConfigBean.getDataCenterInfo();
         assertThat(dataCenterInfo.getMetadata()).containsEntry("availability-zone", "test1")
                                                 .containsEntry("ami-id", "test2")
@@ -100,7 +104,8 @@ class EVCacheServerEurekaInstanceConfigBeanPostProcessorTest {
     @Test
     void should_be_set_metadata_using_default_when_not_exists_property() {
         eurekaInstanceConfigBean.setInstanceId("test1");
-        assertThat(processor.postProcessAfterInitialization(eurekaInstanceConfigBean, "beanName")).isEqualTo(eurekaInstanceConfigBean);
+        assertThat(processor.postProcessAfterInitialization(eurekaInstanceConfigBean, "beanName"))
+            .isEqualTo(eurekaInstanceConfigBean);
         final AmazonInfo dataCenterInfo = (AmazonInfo) eurekaInstanceConfigBean.getDataCenterInfo();
         assertThat(dataCenterInfo.getMetadata()).containsEntry("availability-zone", "defaultZone")
                                                 .containsEntry("ami-id", "n/a")
@@ -115,7 +120,8 @@ class EVCacheServerEurekaInstanceConfigBeanPostProcessorTest {
         final String[] zones = {"zone1", "zone2"};
         doReturn("region").when(eurekaClientConfigBean).getRegion();
         doReturn(zones).when(eurekaClientConfigBean).getAvailabilityZones("region");
-        assertThat(processor.postProcessAfterInitialization(eurekaInstanceConfigBean, "beanName")).isEqualTo(eurekaInstanceConfigBean);
+        assertThat(processor.postProcessAfterInitialization(eurekaInstanceConfigBean, "beanName"))
+            .isEqualTo(eurekaInstanceConfigBean);
         final AmazonInfo dataCenterInfo = (AmazonInfo) eurekaInstanceConfigBean.getDataCenterInfo();
         assertThat(dataCenterInfo.getMetadata()).containsEntry("availability-zone", zones[0]);
     }

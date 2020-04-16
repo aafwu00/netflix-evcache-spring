@@ -17,6 +17,7 @@
 package com.github.aafwu00.evcache.client.spring.boot;
 
 import com.github.aafwu00.evcache.client.spring.EVCacheManager;
+import com.github.aafwu00.evcache.client.spring.boot.EVCacheMetricsAutoConfiguration.SpectatorRegistration;
 import com.netflix.spectator.api.Registry;
 import com.netflix.spectator.api.Spectator;
 import com.netflix.spectator.micrometer.MicrometerRegistry;
@@ -34,7 +35,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.util.ReflectionTestUtils.getField;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
@@ -60,10 +60,8 @@ class EVCacheMetricsAutoConfigurationTest {
     @Test
     void should_be_loaded_EVCacheMeterBinderProvider() {
         contextRunner.withUserConfiguration(EnableEVCacheManagerConfiguration.class)
-                     .run(context -> assertAll(
-                         () -> assertThat(context).hasSingleBean(EVCacheMeterBinderProvider.class),
-                         () -> assertThat(context).hasSingleBean(EVCacheMetricsAutoConfiguration.SpectatorRegistration.class)
-                     ));
+                     .run(context -> assertThat(context).hasSingleBean(EVCacheMeterBinderProvider.class)
+                                                        .hasSingleBean(SpectatorRegistration.class));
     }
 
     @Test
@@ -77,20 +75,17 @@ class EVCacheMetricsAutoConfigurationTest {
     @Test
     void should_be_not_loaded_MicrometerRegistry_when_MeterRegistry_not_exists() {
         contextRunner.withUserConfiguration(EnableEVCacheManagerConfiguration.class)
-                     .run(context -> {
-                         final List<Registry> registries = (List<Registry>) getField(Spectator.globalRegistry(), "registries");
-                         assertThat(registries).isEmpty();
-                     });
+                     .run(context -> assertThat((List<Registry>) getField(Spectator.globalRegistry(),
+                                                                          "registries")).isEmpty());
     }
 
     @SuppressWarnings("unchecked")
     @Test
     void should_be_loaded_MicrometerRegistry_when_MeterRegistry() {
         contextRunner.withUserConfiguration(EnableMicrometerRegistryConfiguration.class)
-                     .run(context -> {
-                         final List<Registry> registries = (List<Registry>) getField(Spectator.globalRegistry(), "registries");
-                         assertThat(findValueOfType(registries, MicrometerRegistry.class)).isNotNull();
-                     });
+                     .run(context -> assertThat(findValueOfType((List<Registry>) getField(Spectator.globalRegistry(),
+                                                                                          "registries"),
+                                                                MicrometerRegistry.class)).isNotNull());
     }
 
     @Configuration

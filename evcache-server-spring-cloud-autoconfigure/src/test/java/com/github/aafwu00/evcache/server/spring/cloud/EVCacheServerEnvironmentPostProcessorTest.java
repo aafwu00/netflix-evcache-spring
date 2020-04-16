@@ -52,14 +52,16 @@ class EVCacheServerEnvironmentPostProcessorTest {
 
     @Test
     void should_be_not_change_when_exist_asg_name() {
-        environment.getPropertySources().addLast(new MapPropertySource("test", singletonMap("eureka.instance.asg-name", "asg")));
+        environment.getPropertySources()
+                   .addLast(new MapPropertySource("test", singletonMap("eureka.instance.asg-name", "asg")));
         processor.postProcessEnvironment(environment, null);
         assertThat(environment.getProperty("eureka.instance.asg-name")).isEqualTo("asg");
     }
 
     @Test
     void should_be_set_when_exist_asg_name() {
-        environment.getPropertySources().addLast(new MapPropertySource("test", singletonMap("evcache.asg-name", "group")));
+        environment.getPropertySources()
+                   .addLast(new MapPropertySource("test", singletonMap("evcache.asg-name", "group")));
         processor.postProcessEnvironment(environment, null);
         assertThat(environment.getProperty("eureka.instance.asg-name")).isEqualTo("group");
     }
@@ -85,7 +87,8 @@ class EVCacheServerEnvironmentPostProcessorTest {
 
     @Test
     void should_be_set_when_exist_evcache_secure_port() {
-        environment.getPropertySources().addLast(new MapPropertySource("test", singletonMap("evcache.secure.port", 11411)));
+        environment.getPropertySources()
+                   .addLast(new MapPropertySource("test", singletonMap("evcache.secure.port", 11411)));
         processor.postProcessEnvironment(environment, null);
         assertThat(environment.getProperty("eureka.instance.metadata-map.evcache.secure.port")).isEqualTo("11411");
     }
@@ -124,7 +127,8 @@ class EVCacheServerEnvironmentPostProcessorTest {
 
     @Test
     void should_be_set_when_exist_udsproxy_memcached_port() {
-        environment.getPropertySources().addLast(new MapPropertySource("test", singletonMap("udsproxy.memcached.port", 11211)));
+        environment.getPropertySources()
+                   .addLast(new MapPropertySource("test", singletonMap("udsproxy.memcached.port", 11211)));
         processor.postProcessEnvironment(environment, null);
         assertThat(environment.getProperty("eureka.instance.metadata-map.udsproxy.memcached.port")).isEqualTo("11211");
     }
@@ -137,7 +141,8 @@ class EVCacheServerEnvironmentPostProcessorTest {
 
     @Test
     void should_be_set_when_exist_udsproxy_memento_port() {
-        environment.getPropertySources().addLast(new MapPropertySource("test", singletonMap("udsproxy.memento.port", 11211)));
+        environment.getPropertySources()
+                   .addLast(new MapPropertySource("test", singletonMap("udsproxy.memento.port", 11211)));
         processor.postProcessEnvironment(environment, null);
         assertThat(environment.getProperty("eureka.instance.metadata-map.udsproxy.memento.port")).isEqualTo("11211");
     }

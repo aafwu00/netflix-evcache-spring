@@ -64,7 +64,8 @@ class EVCacheTraceAutoConfigurationTest {
                                          "evcache.clusters[0].keyPrefix=test1",
                                          "evcache.trace.enabled=false")
                      .withUserConfiguration(EnableCachingConfiguration.class)
-                     .run(context -> verify(manager, never()).addEVCacheEventListener(any(EVCacheTracingEventListener.class)));
+                     .run(context -> verify(manager,
+                                            never()).addEVCacheEventListener(any(EVCacheTracingEventListener.class)));
     }
 
     @Configuration

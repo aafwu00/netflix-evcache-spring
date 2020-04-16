@@ -62,7 +62,8 @@ class EVCacheServerSpringCloudIntegrationTest {
     @DynamicPropertySource
     static void eurekaProperties(final DynamicPropertyRegistry registry) {
         registry.add("eureka.instance.metadata-map.evcache.port", MEMCACHED::getFirstMappedPort);
-        registry.add("eureka.client.serviceUrl.defaultZone", () -> "http://" + EUREKA.getContainerIpAddress() + ":" + EUREKA.getFirstMappedPort() + "/eureka/");
+        registry.add("eureka.client.serviceUrl.defaultZone",
+                     () -> "http://" + EUREKA.getContainerIpAddress() + ":" + EUREKA.getFirstMappedPort() + "/eureka/");
     }
 
     @Test

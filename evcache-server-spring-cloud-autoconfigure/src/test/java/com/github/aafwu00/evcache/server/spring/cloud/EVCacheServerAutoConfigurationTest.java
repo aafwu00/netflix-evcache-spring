@@ -41,20 +41,22 @@ class EVCacheServerAutoConfigurationTest {
                                                      EurekaDiscoveryClientConfiguration.class,
                                                      EurekaClientAutoConfiguration.class,
                                                      EurekaDiscoveryClientConfigServiceAutoConfiguration.class,
-                                                     EVCacheServerAutoConfiguration.class
-            )).withPropertyValues("spring.cloud.service-registry.auto-registration.enabled=false");
+                                                     EVCacheServerAutoConfiguration.class))
+            .withPropertyValues("spring.cloud.service-registry.auto-registration.enabled=false");
     }
 
     @Test
     void should_be_loaded_EnableEVCacheServerConfiguration() {
         contextRunner.withUserConfiguration(EnableEVCacheServerConfiguration.class)
-                     .run(context -> assertThat(context).hasSingleBean(EVCacheServerEurekaInstanceConfigBeanPostProcessor.class));
+                     .run(context -> assertThat(context)
+                         .hasSingleBean(EVCacheServerEurekaInstanceConfigBeanPostProcessor.class));
     }
 
     @Test
     void should_be_not_loaded_when_not_exists_EnableEVCacheServer() {
         contextRunner.withUserConfiguration(NoEVCacheServerConfiguration.class)
-                     .run(context -> assertThat(context).doesNotHaveBean(EVCacheServerEurekaInstanceConfigBeanPostProcessor.class));
+                     .run(context -> assertThat(context)
+                         .doesNotHaveBean(EVCacheServerEurekaInstanceConfigBeanPostProcessor.class));
     }
 
     @Configuration

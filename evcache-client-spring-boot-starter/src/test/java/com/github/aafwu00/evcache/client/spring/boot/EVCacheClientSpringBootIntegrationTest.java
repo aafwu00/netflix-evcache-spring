@@ -66,7 +66,8 @@ class EVCacheClientSpringBootIntegrationTest {
 
     @DynamicPropertySource
     static void evcacheProperties(final DynamicPropertyRegistry registry) {
-        registry.add("TODO-NODES", () -> "shard1=" + MEMCACHED.getContainerIpAddress() + ":" + MEMCACHED.getFirstMappedPort());
+        registry.add("TODO-NODES",
+                     () -> "shard1=" + MEMCACHED.getContainerIpAddress() + ":" + MEMCACHED.getFirstMappedPort());
     }
 
     @Test
@@ -77,20 +78,20 @@ class EVCacheClientSpringBootIntegrationTest {
     @SpringBootApplication
     @EnableCaching
     static class TodoApp {
-        @Repository
-        static class TodoRepository {
-            @Cacheable(cacheNames = "TODO.todos", key = "'findAll'")
-            public List<Todo> findAll() {
-                return Arrays.asList(new Todo("first"), new Todo("second"));
-            }
-        }
-
         @Bean
         public MemcachedClientFactoryBean memcachedClient(final ConfigurableEnvironment environment) {
             final MemcachedClientFactoryBean bean = new MemcachedClientFactoryBean();
             final String nodes = environment.getProperty("TODO-NODES");
             bean.setServers(StringUtils.remove(nodes, "shard1="));
             return bean;
+        }
+
+        @Repository
+        static class TodoRepository {
+            @Cacheable(cacheNames = "TODO.todos", key = "'findAll'")
+            public List<Todo> findAll() {
+                return Arrays.asList(new Todo("first"), new Todo("second"));
+            }
         }
 
         static class Todo implements Serializable {
