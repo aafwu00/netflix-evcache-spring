@@ -16,11 +16,13 @@
 
 package com.github.aafwu00.evcache.client.spring;
 
+import com.google.common.util.concurrent.Striped;
 import org.springframework.cache.Cache;
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 import org.springframework.util.Assert;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.locks.Lock;
 
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
@@ -33,6 +35,7 @@ import static java.util.Objects.requireNonNull;
 public class EVCacheImpl extends AbstractValueAdaptingCache implements EVCache {
     private final String name;
     private final com.netflix.evcache.EVCache cache;
+    private final Striped<Lock> locks;
 
     /**
      * Create a {@link EVCache} instance with the specified name and the
@@ -48,6 +51,7 @@ public class EVCacheImpl extends AbstractValueAdaptingCache implements EVCache {
         super(allowNullValues);
         this.name = requireNonNull(name);
         this.cache = requireNonNull(cache);
+        this.locks = Striped.lock(Runtime.getRuntime().availableProcessors() * 4);
     }
 
     @Override
@@ -78,25 +82,24 @@ public class EVCacheImpl extends AbstractValueAdaptingCache implements EVCache {
         }
     }
 
-    /**
-     * Not Support Synchronize
-     *
-     * @see org.springframework.cache.annotation.Cacheable#sync()
-     */
     @SuppressWarnings("unchecked")
     @Override
     public <T> T get(final Object key, final Callable<T> valueLoader) {
         final String candidateKey = asKey(key);
-        final Object cached = doGet(candidateKey);
-        if (nonNull(cached)) {
-            return (T) fromStoreValue(cached);
-        }
+        final Lock lock = locks.get(candidateKey);
+        lock.lock();
         try {
+            final Object cached = doGet(candidateKey);
+            if (nonNull(cached)) {
+                return (T) fromStoreValue(cached);
+            }
             final T value = valueLoader.call();
             doSet(candidateKey, value);
             return (T) fromStoreValue(value);
         } catch (final Exception ex) {
             throw new ValueRetrievalException(key, valueLoader, ex);
+        } finally {
+            lock.unlock();
         }
     }
 

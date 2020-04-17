@@ -139,7 +139,7 @@ class EVCacheClientSpringCloudIntegrationTest {
 
         @Repository
         static class TodoRepository {
-            @Cacheable(cacheNames = "todos", key = "'findAll'")
+            @Cacheable(cacheNames = "todos", key = "'findAll'", sync = true)
             public List<Todo> findAll() {
                 return Arrays.asList(new Todo("first"), new Todo("second"));
             }
