@@ -17,10 +17,9 @@
 package com.github.aafwu00.evcache.client.spring;
 
 import com.netflix.evcache.EVCacheClientPoolConfigurationProperties;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.time.Duration;
+import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 
@@ -95,16 +94,12 @@ public class EVCacheConfiguration {
             return false;
         }
         final EVCacheConfiguration that = (EVCacheConfiguration) obj;
-        return new EqualsBuilder()
-            .append(name, that.name)
-            .isEquals();
+        return Objects.equals(name, that.getName());
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder()
-            .append(name)
-            .toHashCode();
+        return Objects.hashCode(name);
     }
 
     public String getName() {

@@ -62,8 +62,17 @@ public class EVCacheImpl extends AbstractValueAdaptingCache implements EVCache {
 
     @Override
     protected Object lookup(final Object key) {
+        return doGet(asKey(key));
+    }
+
+    private String asKey(final Object key) {
+        Assert.notNull(key, "Key cannot be null");
+        return key.toString();
+    }
+
+    private Object doGet(final String key) {
         try {
-            return cache.get(createKey(key));
+            return cache.get(key);
         } catch (final com.netflix.evcache.EVCacheException ex) {
             throw new EVCacheGetException(key, ex);
         }
@@ -77,13 +86,14 @@ public class EVCacheImpl extends AbstractValueAdaptingCache implements EVCache {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T get(final Object key, final Callable<T> valueLoader) {
-        final Object cached = lookup(key);
+        final String candidateKey = asKey(key);
+        final Object cached = doGet(candidateKey);
         if (nonNull(cached)) {
             return (T) fromStoreValue(cached);
         }
         try {
             final T value = valueLoader.call();
-            put(key, value);
+            doSet(candidateKey, value);
             return (T) fromStoreValue(value);
         } catch (final Exception ex) {
             throw new ValueRetrievalException(key, valueLoader, ex);
@@ -92,8 +102,12 @@ public class EVCacheImpl extends AbstractValueAdaptingCache implements EVCache {
 
     @Override
     public void put(final Object key, final Object value) {
+        doSet(asKey(key), value);
+    }
+
+    private void doSet(final String key, final Object value) {
         try {
-            cache.set(createKey(key), toStoreValue(value));
+            cache.set(key, toStoreValue(value));
         } catch (final com.netflix.evcache.EVCacheException ex) {
             throw new EVCachePutException(key, value, ex);
         }
@@ -107,20 +121,15 @@ public class EVCacheImpl extends AbstractValueAdaptingCache implements EVCache {
 
     @Override
     public void evict(final Object key) {
+        doDelete(asKey(key));
+    }
+
+    private void doDelete(final String key) {
         try {
-            cache.delete(createKey(key));
+            cache.delete(key);
         } catch (final com.netflix.evcache.EVCacheException ex) {
             throw new EVCacheEvictException(key, ex);
         }
-    }
-
-    private String createKey(final Object key) {
-        return convertKey(key);
-    }
-
-    private String convertKey(final Object key) {
-        Assert.notNull(key, "Key cannot be null");
-        return key.toString();
     }
 
     @Override
