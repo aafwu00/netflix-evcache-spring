@@ -76,11 +76,11 @@ class EVCachePropertiesTest {
     }
 
     private Cluster cluster(final String appName, final String keyPrefix) {
-        return new Cluster(null, appName, keyPrefix, ofSeconds(1), false, false);
+        return new Cluster("", 1, appName, keyPrefix, ofSeconds(1), false, false);
     }
 
     private Cluster cluster(final String name) {
-        return new Cluster(name, "", "", ofSeconds(1), false, false);
+        return new Cluster(name, 1, "appName", "keyPrefix", ofSeconds(1), false, false);
     }
 
     @Test
@@ -88,13 +88,18 @@ class EVCachePropertiesTest {
         assertThat(properties.isEnabled()).isFalse();
         assertThat(first(properties.getClusters()).determineName()).isEqualTo("test");
         assertThat(first(properties.getClusters()).getName()).isEqualTo("test");
+        assertThat(first(properties.getClusters()).determineStriped()).isEqualTo(2);
+        assertThat(first(properties.getClusters()).getStriped()).isEqualTo(2);
         assertThat(first(properties.getClusters()).getAppName()).isEqualTo("test");
         assertThat(first(properties.getClusters()).getKeyPrefix()).isEmpty();
         assertThat(first(properties.getClusters()).getTimeToLive()).isEqualTo(ofSeconds(1000));
         assertThat(first(properties.getClusters()).isRetryEnabled()).isTrue();
         assertThat(first(properties.getClusters()).isExceptionThrowingEnabled()).isTrue();
         assertThat(second(properties.getClusters()).determineName()).isEqualTo("test.test2");
-        assertThat(second(properties.getClusters()).getName()).isNull();
+        assertThat(second(properties.getClusters()).getName()).isEmpty();
+        assertThat(second(properties.getClusters()).determineStriped()).isEqualTo(Runtime.getRuntime()
+                                                                                         .availableProcessors() * 4);
+        assertThat(second(properties.getClusters()).getStriped()).isZero();
         assertThat(second(properties.getClusters()).getAppName()).isEqualTo("test");
         assertThat(second(properties.getClusters()).getKeyPrefix()).isEqualTo("test2");
         assertThat(second(properties.getClusters()).isRetryEnabled()).isFalse();

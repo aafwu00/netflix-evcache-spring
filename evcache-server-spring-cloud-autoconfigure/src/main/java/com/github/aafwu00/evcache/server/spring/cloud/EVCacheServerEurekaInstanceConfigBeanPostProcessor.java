@@ -25,8 +25,8 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.cloud.netflix.eureka.EurekaClientConfigBean;
 import org.springframework.cloud.netflix.eureka.EurekaInstanceConfigBean;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.util.Assert;
 
-import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 import static org.springframework.cloud.netflix.eureka.EurekaClientConfigBean.DEFAULT_ZONE;
 import static org.springframework.util.ClassUtils.isAssignableValue;
@@ -45,8 +45,10 @@ class EVCacheServerEurekaInstanceConfigBeanPostProcessor implements BeanPostProc
 
     EVCacheServerEurekaInstanceConfigBeanPostProcessor(final ConfigurableEnvironment environment,
                                                        final EurekaClientConfigBean eurekaClientConfigBean) {
-        this.environment = requireNonNull(environment);
-        this.eurekaClientConfigBean = requireNonNull(eurekaClientConfigBean);
+        Assert.notNull(environment, "`environment` must not be null");
+        Assert.notNull(eurekaClientConfigBean, "`eurekaClientConfigBean` must not be null");
+        this.environment = environment;
+        this.eurekaClientConfigBean = eurekaClientConfigBean;
     }
 
     @Override

@@ -20,13 +20,13 @@ import net.spy.memcached.MemcachedClient;
 import org.springframework.boot.actuate.health.AbstractReactiveHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator;
+import org.springframework.util.Assert;
 import reactor.core.publisher.Mono;
 
 import static com.github.aafwu00.evcache.server.spring.cloud.MemcachedHealthIndicator.DURATION;
 import static com.github.aafwu00.evcache.server.spring.cloud.MemcachedHealthIndicator.EXPIRATION;
 import static com.github.aafwu00.evcache.server.spring.cloud.MemcachedHealthIndicator.KEY;
 import static com.github.aafwu00.evcache.server.spring.cloud.MemcachedHealthIndicator.VALUE;
-import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
@@ -37,9 +37,15 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 public class MemcachedReactiveHealthIndicator extends AbstractReactiveHealthIndicator {
     private final MemcachedClient client;
 
+    /**
+     * Default Constructor
+     *
+     * @param client evcache`s memcached client
+     */
     public MemcachedReactiveHealthIndicator(final MemcachedClient client) {
         super();
-        this.client = requireNonNull(client);
+        Assert.notNull(client, "`client` must not be null");
+        this.client = client;
     }
 
     @Override

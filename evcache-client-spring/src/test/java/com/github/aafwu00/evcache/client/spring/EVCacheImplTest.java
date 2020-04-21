@@ -35,6 +35,7 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Taeho Kim
  */
+@SuppressWarnings("unchecked")
 class EVCacheImplTest {
     private com.netflix.evcache.EVCache source;
     private EVCacheImpl cache;
@@ -43,7 +44,7 @@ class EVCacheImplTest {
     @BeforeEach
     void setUp() {
         source = mock(com.netflix.evcache.EVCache.class);
-        cache = new EVCacheImpl("name", source, true);
+        cache = new EVCacheImpl("name", source, true, 1);
         callable = mock(Callable.class);
     }
 

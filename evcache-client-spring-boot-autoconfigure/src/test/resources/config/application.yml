@@ -2,6 +2,7 @@ evcache:
   enabled: false
   clusters:
     - name: test
+      striped: 2
       appName: test
       time-to-live: 1000s
       retryEnabled: true

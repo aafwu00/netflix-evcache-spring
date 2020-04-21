@@ -20,6 +20,7 @@ import com.netflix.evcache.EVCache.Builder;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.support.AbstractCacheManager;
+import org.springframework.util.Assert;
 
 import java.util.Collection;
 import java.util.List;
@@ -27,7 +28,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
-import static java.util.Objects.requireNonNull;
 
 /**
  * {@link CacheManager} backed by an {@link EVCacheImpl}.
@@ -55,8 +55,10 @@ public class EVCacheManager extends AbstractCacheManager {
     public EVCacheManager(final Set<EVCacheConfiguration> configurations,
                           final List<Builder.Customizer> customizers) {
         super();
-        this.configurations = requireNonNull(configurations);
-        this.customizers = requireNonNull(customizers);
+        Assert.notNull(configurations, "`configurations` must not be null");
+        Assert.notNull(customizers, "`customizers` must not be null");
+        this.configurations = configurations;
+        this.customizers = customizers;
     }
 
     @Override
@@ -67,7 +69,10 @@ public class EVCacheManager extends AbstractCacheManager {
     }
 
     private EVCache create(final EVCacheConfiguration configuration) {
-        return new EVCacheImpl(configuration.getName(), build(configuration), allowNullValues);
+        return new EVCacheImpl(configuration.getName(),
+                               build(configuration),
+                               allowNullValues,
+                               configuration.getStriped());
     }
 
     private com.netflix.evcache.EVCache build(final EVCacheConfiguration configuration) {

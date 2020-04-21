@@ -42,12 +42,14 @@ class EVCacheManagerTest {
     @Test
     void loadCaches() {
         final EVCacheConfiguration configuration1 = new EVCacheConfiguration("1",
+                                                                             1,
                                                                              "TEST",
                                                                              "test1",
                                                                              Duration.ofSeconds(1000),
                                                                              true,
                                                                              true);
         final EVCacheConfiguration configuration2 = new EVCacheConfiguration("2",
+                                                                             2,
                                                                              "TEST",
                                                                              "test2",
                                                                              Duration.ofSeconds(90),

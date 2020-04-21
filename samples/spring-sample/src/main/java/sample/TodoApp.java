@@ -61,7 +61,7 @@ public class TodoApp {
         properties.setTimeToLive(Duration.ofSeconds(10));
         properties.setRetryEnabled(true);
         properties.setExceptionThrowingEnabled(false);
-        final EVCacheConfiguration configuration = new EVCacheConfiguration("todos", "TODO", properties);
+        final EVCacheConfiguration configuration = new EVCacheConfiguration("todos", 1, "TODO", properties);
         return new EVCacheManager(Collections.singleton(configuration));
     }
 }

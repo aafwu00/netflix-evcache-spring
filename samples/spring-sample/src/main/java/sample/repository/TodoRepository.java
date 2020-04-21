@@ -31,7 +31,7 @@ import java.util.List;
 public class TodoRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(TodoRepository.class);
 
-    @Cacheable(cacheNames = "todos", key = "'findAll'")
+    @Cacheable(cacheNames = "todos", key = "'findAll'", sync = true)
     public List<Todo> findAll() {
         LOGGER.info("CALLED");
         return Arrays.asList(new Todo("first"), new Todo("second"));

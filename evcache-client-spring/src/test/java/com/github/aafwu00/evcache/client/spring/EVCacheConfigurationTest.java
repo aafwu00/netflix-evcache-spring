@@ -30,7 +30,7 @@ class EVCacheConfigurationTest {
                                         final String appName,
                                         final String keyPrefix,
                                         final int timeToLive) {
-        return new EVCacheConfiguration(name, appName, keyPrefix, Duration.ofSeconds(timeToLive), true, true);
+        return new EVCacheConfiguration(name, 1, appName, keyPrefix, Duration.ofSeconds(timeToLive), true, true);
     }
 
     @Test

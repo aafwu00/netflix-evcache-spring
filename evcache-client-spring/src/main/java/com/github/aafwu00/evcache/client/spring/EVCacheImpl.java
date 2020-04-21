@@ -25,7 +25,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.locks.Lock;
 
 import static java.util.Objects.nonNull;
-import static java.util.Objects.requireNonNull;
 
 /**
  * {@link Cache} implementation on top of an {@link com.netflix.evcache.EVCache} instance.
@@ -37,6 +36,7 @@ public class EVCacheImpl extends AbstractValueAdaptingCache implements EVCache {
     private final com.netflix.evcache.EVCache cache;
     private final Striped<Lock> locks;
 
+
     /**
      * Create a {@link EVCache} instance with the specified name and the
      * given internal {@link com.netflix.evcache.EVCache} to use.
@@ -44,14 +44,21 @@ public class EVCacheImpl extends AbstractValueAdaptingCache implements EVCache {
      * @param name            the name of the cache
      * @param cache           the backing EVCache instance
      * @param allowNullValues whether to accept and convert {@code null}
+     * @param striped         the minimum number of stripes (locks) required,
+     *                        effected only {@link EVCacheImpl#get(Object, Callable)},
+     *                        {@link EVCacheImpl#putIfAbsent(Object, Object)}
      */
     public EVCacheImpl(final String name,
                        final com.netflix.evcache.EVCache cache,
-                       final boolean allowNullValues) {
+                       final boolean allowNullValues,
+                       final int striped) {
         super(allowNullValues);
-        this.name = requireNonNull(name);
-        this.cache = requireNonNull(cache);
-        this.locks = Striped.lock(Runtime.getRuntime().availableProcessors() * 4);
+        Assert.notNull(name, "`name` must not be null");
+        Assert.notNull(cache, "`cache` must not be null");
+        Assert.state(striped > 0, "`striped` must be positive value");
+        this.name = name;
+        this.cache = cache;
+        this.locks = Striped.lock(striped);
     }
 
     @Override

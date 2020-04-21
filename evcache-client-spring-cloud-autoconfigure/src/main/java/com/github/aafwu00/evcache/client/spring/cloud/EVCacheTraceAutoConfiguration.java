@@ -28,8 +28,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.sleuth.autoconfig.TraceAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
-
-import static java.util.Objects.requireNonNull;
+import org.springframework.util.Assert;
 
 /**
  * Spring configuration for configuring EVCache Trace defaults to be Sleuth based
@@ -48,9 +47,17 @@ public class EVCacheTraceAutoConfiguration implements InitializingBean {
     private final Tracing tracing;
     private final EVCacheClientPoolManager manager;
 
+    /**
+     * Default Constructor
+     *
+     * @param tracing must not be null
+     * @param manager must not be null
+     */
     public EVCacheTraceAutoConfiguration(final Tracing tracing, final EVCacheClientPoolManager manager) {
-        this.tracing = requireNonNull(tracing);
-        this.manager = requireNonNull(manager);
+        Assert.notNull(tracing, "`tracing` must not be null");
+        Assert.notNull(manager, "`manager` must not be null");
+        this.tracing = tracing;
+        this.manager = manager;
     }
 
     @Override

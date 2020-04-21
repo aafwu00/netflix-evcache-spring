@@ -20,11 +20,11 @@ import net.spy.memcached.MemcachedClient;
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.util.Assert;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
@@ -39,9 +39,15 @@ public class MemcachedHealthIndicator extends AbstractHealthIndicator {
     protected static final int EXPIRATION = 300;
     private final MemcachedClient client;
 
+    /**
+     * Default Constructor
+     *
+     * @param client evcache`s memcached client
+     */
     public MemcachedHealthIndicator(final MemcachedClient client) {
         super();
-        this.client = requireNonNull(client);
+        Assert.notNull(client, "`client` must not be null");
+        this.client = client;
     }
 
     @Override
