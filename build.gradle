@@ -9,7 +9,7 @@ plugins {
     id 'nebula.maven-apache-license' version '17.2.1' apply false
     id 'nebula.source-jar' version '17.2.1' apply false
 
-    id 'org.springframework.boot' version '2.2.6.RELEASE' apply false
+    id 'org.springframework.boot' version '2.2.7.RELEASE' apply false
     id 'io.spring.dependency-management' version '1.0.9.RELEASE' apply false
     id 'io.spring.propdeps' version '0.0.10.RELEASE' apply false
 
@@ -153,7 +153,7 @@ subprojects {
     dependencyManagement {
         imports {
             mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
-            mavenBom 'org.springframework.cloud:spring-cloud-dependencies:Hoxton.SR3'
+            mavenBom 'org.springframework.cloud:spring-cloud-dependencies:Hoxton.SR4'
         }
     }
 
@@ -162,7 +162,7 @@ subprojects {
             spotbugs 'com.github.spotbugs:spotbugs:4.0.2'
         }
         if (project.name.endsWith('starter')) {
-            testImplementation 'org.testcontainers:junit-jupiter:1.13.0'
+            testImplementation 'org.testcontainers:junit-jupiter:1.14.1'
         }
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
         testImplementation 'org.junit.jupiter:junit-jupiter-api'
