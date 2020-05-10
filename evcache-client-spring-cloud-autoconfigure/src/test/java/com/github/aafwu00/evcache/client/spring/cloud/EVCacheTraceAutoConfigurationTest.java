@@ -17,8 +17,11 @@
 package com.github.aafwu00.evcache.client.spring.cloud;
 
 import com.github.aafwu00.evcache.client.spring.boot.EVCacheAutoConfiguration;
+import com.netflix.archaius.DefaultPropertyFactory;
+import com.netflix.archaius.config.EmptyConfig;
 import com.netflix.evcache.EVCacheTracingEventListener;
 import com.netflix.evcache.pool.EVCacheClientPoolManager;
+import com.netflix.evcache.util.EVCacheConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -43,6 +46,7 @@ class EVCacheTraceAutoConfigurationTest {
 
     @BeforeEach
     void setUp() {
+        new EVCacheConfig(DefaultPropertyFactory.from(EmptyConfig.INSTANCE));
         reset(manager);
         contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(TraceAutoConfiguration.class,

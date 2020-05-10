@@ -16,8 +16,11 @@
 
 package com.github.aafwu00.evcache.client.spring;
 
+import com.netflix.archaius.DefaultPropertyFactory;
+import com.netflix.archaius.config.EmptyConfig;
 import com.netflix.evcache.EVCache;
 import com.netflix.evcache.EVCacheImpl;
+import com.netflix.evcache.util.EVCacheConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.cache.Cache;
 
@@ -59,6 +62,7 @@ class EVCacheManagerTest {
         configurations.add(configuration1);
         configurations.add(configuration2);
         final EVCache.Builder.Customizer customizer = mock(EVCache.Builder.Customizer.class);
+        new EVCacheConfig(DefaultPropertyFactory.from(EmptyConfig.INSTANCE));
         final EVCacheManager manager = new EVCacheManager(configurations, singletonList(customizer));
         final List<? extends Cache> caches = new ArrayList<>(manager.loadCaches());
         assertThatCache(getNativeCache(caches, 0), configuration1);

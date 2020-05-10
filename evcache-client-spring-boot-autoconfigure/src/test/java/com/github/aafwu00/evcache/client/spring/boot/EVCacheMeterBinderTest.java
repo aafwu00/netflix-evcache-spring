@@ -17,7 +17,10 @@
 package com.github.aafwu00.evcache.client.spring.boot;
 
 import com.github.aafwu00.evcache.client.spring.EVCache;
+import com.netflix.archaius.DefaultPropertyFactory;
+import com.netflix.archaius.config.EmptyConfig;
 import com.netflix.evcache.metrics.EVCacheMetricsFactory;
+import com.netflix.evcache.util.EVCacheConfig;
 import com.netflix.spectator.api.DefaultRegistry;
 import com.netflix.spectator.api.Spectator;
 import com.netflix.spectator.api.Tag;
@@ -60,6 +63,7 @@ class EVCacheMeterBinderTest {
 
     @BeforeEach
     void setUp() {
+        new EVCacheConfig(DefaultPropertyFactory.from(EmptyConfig.INSTANCE));
         Spectator.globalRegistry().add(new DefaultRegistry());
         final EVCache cache = mock(EVCache.class);
         doReturn(CACHE_NAME).when(cache).getName();

@@ -20,8 +20,8 @@ plugins {
 }
 
 ext {
-    evcacheVersion = '5.12.28'
-    spectatorVersion = '0.103.0'
+    evcacheVersion = '5.15.1'
+    spectatorVersion = '0.107.0'
 }
 
 allprojects {
