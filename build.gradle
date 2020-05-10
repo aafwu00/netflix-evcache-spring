@@ -1,6 +1,6 @@
 plugins {
     id 'nebula.project' version '7.0.9'
-    id 'nebula.info' version '7.1.3'
+    id 'nebula.info' version '7.1.4'
     id 'nebula.optional-base' version '5.0.3'
     id 'nebula.release' version '15.0.0'
     id 'nebula.lint' version '16.8.0'
@@ -13,7 +13,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.9.RELEASE' apply false
     id 'io.spring.propdeps' version '0.0.10.RELEASE' apply false
 
-    id 'com.github.spotbugs' version '4.0.5' apply false
+    id 'com.github.spotbugs' version '4.0.8' apply false
 
     id 'com.github.ben-manes.versions' version '0.28.0'
     id 'com.dorongold.task-tree' version '1.5'
@@ -70,7 +70,7 @@ subprojects {
         apply plugin: 'com.github.ben-manes.versions'
 
         checkstyle {
-            toolVersion = '8.31'
+            toolVersion = '8.32'
             sourceSets = [project.sourceSets.main as SourceSet]
             configFile = rootProject.file('config/checkstyle/google_checks.xml')
             configProperties = ['checkstyle.regexp.header.file': "${rootProject.projectDir}/config/checkstyle/java_regexp.header"]
@@ -79,7 +79,7 @@ subprojects {
         }
 
         pmd {
-            toolVersion = '6.22.0'
+            toolVersion = '6.23.0'
             sourceSets = [project.sourceSets.main as SourceSet]
             ruleSets = []
             ruleSetFiles = rootProject.files('config/pmd/rulesets.xml')
