@@ -1,0 +1,29 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Publish with Gradle
+        run: ./gradlew -Prelease.version=${{ github.ref }} final publish
+        env:
+          bintrayUser: ${{ secrets.bintrayUser }}
+          bintrayKey: ${{ secrets.bintrayKey }}
+          sonatypeUsername: ${{ secrets.sonatypeUsername }}
+          sonatypePassword: ${{ secrets.sonatypePassword }}
+      - name: Run Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

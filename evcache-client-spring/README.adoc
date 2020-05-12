@@ -8,14 +8,14 @@ See on link:samples/spring-sample[spring-sample]
 [source,gradle]
 ----
 repositories {
-    maven { url 'https://jitpack.io' } <1>
+    jcenter() <1>
 }
 
 dependencies {
     compile 'com.github.aafwu00:evcache-client-spring:x.y.z' <2>
 }
 ----
-<1> add `jitpack` repository
+<1> add `jcenter()` repository
 <2> add dependency
 
 2. Write java source code

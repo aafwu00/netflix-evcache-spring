@@ -8,6 +8,7 @@ plugins {
     id 'nebula.maven-publish' version '17.2.1' apply false
     id 'nebula.maven-apache-license' version '17.2.1' apply false
     id 'nebula.source-jar' version '17.2.1' apply false
+    id 'nebula.nebula-bintray' version '8.4.0' apply false
 
     id 'org.springframework.boot' version '2.2.7.RELEASE' apply false
     id 'io.spring.dependency-management' version '1.0.9.RELEASE' apply false
@@ -37,6 +38,24 @@ allprojects {
         'aafwu00@gmail.com' {
             moniker 'Taeho Kim'
             role 'Developer'
+        }
+    }
+
+    project.description = 'Netflix EVCache integrations for Spring'
+
+    if (!project.name.contains('sample')) {
+        apply plugin: 'nebula.nebula-bintray-publishing'
+        bintray {
+            userOrg = user
+            repo = 'netflix-evcache-spring'
+            pkgName = 'netflix-evcache-spring'
+            licenses = ['Apache-2.0']
+            labels = ['evcache', 'spring', 'spring-boot', 'spring-cloud', 'netflix']
+            vcsUrl = 'https://github.com/aafwu00/netflix-evcache-spring.git'
+            websiteUrl = 'https://github.com/aafwu00/netflix-evcache-spring'
+            issueTrackerUrl = 'https://github.com/aafwu00/netflix-evcache-spring/issues'
+            syncToMavenCentral = false
+            gppSign = false
         }
     }
 }
@@ -99,7 +118,7 @@ subprojects {
 
         jacocoTestCoverageVerification {
             violationRules {
-                rule {                    
+                rule {
                     limit {
                         minimum = 0.70
                     }
@@ -137,7 +156,7 @@ subprojects {
     repositories {
         mavenLocal()
         mavenCentral()
-        maven { url 'https://jitpack.io' }
+        jcenter()
     }
 
     configurations {

@@ -1,4 +1,0 @@
-jdk:
-  - oraclejdk8
-install:
-  - ./gradlew clean build publishToMavenLocal -Pexclude-ci
