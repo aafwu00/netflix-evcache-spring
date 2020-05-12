@@ -17,7 +17,7 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Publish with Gradle
-        run: ./gradlew -Prelease.version=${{ github.ref }} final publish
+        run: ./gradlew -Prelease.useLastTag=true final publish
         env:
           bintrayUser: ${{ secrets.bintrayUser }}
           bintrayKey: ${{ secrets.bintrayKey }}
