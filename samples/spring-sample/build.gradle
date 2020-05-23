@@ -1,7 +1,7 @@
 dependencies {
     implementation project(':evcache-client-spring')
 
-    implementation "com.netflix.evcache:evcache-core:${evcacheVersion}"
+    implementation "com.netflix.evcache:evcache-core:${project.ext['evcache.version']}"
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
 }

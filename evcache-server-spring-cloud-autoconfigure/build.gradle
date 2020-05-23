@@ -1,5 +1,5 @@
 dependencies {
-    implementation "com.netflix.evcache:evcache-client:${evcacheVersion}"
+    implementation "com.netflix.evcache:evcache-client:${project.ext['evcache.version']}"
 
     implementation 'org.springframework.boot:spring-boot-autoconfigure'
     implementation 'org.springframework.cloud:spring-cloud-commons'

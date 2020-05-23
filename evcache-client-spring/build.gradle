@@ -1,5 +1,5 @@
 dependencies {
-    implementation "com.netflix.evcache:evcache-core:${evcacheVersion}"
+    implementation "com.netflix.evcache:evcache-core:${project.ext['evcache.version']}"
 
     implementation 'org.springframework:spring-context'
 }

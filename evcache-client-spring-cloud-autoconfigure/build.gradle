@@ -1,12 +1,12 @@
 dependencies {
     implementation project(':evcache-client-spring-boot-autoconfigure')
 
-    implementation "com.netflix.evcache:evcache-client:${evcacheVersion}"
+    implementation "com.netflix.evcache:evcache-client:${project.ext['evcache.version']}"
     implementation 'com.netflix.eureka:eureka-client'
 
     implementation 'org.springframework.cloud:spring-cloud-netflix-archaius'
     implementation 'org.springframework.cloud:spring-cloud-netflix-eureka-client'
 
-    implementation "com.netflix.evcache:evcache-zipkin-tracing:${evcacheVersion}", optional
+    implementation "com.netflix.evcache:evcache-zipkin-tracing:${project.ext['evcache.version']}", optional
     implementation 'org.springframework.cloud:spring-cloud-sleuth-core', optional
 }

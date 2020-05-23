@@ -1,14 +1,14 @@
 dependencies {
     implementation project(':evcache-client-spring')
 
-    implementation "com.netflix.evcache:evcache-core:${evcacheVersion}"
+    implementation "com.netflix.evcache:evcache-core:${project.ext['evcache.version']}"
 
     implementation 'org.springframework.boot:spring-boot-autoconfigure'
 
     implementation 'org.springframework.cloud:spring-cloud-netflix-archaius'
 
-    implementation "com.netflix.archaius:archaius2-commons-configuration:${archaiusVersion}"
-    implementation "com.netflix.archaius:archaius2-archaius1-bridge:${archaiusVersion}"
+    implementation "com.netflix.archaius:archaius2-commons-configuration:${project.ext['archaius.version']}"
+    implementation "com.netflix.archaius:archaius2-archaius1-bridge:${project.ext['archaius.version']}"
 
     implementation 'org.springframework.boot:spring-boot-actuator-autoconfigure', optional
 
@@ -17,7 +17,7 @@ dependencies {
 
     implementation 'io.micrometer:micrometer-core', optional
 
-    implementation "com.netflix.spectator:spectator-reg-micrometer:${spectatorVersion}", optional
+    implementation "com.netflix.spectator:spectator-reg-micrometer:${project.ext['spectator.version']}", optional
 
     testImplementation "io.micrometer:micrometer-test:${dependencyManagement.importedProperties['micrometer.version']}"
 }
