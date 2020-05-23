@@ -17,18 +17,19 @@
 package com.github.aafwu00.evcache.client.spring;
 
 import com.netflix.evcache.EVCache.Builder;
+import com.netflix.evcache.pool.EVCacheClientPoolManager;
 import net.spy.memcached.transcoders.Transcoder;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.support.AbstractCacheManager;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static java.util.Collections.emptyList;
 
 /**
  * {@link CacheManager} backed by an {@link EVCacheImpl}.
@@ -36,6 +37,7 @@ import static java.util.Collections.emptyList;
  * @author Taeho Kim
  */
 public class EVCacheManager extends AbstractCacheManager {
+    private final EVCacheClientPoolManager evcacheClientPoolManager;
     private final Set<EVCacheConfiguration> configurations;
     private final List<Builder.Customizer> customizers;
     /**
@@ -48,21 +50,23 @@ public class EVCacheManager extends AbstractCacheManager {
      */
     private Transcoder<? extends Object> transcoder;
 
-    public EVCacheManager(final Set<EVCacheConfiguration> configurations) {
-        this(configurations, emptyList());
-    }
-
     /**
      * Create a new EVCacheManager for the given configurations and customizers
      *
-     * @param configurations To be applied by for {@link Builder}`s {@link com.netflix.evcache.EVCacheClientPoolConfigurationProperties}
-     * @param customizers    To be applied by for {@link Builder}`s customizer
+     * @param evcacheClientPoolManager To be applied by for {@link Builder}`s poolManager
+     * @param configurations           To be applied by for {@link Builder}`s
+     *                                 {@link com.netflix.evcache.EVCacheClientPoolConfigurationProperties}
+     * @param customizers              To be applied by for {@link Builder}`s customizers
      */
-    public EVCacheManager(final Set<EVCacheConfiguration> configurations,
+    public EVCacheManager(final EVCacheClientPoolManager evcacheClientPoolManager,
+                          final Set<EVCacheConfiguration> configurations,
                           final List<Builder.Customizer> customizers) {
         super();
+        Assert.notNull(evcacheClientPoolManager, "`evcacheClientPoolManager` must not be null");
         Assert.notNull(configurations, "`configurations` must not be null");
+        Assert.notEmpty(configurations, "`configurations` must not be empty");
         Assert.notNull(customizers, "`customizers` must not be null");
+        this.evcacheClientPoolManager = evcacheClientPoolManager;
         this.configurations = configurations;
         this.customizers = customizers;
     }
@@ -82,8 +86,11 @@ public class EVCacheManager extends AbstractCacheManager {
     }
 
     private com.netflix.evcache.EVCache build(final EVCacheConfiguration configuration) {
-        return Builder.forApp(configuration.getAppName())
-                      .withConfigurationProperties(configuration.getProperties())
+        final Builder builder = Builder.forApp(configuration.getAppName());
+        final Field field = ReflectionUtils.findField(Builder.class, "_poolManager");
+        ReflectionUtils.makeAccessible(field);
+        ReflectionUtils.setField(field, builder, evcacheClientPoolManager);
+        return builder.withConfigurationProperties(configuration.getProperties())
                       .addCustomizers(customizers)
                       .setTranscoder(transcoder)
                       .build();

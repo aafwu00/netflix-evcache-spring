@@ -42,7 +42,6 @@ import org.springframework.cloud.netflix.archaius.ArchaiusAutoConfiguration;
 import org.springframework.cloud.netflix.archaius.ConfigurableEnvironmentConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 
 import static java.util.stream.Collectors.toList;
 
@@ -69,13 +68,14 @@ public class EVCacheAutoConfiguration {
     }
 
     @Bean
-    @DependsOn("evcacheClientPoolManager")
     @ConditionalOnMissingBean
     public EVCacheManager cacheManager(final CacheManagerCustomizers customizers,
+                                       final EVCacheClientPoolManager evcacheClientPoolManager,
                                        final EVCacheProperties properties,
                                        final ObjectProvider<EVCache.Builder.Customizer> builders,
                                        final ObjectProvider<Transcoder<?>> transcoder) {
-        final EVCacheManager cacheManager = new EVCacheManager(properties.toConfigurations(),
+        final EVCacheManager cacheManager = new EVCacheManager(evcacheClientPoolManager,
+                                                               properties.toConfigurations(),
                                                                builders.orderedStream().collect(toList()));
         cacheManager.setAllowNullValues(properties.isAllowNullValues());
         transcoder.ifAvailable(cacheManager::setTranscoder);

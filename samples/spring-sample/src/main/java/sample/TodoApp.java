@@ -19,6 +19,9 @@ package sample;
 import com.github.aafwu00.evcache.client.spring.EVCacheConfiguration;
 import com.github.aafwu00.evcache.client.spring.EVCacheManager;
 import com.netflix.evcache.EVCacheClientPoolConfigurationProperties;
+import com.netflix.evcache.connection.ConnectionFactoryBuilder;
+import com.netflix.evcache.pool.EVCacheClientPoolManager;
+import com.netflix.evcache.pool.SimpleNodeListProvider;
 import com.netflix.evcache.util.EVCacheConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,16 +55,19 @@ public class TodoApp {
 
     @Bean
     public CacheManager cacheManager() {
-        EVCacheConfig.getInstance()
-                     .getPropertyRepository()
-                     .get("TODO-NODES", String.class)
-                     .orElseGet("shard1=localhost:11211,localhost:11212;shard2=localhost:11213,localhost:11214");
+        final EVCacheConfig config = EVCacheConfig.getInstance();
+        config.getPropertyRepository()
+              .get("TODO-NODES", String.class)
+              .orElseGet("shard1=localhost:11211,localhost:11212;shard2=localhost:11213,localhost:11214");
+        final EVCacheClientPoolManager evcacheClientPoolManager = new EVCacheClientPoolManager(new ConnectionFactoryBuilder(),
+                                                                                               new SimpleNodeListProvider(),
+                                                                                               config);
         final EVCacheClientPoolConfigurationProperties properties = new EVCacheClientPoolConfigurationProperties();
         properties.setKeyPrefix("todo");
         properties.setTimeToLive(Duration.ofSeconds(10));
         properties.setRetryEnabled(true);
         properties.setExceptionThrowingEnabled(false);
         final EVCacheConfiguration configuration = new EVCacheConfiguration("todos", 1, "TODO", properties);
-        return new EVCacheManager(Collections.singleton(configuration));
+        return new EVCacheManager(evcacheClientPoolManager, Collections.singleton(configuration), Collections.emptyList());
     }
 }

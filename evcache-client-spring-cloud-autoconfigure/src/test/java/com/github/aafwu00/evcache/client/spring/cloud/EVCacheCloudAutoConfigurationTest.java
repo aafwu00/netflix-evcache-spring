@@ -22,8 +22,10 @@ import com.netflix.appinfo.DataCenterInfo;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.appinfo.MyDataCenterInfo;
 import com.netflix.discovery.EurekaClient;
+import com.netflix.evcache.connection.ConnectionFactoryBuilder;
 import com.netflix.evcache.connection.DIConnectionFactoryBuilderProvider;
 import com.netflix.evcache.pool.EVCacheClientPoolManager;
+import com.netflix.evcache.pool.SimpleNodeListProvider;
 import com.netflix.evcache.pool.eureka.EurekaNodeListProvider;
 import com.netflix.evcache.util.EVCacheConfig;
 import org.junit.jupiter.api.BeforeEach;
@@ -166,7 +168,9 @@ class EVCacheCloudAutoConfigurationTest {
     static class ExistsEVCacheClientPoolManagerConfiguration extends EnableCachingConfiguration {
         @Bean
         EVCacheClientPoolManager evcacheClientPoolManager() {
-            return mock(EVCacheClientPoolManager.class);
+            return new EVCacheClientPoolManager(new ConnectionFactoryBuilder(),
+                                                new SimpleNodeListProvider(),
+                                                EVCacheConfig.getInstance());
         }
     }
 
