@@ -17,7 +17,7 @@ eureka:
 
 evcache:
   clusters:
-    - name: TODO
+    TODO:
       app-name: EVCACHE
       key-prefix: todos
       time-to-live: 5s

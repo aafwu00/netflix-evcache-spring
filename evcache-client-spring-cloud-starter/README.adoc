@@ -27,7 +27,7 @@ dependencies {
 ----
 @SpringBootApplication
 @EnableDiscoveryClient # <1>
-@EnableCaching # <2>
+@EnableCaching         # <2>
 public class Application {
     public static void main(final String[] args) {
         new SpringApplicationBuilder(Application.class).run(args);
@@ -56,9 +56,9 @@ eureka:
 
 evcache:
   clusters:
-    - name: todos # <2>
+    todos:             # <2>
       appName: EVCACHE # <3>
-      keyPrefix: todo # <4>
+      keyPrefix: todo  # <4>
       timeToLive: 5s
       retry-enabled: true
 ----
@@ -67,7 +67,7 @@ evcache:
 <3> EVCache App Name(`spring.application.name`)
 <4> EVCache Cache Prefix
 
-IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
+IMPORTANT: `spring.cache.type` value is exists, evcache will be disabled
 
 .Table EVCache Cloud Properties
 |===

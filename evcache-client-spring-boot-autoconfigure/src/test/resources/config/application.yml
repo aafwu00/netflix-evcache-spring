@@ -2,13 +2,14 @@ evcache:
   enabled: false
   allow-null-values: false
   clusters:
-    - name: test
-      striped: 2
+    first:
       appName: test
       time-to-live: 1000s
       retryEnabled: true
       exceptionThrowingEnabled: true
-    - app-name: test
+      striped: 2
+    second:
+      app-name: test
       key-prefix: test2
       retry-enabled: false
       exception-throwing-enabled: false

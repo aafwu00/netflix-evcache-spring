@@ -30,6 +30,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static java.time.Duration.ofSeconds;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,49 +47,25 @@ class EVCachePropertiesTest {
     private EVCacheProperties properties;
 
     @Test
-    void should_be_equal_to_clusterAppName_when_keyPrefix_is_not_exists() {
-        assertThat(cluster("TEST").determineName()).isEqualTo("TEST");
-    }
-
-    @Test
-    void should_be_compose_of_cluster_appName_and_prefix_when_keyPrefix_is_exists() {
-        assertThat(cluster("TEST", "prefix").determineName()).isEqualTo("TEST.prefix");
-    }
-
-    @Test
     void should_be_equals_when_appName_and_keyPrefix_are_equals() {
         final Cluster cluster = cluster("TEST", "test1");
         assertThat(cluster).isEqualTo(cluster("TEST", "test1"));
         assertThat(cluster).isNotEqualTo(cluster("TEST1", "test1"));
         assertThat(cluster).isNotEqualTo(cluster("TEST", "test"));
-        assertThat(cluster("TEST")).isEqualTo(cluster("TEST"));
-        assertThat(cluster("TEST")).isNotEqualTo(cluster("TEST1"));
-    }
-
-    @Test
-    void should_be_same_hashCode_when_appName_and_keyPrefix_are_equals() {
-        final Cluster cluster = cluster("TEST", "test1");
-        assertThat(cluster).hasSameHashCodeAs(cluster("TEST", "test1"));
-        assertThat(cluster.hashCode()).isNotEqualTo(cluster("TEST1", "test1").hashCode());
-        assertThat(cluster.hashCode()).isNotEqualTo(cluster("TEST", "test").hashCode());
-        assertThat(cluster("TEST")).hasSameHashCodeAs(cluster("TEST"));
-        assertThat(cluster("TEST").hashCode()).isNotEqualTo(cluster("TEST1").hashCode());
+        assertThat(cluster("TEST", "")).isEqualTo(cluster("TEST", ""));
+        assertThat(cluster("TEST", "")).isNotEqualTo(cluster("TEST1", ""));
+        assertThat(cluster("TEST", "1")).isNotEqualTo(cluster("TEST", "2"));
     }
 
     private Cluster cluster(final String appName, final String keyPrefix) {
-        return new Cluster("", 1, appName, keyPrefix, ofSeconds(1), false, false);
-    }
-
-    private Cluster cluster(final String name) {
-        return new Cluster(name, 1, "appName", "keyPrefix", ofSeconds(1), false, false);
+        return new Cluster(appName, keyPrefix, ofSeconds(1), false, false, 1);
     }
 
     @Test
     void should_be_loaded_yml() {
         assertThat(properties.isEnabled()).isFalse();
         assertThat(properties.isAllowNullValues()).isFalse();
-        assertThat(first(properties.getClusters()).determineName()).isEqualTo("test");
-        assertThat(first(properties.getClusters()).getName()).isEqualTo("test");
+        assertThat(properties.getClusters()).containsKeys("first");
         assertThat(first(properties.getClusters()).determineStriped()).isEqualTo(2);
         assertThat(first(properties.getClusters()).getStriped()).isEqualTo(2);
         assertThat(first(properties.getClusters()).getAppName()).isEqualTo("test");
@@ -96,8 +73,7 @@ class EVCachePropertiesTest {
         assertThat(first(properties.getClusters()).getTimeToLive()).isEqualTo(ofSeconds(1000));
         assertThat(first(properties.getClusters()).isRetryEnabled()).isTrue();
         assertThat(first(properties.getClusters()).isExceptionThrowingEnabled()).isTrue();
-        assertThat(second(properties.getClusters()).determineName()).isEqualTo("test.test2");
-        assertThat(second(properties.getClusters()).getName()).isEmpty();
+        assertThat(properties.getClusters()).containsKeys("second");
         assertThat(second(properties.getClusters()).determineStriped()).isEqualTo(Runtime.getRuntime()
                                                                                          .availableProcessors() * 4);
         assertThat(second(properties.getClusters()).getStriped()).isZero();
@@ -119,12 +95,20 @@ class EVCachePropertiesTest {
         assertThat(second(configurations).getProperties().getExceptionThrowingEnabled()).isFalse();
     }
 
-    private <T> T first(final List<T> list) {
-        return list.get(0);
+    private Cluster first(final Map<String, Cluster> clusters) {
+        return clusters.get("first");
     }
 
-    private <T> T second(final List<T> list) {
-        return list.get(1);
+    private EVCacheConfiguration first(final List<EVCacheConfiguration> configurations) {
+        return configurations.get(0);
+    }
+
+    private Cluster second(final Map<String, Cluster> clusters) {
+        return clusters.get("second");
+    }
+
+    private EVCacheConfiguration second(final List<EVCacheConfiguration> configurations) {
+        return configurations.get(1);
     }
 
     @Configuration(proxyBeanMethods = false)

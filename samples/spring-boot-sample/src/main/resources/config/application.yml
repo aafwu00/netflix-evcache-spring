@@ -10,7 +10,8 @@ management:
 
 evcache:
   clusters:
-    - app-name: TODO
+    todos:
+      app-name: TODO
       key-prefix: todos
       time-to-live: 10s
       retry-enabled: true
