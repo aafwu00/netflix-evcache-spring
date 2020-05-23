@@ -16,8 +16,8 @@ coverage:
 
   ignore:          # files and folders that will be removed during processing
     - "samples"
-    - "ConditionalOnEVCache.java"
-    - "ConditionalOnEVCacheCloud.java"
+    - "**/ConditionalOnEVCache.java"
+    - "**/ConditionalOnEVCacheCloud.java"
 
 comment:
   layout: "header, diff"
