@@ -73,6 +73,10 @@ IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
 | true
 | Whether to allow cache for null values
 
+| evcache.deleteWhitespaceKey
+| false
+| Delete whitespace key. Careful, Both of 'ab' and 'a b' are same key
+
 | evcache.clusters.[cacheName]
 |
 | Name of the Cache, @Cacheable cacheName

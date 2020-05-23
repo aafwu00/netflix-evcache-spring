@@ -37,6 +37,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -51,7 +52,7 @@ class EVCacheImplTest {
     @BeforeEach
     void setUp() {
         source = mock(com.netflix.evcache.EVCache.class);
-        cache = new EVCacheImpl("name", source, true, 10);
+        cache = new EVCacheImpl("name", source, true, 10, false);
         callable = mock(Callable.class);
     }
 
@@ -90,9 +91,8 @@ class EVCacheImplTest {
     }
 
     @Test
-    void should_be_thrown_IllegalArgumentException_when_lookup_key_is_null() {
-        assertThatThrownBy(() -> cache.lookup(null)).isExactlyInstanceOf(IllegalArgumentException.class)
-                                                    .hasMessage("Key cannot be null");
+    void should_be_thrown_EVCacheInvalidKeyException_when_lookup_key_is_null() {
+        assertThatThrownBy(() -> cache.lookup(null)).isExactlyInstanceOf(EVCacheInvalidKeyException.class);
     }
 
 
@@ -109,9 +109,8 @@ class EVCacheImplTest {
     }
 
     @Test
-    void should_be_thrown_IllegalArgumentException_when_put_key_is_null() {
-        assertThatThrownBy(() -> cache.put(null, null)).isExactlyInstanceOf(IllegalArgumentException.class)
-                                                       .hasMessage("Key cannot be null");
+    void should_be_thrown_EVCacheInvalidKeyException_when_put_key_is_null() {
+        assertThatThrownBy(() -> cache.put(null, null)).isExactlyInstanceOf(EVCacheInvalidKeyException.class);
     }
 
     @Test
@@ -129,9 +128,8 @@ class EVCacheImplTest {
     }
 
     @Test
-    void should_be_thrown_IllegalArgumentException_when_putIfAbsent_key_is_null() {
-        assertThatThrownBy(() -> cache.putIfAbsent(null, null)).isExactlyInstanceOf(IllegalArgumentException.class)
-                                                               .hasMessage("Key cannot be null");
+    void should_be_thrown_EVCacheInvalidKeyException_when_putIfAbsent_key_is_null() {
+        assertThatThrownBy(() -> cache.putIfAbsent(null, null)).isExactlyInstanceOf(EVCacheInvalidKeyException.class);
     }
 
     @Test
@@ -141,9 +139,8 @@ class EVCacheImplTest {
     }
 
     @Test
-    void should_be_throw_IllegalArgumentException_when_evict_key_is_null() {
-        assertThatThrownBy(() -> cache.evict(null)).isExactlyInstanceOf(IllegalArgumentException.class)
-                                                   .hasMessage("Key cannot be null");
+    void should_be_throw_EVCacheInvalidKeyException_when_evict_key_is_null() {
+        assertThatThrownBy(() -> cache.evict(null)).isExactlyInstanceOf(EVCacheInvalidKeyException.class);
     }
 
     @Test
@@ -202,8 +199,44 @@ class EVCacheImplTest {
     }
 
     @Test
-    void should_be_thrown_IllegalArgumentException_when_callable_key_is_null() {
-        assertThatThrownBy(() -> cache.get(null, callable)).isExactlyInstanceOf(IllegalArgumentException.class)
-                                                           .hasMessage("Key cannot be null");
+    void should_be_thrown_EVCacheInvalidKeyException_when_key_is_null() {
+        assertThatThrownBy(() -> cache.lookup(null)).isExactlyInstanceOf(EVCacheInvalidKeyException.class)
+                                                    .hasMessage("Key must not be null");
+    }
+
+    @Test
+    void should_be_thrown_EVCacheInvalidKeyException_when_key_is_empty() {
+        assertThatThrownBy(() -> cache.lookup("")).isExactlyInstanceOf(EVCacheInvalidKeyException.class)
+                                                  .hasMessage("Key must not be empty");
+    }
+
+    @Test
+    void should_be_thrown_EVCacheInvalidKeyException_when_key_contain_whitespace() {
+        assertThatThrownBy(() -> cache.lookup(" ")).isExactlyInstanceOf(EVCacheInvalidKeyException.class)
+                                                   .hasMessage("Key must not be contain whitespace");
+        assertThatThrownBy(() -> cache.lookup("a b")).isExactlyInstanceOf(EVCacheInvalidKeyException.class)
+                                                     .hasMessage("Key must not be contain whitespace");
+        assertThatThrownBy(() -> cache.lookup("ab ")).isExactlyInstanceOf(EVCacheInvalidKeyException.class)
+                                                     .hasMessage("Key must not be contain whitespace");
+        assertThatThrownBy(() -> cache.lookup(" ab")).isExactlyInstanceOf(EVCacheInvalidKeyException.class)
+                                                     .hasMessage("Key must not be contain whitespace");
+    }
+
+    @Test
+    void should_be_thrown_EVCacheInvalidKeyException_when_key_contain_whitespace_with_deleteWhitespaceKey() {
+        cache = new EVCacheImpl("name", source, true, 10, true);
+        assertThatThrownBy(() -> cache.lookup("   ")).isExactlyInstanceOf(EVCacheInvalidKeyException.class)
+                                                     .hasMessage("Deleted whitespace key is empty");
+    }
+
+    @Test
+    void should_be_lookup_when_key_contain_whitespace_with_deleteWhitespaceKey() throws EVCacheException {
+        cache = new EVCacheImpl("name", source, true, 10, true);
+        doReturn(1).when(source).get("ab");
+        assertThat(cache.lookup("ab ")).isEqualTo(1);
+        assertThat(cache.lookup("a   b")).isEqualTo(1);
+        assertThat(cache.lookup("  ab")).isEqualTo(1);
+        assertThat(cache.lookup("  a b ")).isEqualTo(1);
+        verify(source, times(4)).get("ab");
     }
 }

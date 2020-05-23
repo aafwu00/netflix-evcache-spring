@@ -45,6 +45,10 @@ public class EVCacheManager extends AbstractCacheManager {
      */
     private boolean allowNullValues = true;
     /**
+     * Delete whitespace key. Careful, Both of 'ab' and 'a b' are same key
+     */
+    private boolean deleteWhitespaceKey;
+    /**
      * The default {@link Transcoder} to be used for serializing and
      * de-serializing items in {@link com.netflix.evcache.EVCache}.
      */
@@ -82,7 +86,8 @@ public class EVCacheManager extends AbstractCacheManager {
         return new EVCacheImpl(configuration.getCacheName(),
                                build(configuration),
                                allowNullValues,
-                               configuration.getStriped());
+                               configuration.getStriped(),
+                               deleteWhitespaceKey);
     }
 
     private com.netflix.evcache.EVCache build(final EVCacheConfiguration configuration) {
@@ -98,6 +103,10 @@ public class EVCacheManager extends AbstractCacheManager {
 
     public void setAllowNullValues(final boolean allowNullValues) {
         this.allowNullValues = allowNullValues;
+    }
+
+    public void setDeleteWhitespaceKey(final boolean deleteWhitespaceKey) {
+        this.deleteWhitespaceKey = deleteWhitespaceKey;
     }
 
     public void setTranscoder(final Transcoder<? extends Object> transcoder) {

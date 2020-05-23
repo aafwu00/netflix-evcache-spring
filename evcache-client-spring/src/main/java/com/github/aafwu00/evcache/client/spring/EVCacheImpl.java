@@ -17,6 +17,7 @@
 package com.github.aafwu00.evcache.client.spring;
 
 import com.google.common.util.concurrent.Striped;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.Cache;
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 import org.springframework.util.Assert;
@@ -35,22 +36,25 @@ public class EVCacheImpl extends AbstractValueAdaptingCache implements EVCache {
     private final String name;
     private final com.netflix.evcache.EVCache cache;
     private final Striped<Lock> locks;
+    private final boolean deleteWhitespaceKey;
 
     /**
      * Create a {@link EVCache} instance with the specified name and the
      * given internal {@link com.netflix.evcache.EVCache} to use.
      *
-     * @param name            the name of the cache
-     * @param cache           the backing EVCache instance
-     * @param allowNullValues whether to accept and convert {@code null}
-     * @param striped         the minimum number of stripes (locks) required,
-     *                        effected only {@link EVCacheImpl#get(Object, Callable)},
-     *                        {@link EVCacheImpl#putIfAbsent(Object, Object)}
+     * @param name                the name of the cache
+     * @param cache               the backing EVCache instance
+     * @param allowNullValues     whether to accept and convert {@code null}
+     * @param striped             the minimum number of stripes (locks) required,
+     *                            effected only {@link EVCacheImpl#get(Object, Callable)},
+     *                            {@link EVCacheImpl#putIfAbsent(Object, Object)}
+     * @param deleteWhitespaceKey delete whitespace key. careful, both of 'ab' and 'a b' are same key
      */
     public EVCacheImpl(final String name,
                        final com.netflix.evcache.EVCache cache,
                        final boolean allowNullValues,
-                       final int striped) {
+                       final int striped,
+                       final boolean deleteWhitespaceKey) {
         super(allowNullValues);
         Assert.notNull(name, "`name` must not be null");
         Assert.notNull(cache, "`cache` must not be null");
@@ -58,6 +62,7 @@ public class EVCacheImpl extends AbstractValueAdaptingCache implements EVCache {
         this.name = name;
         this.cache = cache;
         this.locks = Striped.lock(striped);
+        this.deleteWhitespaceKey = deleteWhitespaceKey;
     }
 
     @Override
@@ -72,12 +77,32 @@ public class EVCacheImpl extends AbstractValueAdaptingCache implements EVCache {
 
     @Override
     protected Object lookup(final Object key) {
-        return doGet(asKey(key));
+        return doGet(toEVCacheKey(key));
     }
 
-    private String asKey(final Object key) {
-        Assert.notNull(key, "Key cannot be null");
-        return key.toString();
+    private String toEVCacheKey(final Object key) {
+        if (key == null) {
+            throw new EVCacheInvalidKeyException("Key must not be null");
+        }
+        final String evcacheKey = key.toString();
+        if (evcacheKey.isEmpty()) {
+            throw new EVCacheInvalidKeyException("Key must not be empty");
+        }
+        return handleWhitespaceKey(evcacheKey);
+    }
+
+    private String handleWhitespaceKey(final String evcacheKey) {
+        if (!StringUtils.containsWhitespace(evcacheKey)) {
+            return evcacheKey;
+        }
+        if (!deleteWhitespaceKey) {
+            throw new EVCacheInvalidKeyException("Key must not be contain whitespace");
+        }
+        final String result = StringUtils.deleteWhitespace(evcacheKey);
+        if (result.isEmpty()) {
+            throw new EVCacheInvalidKeyException("Deleted whitespace key is empty");
+        }
+        return result;
     }
 
     private Object doGet(final String key) {
@@ -91,7 +116,7 @@ public class EVCacheImpl extends AbstractValueAdaptingCache implements EVCache {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T get(final Object key, final Callable<T> valueLoader) {
-        final String candidateKey = asKey(key);
+        final String candidateKey = toEVCacheKey(key);
         final Lock lock = locks.get(candidateKey);
         lock.lock();
         try {
@@ -111,7 +136,7 @@ public class EVCacheImpl extends AbstractValueAdaptingCache implements EVCache {
 
     @Override
     public void put(final Object key, final Object value) {
-        doSet(asKey(key), value);
+        doSet(toEVCacheKey(key), value);
     }
 
     private void doSet(final String key, final Object value) {
@@ -130,7 +155,7 @@ public class EVCacheImpl extends AbstractValueAdaptingCache implements EVCache {
 
     @Override
     public void evict(final Object key) {
-        doDelete(asKey(key));
+        doDelete(toEVCacheKey(key));
     }
 
     private void doDelete(final String key) {

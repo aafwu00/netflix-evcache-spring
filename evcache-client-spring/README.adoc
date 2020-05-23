@@ -31,7 +31,7 @@ public class TodoApp {
         final EVCacheConfig config = EVCacheConfig.getInstance();
         config.getPropertyRepository()
               .get("TODO-NODES", String.class)
-              .orElseGet("shard1=localhost:11211,localhost:11212;shard2=localhost:11213,localhost:11214"); # <2?
+              .orElseGet("shard1=localhost:11211,localhost:11212;shard2=localhost:11213,localhost:11214"); # <2>
         final EVCacheClientPoolManager evcacheClientPoolManager = new EVCacheClientPoolManager(new ConnectionFactoryBuilder(),
                                                                                                new SimpleNodeListProvider(),
                                                                                                config);
@@ -55,4 +55,4 @@ public class TodoRepository {
 ----
 <1> `EVCacheManager` app name is `TODO`, cache name is `todos`
 <2> `EVCacheManager` app name + `-NODES` means memcached server address, see on : https://github.com/Netflix/EVCache/wiki/Sample-EVCache-Deployment#step-4-create-a-cache-deployment-descriptor
-<3> `cacheNames` is sames as configuration `name`
+<3> `cacheNames` is sames as configuration `cacheName`. `key` must not be contain whitespace.
