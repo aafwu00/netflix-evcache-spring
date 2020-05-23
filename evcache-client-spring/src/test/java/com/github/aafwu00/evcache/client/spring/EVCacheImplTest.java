@@ -19,13 +19,20 @@ package com.github.aafwu00.evcache.client.spring;
 import com.netflix.evcache.EVCacheException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.internal.stubbing.answers.AnswersWithDelay;
+import org.mockito.internal.stubbing.answers.Returns;
 import org.springframework.cache.Cache;
+import org.springframework.util.StopWatch;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
 
+import static java.time.Duration.ofMillis;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -44,7 +51,7 @@ class EVCacheImplTest {
     @BeforeEach
     void setUp() {
         source = mock(com.netflix.evcache.EVCache.class);
-        cache = new EVCacheImpl("name", source, true, 1);
+        cache = new EVCacheImpl("name", source, true, 10);
         callable = mock(Callable.class);
     }
 
@@ -163,6 +170,27 @@ class EVCacheImplTest {
         doReturn(2).when(callable).call();
         assertThat(cache.get(1, callable)).isEqualTo(2);
         verify(source).set("1", 2);
+    }
+
+    @Test
+    void should_be_locked_when_callable_key_is_same() throws Exception {
+        doAnswer(new AnswersWithDelay(100, new Returns(1)))
+            .doReturn(1).when(source).get("1");
+        final StopWatch stopWatch = new StopWatch();
+        Executors.newFixedThreadPool(1).submit(() -> cache.get(1, callable));
+        stopWatch.start();
+        assertThat(cache.get(1, callable)).isEqualTo(1);
+        stopWatch.stop();
+        assertThat(stopWatch.getTotalTimeMillis()).isGreaterThanOrEqualTo(100);
+    }
+
+    @Test
+    void should_be_not_locked_when_callable_key_is_not_same() throws Exception {
+        doAnswer(new AnswersWithDelay(100, new Returns(1))).when(source).get("1");
+        doReturn(2).when(source).get("2");
+        doReturn(1).when(callable).call();
+        Executors.newFixedThreadPool(1).submit(() -> cache.get(1, callable));
+        assertTimeoutPreemptively(ofMillis(20), () -> cache.get(2, callable));
     }
 
     @Test
