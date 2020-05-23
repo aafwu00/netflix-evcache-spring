@@ -88,11 +88,11 @@ class EVCacheMetricsAutoConfigurationTest {
                                                                 MicrometerRegistry.class)).isNotNull());
     }
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     static class NoEVCacheManagerConfiguration {
     }
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     static class EnableEVCacheManagerConfiguration {
         @Bean
         EVCacheManager cacheManager() {
@@ -100,7 +100,7 @@ class EVCacheMetricsAutoConfigurationTest {
         }
     }
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     static class EnableMicrometerRegistryConfiguration {
         @Bean
         EVCacheManager cacheManager() {

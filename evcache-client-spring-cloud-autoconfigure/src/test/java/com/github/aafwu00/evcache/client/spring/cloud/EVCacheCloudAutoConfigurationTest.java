@@ -138,11 +138,11 @@ class EVCacheCloudAutoConfigurationTest {
                      .run(context -> assertThat(context).doesNotHaveBean(EVCacheClientPoolManager.class));
     }
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     static class NoCacheableConfiguration {
     }
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     @EnableCaching
     static class EnableCachingConfiguration {
         @Bean
@@ -161,7 +161,7 @@ class EVCacheCloudAutoConfigurationTest {
         }
     }
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     @EnableCaching
     static class ExistsEVCacheClientPoolManagerConfiguration extends EnableCachingConfiguration {
         @Bean
@@ -170,7 +170,7 @@ class EVCacheCloudAutoConfigurationTest {
         }
     }
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     @EnableCaching
     static class NoEurekaClientConfiguration {
     }

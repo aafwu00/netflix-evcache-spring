@@ -72,7 +72,7 @@ class EVCacheTraceAutoConfigurationTest {
                                             never()).addEVCacheEventListener(any(EVCacheTracingEventListener.class)));
     }
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     @EnableCaching
     static class EnableCachingConfiguration {
         @Bean

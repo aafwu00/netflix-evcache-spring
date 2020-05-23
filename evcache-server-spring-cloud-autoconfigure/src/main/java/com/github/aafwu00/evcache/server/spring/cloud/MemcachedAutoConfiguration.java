@@ -39,7 +39,7 @@ import static java.lang.Boolean.FALSE;
  *
  * @author Taeho Kim
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnBean(EVCacheServerMarkerConfiguration.Marker.class)
 @ConditionalOnEnabledHealthIndicator("memcached")
 @AutoConfigureAfter(EVCacheServerAutoConfiguration.class)

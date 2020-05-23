@@ -41,7 +41,7 @@ import org.springframework.context.annotation.Configuration;
  * @see EurekaClientAutoConfiguration
  * @see EVCacheAutoConfiguration
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnEVCache
 @ConditionalOnEVCacheCloud
 @AutoConfigureAfter({ArchaiusAutoConfiguration.class, EurekaClientAutoConfiguration.class})

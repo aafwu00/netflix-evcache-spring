@@ -30,7 +30,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
  *
  * @author Taeho Kim
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnBean({EurekaInstanceConfigBean.class, EVCacheServerMarkerConfiguration.Marker.class})
 @AutoConfigureAfter(EurekaClientAutoConfiguration.class)
 public class EVCacheServerAutoConfiguration {

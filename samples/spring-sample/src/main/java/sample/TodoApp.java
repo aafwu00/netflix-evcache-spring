@@ -37,7 +37,7 @@ import java.util.Collections;
 /**
  * @author Taeho Kim
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ComponentScan
 @EnableCaching
 public class TodoApp {

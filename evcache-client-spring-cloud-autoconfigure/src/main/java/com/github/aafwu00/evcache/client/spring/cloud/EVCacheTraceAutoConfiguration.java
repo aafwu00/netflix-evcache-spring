@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
  * @see TraceAutoConfiguration
  * @see EVCacheAutoConfiguration
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(value = "evcache.trace.enabled", matchIfMissing = true)
 @ConditionalOnClass(EVCacheTracingEventListener.class)
 @ConditionalOnMissingBean(EVCacheTracingEventListener.class)

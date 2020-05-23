@@ -54,7 +54,7 @@ import static java.util.stream.Collectors.toList;
  * @author Taeho Kim
  * @see EnableCaching
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnEVCache
 @AutoConfigureAfter(ArchaiusAutoConfiguration.class)
 @AutoConfigureBefore(CacheAutoConfiguration.class)

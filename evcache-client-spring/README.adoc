@@ -22,7 +22,7 @@ dependencies {
 
 [source,java]
 ----
-import java.time.Duration;@Configuration
+@Configuration
 @ComponentScan
 @EnableCaching
 public class TodoApp {

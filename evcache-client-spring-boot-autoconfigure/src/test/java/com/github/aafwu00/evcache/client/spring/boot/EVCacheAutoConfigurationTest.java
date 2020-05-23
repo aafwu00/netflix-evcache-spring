@@ -73,7 +73,6 @@ class EVCacheAutoConfigurationTest {
         contextRunner.withPropertyValues("evcache.clusters[0].appName=test", "evcache.clusters[0].keyPrefix=test1")
                      .withUserConfiguration(EnableCachingConfiguration.class)
                      .run(context -> assertThat(context).hasSingleBean(EVCacheManager.class)
-                                                        .hasSingleBean(EVCacheManager.class)
                                                         .hasSingleBean(EVCacheClientPoolManager.class));
         verify(cacheManagerCustomizer).customize(any(EVCacheManager.class));
         verify(customizer).customize(eq("TEST"), any(Builder.class));
@@ -181,11 +180,11 @@ class EVCacheAutoConfigurationTest {
         return Objects.equals(actual.get(), expect);
     }
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     static class NoCacheableConfiguration {
     }
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     @EnableCaching
     static class EnableCachingConfiguration {
         @Bean
@@ -199,7 +198,7 @@ class EVCacheAutoConfigurationTest {
         }
     }
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     @EnableCaching
     static class ExistsCacheManagerConfiguration {
         @Bean

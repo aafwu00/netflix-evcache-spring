@@ -30,7 +30,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(MeterBinder.class)
 @ConditionalOnBean(EVCacheManager.class)
 @ConditionalOnProperty(value = "evcache.metrics.enabled", matchIfMissing = true)
@@ -41,7 +41,7 @@ public class EVCacheMetricsAutoConfiguration {
         return new EVCacheMeterBinderProvider();
     }
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(MicrometerRegistry.class)
     public static class SpectatorRegistration {
         @Bean

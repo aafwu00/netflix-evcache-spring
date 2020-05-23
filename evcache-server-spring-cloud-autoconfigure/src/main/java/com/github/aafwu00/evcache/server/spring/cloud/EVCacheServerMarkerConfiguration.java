@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Configuration;
  *
  * @author Taeho Kim
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class EVCacheServerMarkerConfiguration {
     @Bean
     public Marker evcacheServerMarkerBean() {

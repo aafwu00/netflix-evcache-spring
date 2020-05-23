@@ -126,7 +126,7 @@ class EVCachePropertiesTest {
         return list.get(1);
     }
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     @EnableConfigurationProperties(EVCacheProperties.class)
     static class Config {
     }

@@ -87,11 +87,11 @@ class MemcachedReactiveHealthContributorAutoConfigurationTest {
                      .run(context -> assertThat(context).doesNotHaveBean(MemcachedReactiveHealthIndicator.class));
     }
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     static class NoEVCacheServerConfiguration {
     }
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     @EnableEVCacheServer
     static class EnableEVCacheServerConfiguration {
     }
