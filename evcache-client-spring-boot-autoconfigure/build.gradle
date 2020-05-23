@@ -7,8 +7,8 @@ dependencies {
 
     implementation 'org.springframework.cloud:spring-cloud-netflix-archaius'
 
-    implementation "com.netflix.archaius:archaius2-commons-configuration:${project.ext['archaius.version']}"
-    implementation "com.netflix.archaius:archaius2-archaius1-bridge:${project.ext['archaius.version']}"
+    implementation "com.netflix.archaius:archaius2-commons-configuration:${project.ext['archaius2.version']}"
+    implementation "com.netflix.archaius:archaius2-archaius1-bridge:${project.ext['archaius2.version']}"
 
     implementation 'org.springframework.boot:spring-boot-actuator-autoconfigure', optional
 

@@ -171,7 +171,7 @@ subprojects {
 
     ext['evcache.version'] = '5.15.5'
     ext['spymemcached.version'] = '2.11.4'
-    ext['archaius.version'] = '2.3.16'
+    ext['archaius2.version'] = '2.3.16'
     ext['spectator.version'] = '0.107.0'
 
     dependencies {
