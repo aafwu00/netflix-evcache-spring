@@ -25,10 +25,8 @@ include 'evcache-client-spring-cloud-starter'
 include 'evcache-server-spring-cloud-autoconfigure'
 include 'evcache-server-spring-cloud-starter'
 
-if (!hasProperty('exclude-ci')) {
-    include 'samples:spring-sample'
-    include 'samples:spring-boot-sample'
-    include 'samples:spring-cloud-sample'
-    include 'samples:evcache-server-sample'
-    include 'samples:eureka-server-sample'
-}
+include 'samples:spring-sample'
+include 'samples:spring-boot-sample'
+include 'samples:spring-cloud-sample'
+include 'samples:evcache-server-sample'
+include 'samples:eureka-server-sample'

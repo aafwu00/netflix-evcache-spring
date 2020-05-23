@@ -1,5 +1,5 @@
 dependencies {
-    api project(':evcache-server-spring-cloud-autoconfigure')
+    implementation project(':evcache-server-spring-cloud-autoconfigure')
 
     implementation 'org.springframework.boot:spring-boot-starter-web', optional
 

@@ -1,5 +1,8 @@
 dependencies {
-    api project(':evcache-client-spring-boot-autoconfigure')
+    implementation project(':evcache-client-spring-boot-autoconfigure')
+
+    implementation "com.netflix.evcache:evcache-client:${evcacheVersion}"
+    implementation 'com.netflix.eureka:eureka-client'
 
     implementation 'org.springframework.cloud:spring-cloud-netflix-archaius'
     implementation 'org.springframework.cloud:spring-cloud-netflix-eureka-client'

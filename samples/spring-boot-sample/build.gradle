@@ -1,5 +1,5 @@
 dependencies {
-    api project(':evcache-client-spring-boot-starter')
+    implementation project(':evcache-client-spring-boot-starter')
 
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
