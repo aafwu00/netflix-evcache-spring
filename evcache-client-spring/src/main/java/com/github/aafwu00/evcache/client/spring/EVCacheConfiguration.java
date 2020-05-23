@@ -33,7 +33,7 @@ public class EVCacheConfiguration {
     /**
      * Name of the Cache, {@link org.springframework.cache.annotation.Cacheable#cacheNames()}
      */
-    private final String name;
+    private final String cacheName;
     /**
      * Name of the EVCache App, Cluster Name, Recommend Upper Case. {@link com.netflix.evcache.EVCache.Builder#setAppName(String)}
      */
@@ -47,20 +47,20 @@ public class EVCacheConfiguration {
     /**
      * Instantiates a new EVCache configuration.
      *
-     * @param name       Name of the Cache, {@link org.springframework.cache.annotation.Cacheable#cacheNames()}
+     * @param cacheName  Name of the Cache, {@link org.springframework.cache.annotation.Cacheable#cacheNames()}
      * @param striped    the minimum number of stripes (locks) required. effected only {@link EVCacheImpl#get(Object, java.util.concurrent.Callable)}, {@link EVCacheImpl#putIfAbsent(Object, Object)}
      * @param appName    Name of the EVCache App, Cluster Name, Recommend Upper Case
      * @param properties EVCache Client Configuration
      */
-    public EVCacheConfiguration(final String name,
+    public EVCacheConfiguration(final String cacheName,
                                 final int striped,
                                 final String appName,
                                 final EVCacheClientPoolConfigurationProperties properties) {
-        Assert.state(StringUtils.isNotBlank(name), "`name` must not be blank");
+        Assert.state(StringUtils.isNotBlank(cacheName), "`cacheName` must not be blank");
         Assert.state(StringUtils.isNotBlank(appName), "`appName` must not be blank");
         Assert.notNull(properties, "`properties` must not be null");
         Assert.state(striped > 0, "`striped` must be positive value");
-        this.name = name;
+        this.cacheName = cacheName;
         this.striped = striped;
         this.appName = appName;
         this.properties = properties;
@@ -69,7 +69,7 @@ public class EVCacheConfiguration {
     /**
      * Instantiates a new EVCache configuration.
      *
-     * @param name                     Name of the Cache, {@link org.springframework.cache.annotation.Cacheable#cacheNames()}
+     * @param cacheName                Name of the Cache, {@link org.springframework.cache.annotation.Cacheable#cacheNames()}
      * @param striped                  the minimum number of stripes (locks) required. effected only {@link EVCacheImpl#get(Object, java.util.concurrent.Callable)}, {@link EVCacheImpl#putIfAbsent(Object, Object)}
      * @param appName                  Name of the EVCache App, Cluster Name, Recommend Upper Case. {@link com.netflix.evcache.EVCache.Builder#setAppName(String)}
      * @param keyPrefix                Name of Cache Prefix Key, Don't contain colon(:) and whitespace character. {@link com.netflix.evcache.EVCache.Builder#setCachePrefix(String)}
@@ -77,14 +77,14 @@ public class EVCacheConfiguration {
      * @param retryEnabled             Retry across Server Group for cache misses and exceptions. {@link com.netflix.evcache.EVCache.Builder#setRetry(boolean)}
      * @param exceptionThrowingEnabled Whether or not exception throwing is to be enabled. {@link com.netflix.evcache.EVCache.Builder#setExceptionThrowing(boolean)}
      */
-    public EVCacheConfiguration(final String name,
+    public EVCacheConfiguration(final String cacheName,
                                 final int striped,
                                 final String appName,
                                 final String keyPrefix,
                                 final Duration timeToLive,
                                 final boolean retryEnabled,
                                 final boolean exceptionThrowingEnabled) {
-        this(name, striped, appName, create(keyPrefix, timeToLive, retryEnabled, exceptionThrowingEnabled));
+        this(cacheName, striped, appName, create(keyPrefix, timeToLive, retryEnabled, exceptionThrowingEnabled));
     }
 
     private static EVCacheClientPoolConfigurationProperties create(final String keyPrefix,
@@ -111,16 +111,16 @@ public class EVCacheConfiguration {
             return false;
         }
         final EVCacheConfiguration that = (EVCacheConfiguration) obj;
-        return Objects.equals(name, that.getName());
+        return Objects.equals(cacheName, that.getCacheName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(name);
+        return Objects.hashCode(cacheName);
     }
 
-    public String getName() {
-        return name;
+    public String getCacheName() {
+        return cacheName;
     }
 
     public int getStriped() {

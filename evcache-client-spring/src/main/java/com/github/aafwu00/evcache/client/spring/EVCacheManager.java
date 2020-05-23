@@ -79,7 +79,7 @@ public class EVCacheManager extends AbstractCacheManager {
     }
 
     private EVCache create(final EVCacheConfiguration configuration) {
-        return new EVCacheImpl(configuration.getName(),
+        return new EVCacheImpl(configuration.getCacheName(),
                                build(configuration),
                                allowNullValues,
                                configuration.getStriped());
