@@ -36,7 +36,6 @@ public class EVCacheImpl extends AbstractValueAdaptingCache implements EVCache {
     private final com.netflix.evcache.EVCache cache;
     private final Striped<Lock> locks;
 
-
     /**
      * Create a {@link EVCache} instance with the specified name and the
      * given internal {@link com.netflix.evcache.EVCache} to use.

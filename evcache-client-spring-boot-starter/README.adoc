@@ -68,9 +68,17 @@ IMPORTANT: `spring.cache.type` value is exists, evcache will be ignored
 | true
 |
 
+| evcache.allowNullValues
+| true
+| Whether to allow cache for null values
+
 | evcache.clusters[].name
 |
 | Name of the Cache, @Cacheable cacheName, Same as `appName` + `.` + `keyPrefix` when name is blank
+
+| evcache.clusters[].striped
+| 0
+| The minimum number of stripes (locks) required. default is zero, if zero then striped will be cpu * 4
 
 | evcache.clusters[].appName
 |

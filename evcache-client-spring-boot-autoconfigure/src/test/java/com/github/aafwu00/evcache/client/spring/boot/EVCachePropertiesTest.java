@@ -86,6 +86,7 @@ class EVCachePropertiesTest {
     @Test
     void should_be_loaded_yml() {
         assertThat(properties.isEnabled()).isFalse();
+        assertThat(properties.isAllowNullValues()).isFalse();
         assertThat(first(properties.getClusters()).determineName()).isEqualTo("test");
         assertThat(first(properties.getClusters()).getName()).isEqualTo("test");
         assertThat(first(properties.getClusters()).determineStriped()).isEqualTo(2);

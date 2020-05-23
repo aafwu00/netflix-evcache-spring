@@ -75,6 +75,7 @@ public class EVCacheAutoConfiguration {
                                        final ObjectProvider<EVCache.Builder.Customizer> builders) {
         final EVCacheManager cacheManager = new EVCacheManager(properties.toConfigurations(),
                                                                builders.orderedStream().collect(toList()));
+        cacheManager.setAllowNullValues(properties.isAllowNullValues());
         return customizers.customize(cacheManager);
     }
 

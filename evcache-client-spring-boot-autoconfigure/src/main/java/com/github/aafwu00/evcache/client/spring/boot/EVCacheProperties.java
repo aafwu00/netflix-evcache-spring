@@ -57,6 +57,10 @@ public class EVCacheProperties {
      */
     private final boolean enabled;
     /**
+     * Whether to allow for {@code null} values
+     */
+    private final boolean allowNullValues;
+    /**
      * Clusters properties
      */
     @NotEmpty
@@ -65,13 +69,16 @@ public class EVCacheProperties {
     private final List<Cluster> clusters;
 
     /**
-     * @param enabled  Enable EVCache
-     * @param clusters Clusters properties
+     * @param enabled         Enable EVCache
+     * @param allowNullValues whether to allow for {@code null} values
+     * @param clusters        Clusters properties
      */
     public EVCacheProperties(@DefaultValue("true") final boolean enabled,
+                             @DefaultValue("true") final boolean allowNullValues,
                              @NotEmpty @Valid final List<Cluster> clusters) {
         Assert.state(!CollectionUtils.isEmpty(clusters), "`clusters` must not be empty");
         this.enabled = enabled;
+        this.allowNullValues = allowNullValues;
         this.clusters = clusters;
     }
 
@@ -83,6 +90,10 @@ public class EVCacheProperties {
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public boolean isAllowNullValues() {
+        return allowNullValues;
     }
 
     public List<Cluster> getClusters() {

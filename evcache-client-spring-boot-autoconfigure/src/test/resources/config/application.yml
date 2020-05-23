@@ -1,5 +1,6 @@
 evcache:
   enabled: false
+  allow-null-values: false
   clusters:
     - name: test
       striped: 2
