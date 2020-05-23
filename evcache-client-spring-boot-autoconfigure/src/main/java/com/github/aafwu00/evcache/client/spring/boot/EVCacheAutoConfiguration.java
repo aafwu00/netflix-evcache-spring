@@ -26,6 +26,7 @@ import com.netflix.evcache.pool.EVCacheClientPoolManager;
 import com.netflix.evcache.pool.EVCacheNodeList;
 import com.netflix.evcache.pool.SimpleNodeListProvider;
 import com.netflix.evcache.util.EVCacheConfig;
+import net.spy.memcached.transcoders.Transcoder;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -72,10 +73,12 @@ public class EVCacheAutoConfiguration {
     @ConditionalOnMissingBean
     public EVCacheManager cacheManager(final CacheManagerCustomizers customizers,
                                        final EVCacheProperties properties,
-                                       final ObjectProvider<EVCache.Builder.Customizer> builders) {
+                                       final ObjectProvider<EVCache.Builder.Customizer> builders,
+                                       final ObjectProvider<Transcoder<?>> transcoder) {
         final EVCacheManager cacheManager = new EVCacheManager(properties.toConfigurations(),
                                                                builders.orderedStream().collect(toList()));
         cacheManager.setAllowNullValues(properties.isAllowNullValues());
+        transcoder.ifAvailable(cacheManager::setTranscoder);
         return customizers.customize(cacheManager);
     }
 

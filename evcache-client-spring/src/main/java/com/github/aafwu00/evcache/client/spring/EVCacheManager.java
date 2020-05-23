@@ -17,6 +17,7 @@
 package com.github.aafwu00.evcache.client.spring;
 
 import com.netflix.evcache.EVCache.Builder;
+import net.spy.memcached.transcoders.Transcoder;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.support.AbstractCacheManager;
@@ -41,6 +42,11 @@ public class EVCacheManager extends AbstractCacheManager {
      * Whether to allow for {@code null} values
      */
     private boolean allowNullValues = true;
+    /**
+     * The default {@link Transcoder} to be used for serializing and
+     * de-serializing items in {@link com.netflix.evcache.EVCache}.
+     */
+    private Transcoder<? extends Object> transcoder;
 
     public EVCacheManager(final Set<EVCacheConfiguration> configurations) {
         this(configurations, emptyList());
@@ -79,10 +85,15 @@ public class EVCacheManager extends AbstractCacheManager {
         return Builder.forApp(configuration.getAppName())
                       .withConfigurationProperties(configuration.getProperties())
                       .addCustomizers(customizers)
+                      .setTranscoder(transcoder)
                       .build();
     }
 
     public void setAllowNullValues(final boolean allowNullValues) {
         this.allowNullValues = allowNullValues;
+    }
+
+    public void setTranscoder(final Transcoder<? extends Object> transcoder) {
+        this.transcoder = transcoder;
     }
 }
